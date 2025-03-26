@@ -2,12 +2,14 @@ require("dotenv").config();
 const sequelize = require("./database/dbConnect")
 const express = require("express");
 const cors = require("cors")
+const userRouter = require('./routes/userRoute')
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT||7039;
 
 const app = express();
 
 app.use(express.json());
+app.use('/api/v1', userRouter)
 app.use(cors())
 
 const server = async()=> {

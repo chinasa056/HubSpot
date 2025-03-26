@@ -27,6 +27,19 @@ User.init(
       allowNull: false
 
     },
+    prifilePiture:{
+         type:DataTypes.String,
+         allowNull:false
+
+    },
+    isVerified:{
+      type:Boolean,
+      default:false 
+    },
+    gender:{
+     type:DataTypes.ENUM('Male','Female'),
+     allowNull:false
+    }
   },
   {
     // Other model options go here
