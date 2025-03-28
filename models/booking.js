@@ -38,14 +38,20 @@ Booking.init(
       allowNull: true
     },
 
-    duration: {
+    checkin: {
+      type: DataTypes.NUMBER,
+      allowNull: true
+    },
+
+    checkout: {
       type: DataTypes.NUMBER,
       allowNull: true
     },
 
     status: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: true,
+      defaultValue: "Confirmed"
     },
 
   },

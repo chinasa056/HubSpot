@@ -42,8 +42,12 @@ module.exports = {
       },
       spaceImages: {
         type: Sequelize.JSON, // This allows storing multiple image URLs in a JSON array
-        allowNull: true,
+        allowNull: false,
       },
+      averageRating: {
+        type: Sequelize.FLOAT, // This allows storing multiple image URLs in a JSON array
+      },
+
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
