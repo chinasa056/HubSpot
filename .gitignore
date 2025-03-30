@@ -2,4 +2,8 @@ node_modules
 .env
 sample.js
 test.html
+<<<<<<< HEAD
 sample.html
+=======
+sample.html
+>>>>>>> 748974928828890465859f5bd7c6f85525c2ef32
