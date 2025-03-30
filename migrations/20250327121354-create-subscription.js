@@ -11,7 +11,10 @@ module.exports = {
       hostId: {
         type: Sequelize.UUID
       },
-      spaceName: {
+      planId: {
+        type: Sequelize.UUID
+      },
+      planName: {
         type: Sequelize.STRING,
         allowNull: false
       },

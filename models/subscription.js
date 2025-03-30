@@ -1,6 +1,7 @@
 const { Model, DataTypes, UUIDV4 } = require('sequelize');
 const sequelize = require('../database/dbConnect');
 const Space = require('./space');
+const Plan = require('./plan');
 class Subscription extends Model { }
 
 Subscription.init(
@@ -13,10 +14,26 @@ Subscription.init(
     },
 
     hostId: {
-      type: DataTypes.UUID
+      type: DataTypes.UUID,
+      references: {
+        model: Host,
+        key: 'id'
+      },
+      onUpdate: 'CASCADE',
+      onDelete: 'CASCADE'
+    },
+    
+    planId: {
+      type: DataTypes.UUID,
+      references: {
+        model: Plan,
+        key: 'id'
+      },
+      onUpdate: 'CASCADE',
+      onDelete: 'CASCADE'
     },
 
-    spaceName: {
+    planName: {
       type: DataTypes.STRING,
       allowNull: false
     },
@@ -67,7 +84,8 @@ Subscription.init(
 );
 
 Subscription.belongsTo(Space, { foreignKey: 'spaceId' });
-Subscription.belongsTo(Host, { foreignKey: 'userId' });
+Subscription.belongsTo(Host, { foreignKey: 'hostId' });
+Subscription.belongsTo(Plan, { foreignKey: 'planId' });
 
 module.exports = Subscription;
 
