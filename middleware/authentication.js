@@ -22,6 +22,11 @@ exports.authenticate = async (req, res, next) => {
         message: "Authentication Failed: User not found",
       });
     }
+    if (!user.isLoggedIn) {
+      return res.status(401).json({
+          message: "Authentication Failed: User is not logged in"
+      });
+    }
     req.user = decodedToken;
 
     next();

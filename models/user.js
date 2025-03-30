@@ -1,5 +1,5 @@
 const { Sequelize, DataTypes, Model } = require('sequelize');
-const sequelize = new Sequelize('sqlite::memory:');
+const sequelize = require('../database/sequelize');
 
 class User extends Model {}
 
@@ -22,24 +22,31 @@ User.init(
       allowNull: false
 
     },
+    gender:{
+       type:DataTypes.ENUM('Male','Female'),
+       allowNull:false
+    },
     email: {
       type: DataTypes.STRING,
       allowNull: false
 
     },
-    prifilePiture:{
-         type:DataTypes.String,
-         allowNull:false
-
-    },
     isVerified:{
-      type:Boolean,
-      default:false 
+        type:DataTypes.BOOLEAN,
+        defaultValue:false
+  },
+  isLoggedin:{
+        type:DataTypes.BOOLEAN,
+        defaultValue:false
+  },
+    createdAt: {
+      allowNull: false,
+      type: DataTypes.DATE
     },
-    gender:{
-     type:DataTypes.ENUM('Male','Female'),
-     allowNull:false
-    }
+    updatedAt: {
+      allowNull: false,
+      type: DataTypes.DATE
+    },
   },
   {
     // Other model options go here
