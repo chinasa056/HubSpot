@@ -11,4 +11,6 @@ const sequelize = new Sequelize('FlexiSpace', 'root', 'kelvin090', {
 //   });
 // npx sequelize-cli db:migrate:undo:all --to XXXXXXXXXXXXXX-create-posts.js
 
+// npx sequelize-cli model:generate --name User --attributes firstName:string,lastName:string,email:string
+
 module.exports = sequelize

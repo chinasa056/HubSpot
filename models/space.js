@@ -1,8 +1,9 @@
-const { Sequelize, DataTypes, Model } = require('sequelize');
+const { Sequelize, DataTypes, Model, UUIDV4 } = require('sequelize');
 const sequelize = require("../database/dbConnect");
 const Location = require('./location');
 const Category = require('./category');
 const Booking = require('./booking');
+const Review = require('./review_rating');
 
 class Space extends Model { }
 
@@ -11,7 +12,8 @@ Space.init(
     id: {
       allowNull: false,
       primaryKey: true,
-      type: DataTypes.UUID
+      type: DataTypes.UUID,
+      defaultValue: UUIDV4
     },
 
     name: {
@@ -71,7 +73,10 @@ Space.init(
 
     spaceImages: {
       type: DataTypes.JSON, // JSON type to store multiple URLs
-      allowNull: true,
+      allowNull: false,
+    },
+    averageRating: {
+      type: DataTypes.FLOAT, // This allows storing multiple image URLs in a JSON array
     },
 
   },
@@ -86,6 +91,7 @@ Space.init(
 Space.belongsTo(Location, { foreignKey: 'locationId' });
 Space.belongsTo(Category, { foreignKey: 'categoryId' });
 Space.belongsTo(Host, { foreignKey: 'hostId' });
+Space.hasMany(Review, { foreignKey: 'spaceId' });
 Space.hasMany(Booking, { foreignKey: 'spaceId' });
 
 

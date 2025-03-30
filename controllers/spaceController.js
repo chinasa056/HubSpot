@@ -162,7 +162,7 @@ exports.getSpacesByCategory = async (req, res) => {
             include: [
                 {
                     model: Category,
-                    attributes: ['id', 'name'], // Optionally include category details
+                    attributes: ['id', 'name'], 
                 },
             ],
         });
