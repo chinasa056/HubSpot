@@ -1,190 +1,275 @@
-const Space = require("../models/space");
 const Subscription = require("../models/subscription");
 const Host = require("")
 const axios = require("axios")
 const otpGenerator = require("otp-generator");
+const Plan = require("../models/plan");
+const { sendMail } = require("../middleware/nodemailer");
+const { verify } = require("jsonwebtoken");
+const { successfulSubscription } = require("../utils/success_mailTemplate");
+const { failedSubscription } = require("../utils/failed_mailTemplate");
 const formattedDate = new Date().toLocaleString();
 const ref = otpGenerator.generate(10, { lowerCaseAlphabets: true, upperCaseAlphabets: true, specialChars: false })
 const korapaySecret = process.env.KORAPAY_SECRET_KEY
 
-exports.initializeSubscription = async (req, res) => {
+// CREATING PLAN
+exports.createSubcriptionPlan = async (req, res) => {
     try {
-        const { hostId } = req.user
-        const { amount } = req.body
-
-        const host = await Host.findById(hostId);
-        if (!host) {
-            return res.status(404).json({
-                message: "Host not found"
+        const { planName, amount, description, duration } = req.body
+        const existingPlan = await Plan.findOne({ where: { planName } })
+        if (existingPlan) {
+            return res.status(400).json({
+                message: "Plan already exist"
             })
         };
 
-        const space = await Space.findOne({ where: { hostId } });
-        if (!space) {
-            return res.status(404).json({
-                message: "This host does not have a space"
-            })
-        };
-
-        const paymentDetails = {
+        const newPlan = await Plan.create({
+            planName,
             amount,
-            currency: "NGN",
-            reference: ref,
-            customer: { email: host.email, name: host.fullName }
-        };
-
-        axios.post("https://api.korapay.com/merchant/api/v1/charges/initialize", paymentDetails, {
-            headers: {
-                Authorization: `Bearer ${korapaySecret}`
-            }
+            description,
+            duration
         });
 
-        const startDate = new Date();
-        const endDate = new Date(startDate);
-        endDate.setMonth(endDate.getMonth() + 1);
-
-        const { data } = response?.data;
-
-        const subscription = await Subscription.create({
-            hostId,
-            spaceName: space.name,
-            amount,
-            startDate,
-            endDate,
-            reference,
-            paymentDate: formattedDate
-
-        })
-
-        res.status(200).json({
-            message: 'subscription initialized successfully',
-            data: {
-                reference: data.reference,
-                checkout_url: data.checkout_url
-            },
-            subscription
+        res.status(201).json({
+            message: "Plan created successfully",
+            data: newPlan
         })
 
     } catch (error) {
         console.log(error)
         res.status(500).json({
-            message: "Error subscribing ",
+            message: "Error creating subsription ",
             data: error.message
         })
     }
 };
 
-exports.verifySubscription = async (req, res) => {
+exports.getAllPlan = async (req, res) => {
     try {
-        const { hostId } = req.user
-        const { reference } = req.query;
-        const subscription = await Subscription.findOne({ where: { reference } });
-        const Host = await Host.findByPk(hostId);
+        const plans = await Plan.findAll();
 
-        if (!Host) {
+        if (plans.length === 0) {
             return res.status(404).json({
-                message: 'Host not found'
+                message: 'Plan has not been added'
             })
         };
 
-        if (!subscription) {
-            return res.status(404).json({
-                message: 'No subscription for this host'
-            })
-        };
-
-        const response = await axios.get(`https://api.korapay.com/merchant/api/v1/charges/${reference}`, {
-            headers: {
-                Authorization: `Bearer ${koraSecretKey}`
-            }
+        res.status(200).json({
+            message: 'All subscription plans',
+            data: plans
         });
 
-        const { data } = response;
-
-        if (data.status && data.data.status === 'success') {
-            subscription.status = 'Success';
-            await subscription.update()
-            res.status(200).json({
-                message: 'Transaction is successful'
-            })
-        } else {
-            subscription.status = 'Failed'
-            await subscription.save();
-
-            res.status(200).json({
-                message: 'Transaction failed'
-            })
-        }
     } catch (error) {
-        console.log(error);
+        console.log(error)
         res.status(500).json({
-            message: 'Error verifying subscription'
+            message: "Error creating subsription ",
+            data: error.message
         })
     }
 };
 
-exports.renewSubscription = async (req, res) => {
+exports.getPlan = async (req, res) => {
+    try {
+        const { planId } = req.params;
+        const plan = await Plan.findById(planId);
+
+        if (!plan) {
+            return res.status(404).json({
+                message: 'Plan not found'
+            })
+        };
+
+        res.status(200).json({
+            message: 'All details for this plan',
+            data: plan
+        })
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).json({
+            message: 'Error getting plan'
+        })
+    }
+};
+
+//   SUBSCRIPTION
+exports.initializeSubscription = async (req, res) => {
     try {
         const { hostId } = req.user;
-        const { amount } = req.body;
+        const { planId } = req.params;
 
-        // Step 1: Fetch the active subscription
-        const subscription = await Subscription.findOne({
-            where: { hostId, status: "Active" },
+        const host = await Host.findByPk(hostId);
+        if (!host) {
+            return res.status(404).json({ message: "Host not found" });
+        }
+
+        const plan = await Plan.findByPk(planId);
+        if (!plan) {
+            return res.status(404).json({ message: "Subscription failed: Plan not found" });
+        }
+
+        const existingSubscription = await Subscription.findOne({
+            where: { hostId },
+            order: [['endDate', 'DESC']], // Fetch the latest subscription
         });
-        if (!subscription) {
-            return res.status(404).json({
-                message: "No active subscription found for this host",
+
+        if (existingSubscription && new Date() < new Date(existingSubscription.endDate)) {
+            return res.status(400).json({
+                message: "You already have an active subscription. Please wait until it expires.",
             });
         }
 
-        // Step 2: Calculate leftover days
-        const currentDate = new Date();
-        const endDate = new Date(subscription.endDate);
-
-        let leftoverDays = 0;
-        if (endDate > currentDate) {
-            // Calculate difference in days
-            const diffTime = Math.abs(endDate - currentDate); // Difference in milliseconds
-            leftoverDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); // Convert to days
-        }
-
-        // Step 3: Extend the subscription duration
-        const newEndDate = new Date(currentDate);
-        newEndDate.setMonth(newEndDate.getMonth() + 1); // Add 1 month
-        newEndDate.setDate(newEndDate.getDate() + leftoverDays); // Add leftover days
-
-        // Step 4: Process payment for renewal
         const paymentDetails = {
-            amount,
+            amount: plan.amount,
             currency: "NGN",
-            reference: otpGenerator.generate(10, { lowerCaseAlphabets: true, upperCaseAlphabets: true, specialChars: false }),
-            customer: { email: subscription.hostEmail, name: subscription.hostName },
+            reference: ref,
+            customer: { email: host.email, name: host.fullName },
         };
-        const response = await axios.post(
-            "https://api.korapay.com/merchant/api/v1/charges/initialize",
-            paymentDetails,
-            { headers: { Authorization: `Bearer ${korapaySecret}` } }
-        );
-        const { data } = response?.data;
 
-        // Step 5: Update subscription record
-        subscription.endDate = newEndDate;
-        await subscription.save();
+        const response = await axios.post("https://api.korapay.com/merchant/api/v1/charges/initialize", paymentDetails, {
+            headers: { Authorization: `Bearer ${korapaySecret}` },
+        });
+
+        const { data } = response.data;
+
+        const subscription = await Subscription.create({
+            hostId,
+            planId,
+            planName: plan.name,
+            amount: plan.amount,
+            reference: data.reference,
+            paymentDate: new Date().toISOString(),
+        });
 
         res.status(200).json({
-            message: "Subscription renewed successfully",
+            message: "Subscription initialized successfully",
             data: {
                 reference: data.reference,
                 checkout_url: data.checkout_url,
-                newEndDate,
             },
+            subscription,
         });
     } catch (error) {
         console.error(error);
+        res.status(500).json({ message: "Error subscribing", data: error.message });
+    }
+};
+
+exports.verifySubscription = async (req, res) => {
+    try {
+        const { reference } = req.query;
+        const subscription = await Subscription.findOne({ where: { reference } });
+        if (!subscription) {
+            return res.status(404).json({
+                message: `No subscription found for reference: ${reference}`,
+            });
+        }
+
+        const host = await Host.findByPk(subscription.hostId);
+        if (!host) {
+            return res.status(404).json({
+                message: `Host not found for subscription ID: ${subscription.id}`,
+            });
+        }
+
+        const response = await axios.get(`https://api.korapay.com/merchant/api/v1/charges/${reference}`, {
+            headers: {
+                Authorization: `Bearer ${korapaySecret}`,
+            },
+        });
+
+        const { data } = response;
+        const link = `${req.protocol}://${req.get("host")}/api/v1/subscription`;
+        const firstName = host.fullName.split(" ")[0];
+
+        if (data?.status && data.data?.status === "success") {
+            subscription.status = "Success";
+            subscription.startDate = new Date();
+            subscription.endDate = new Date(subscription.startDate.getTime() + (30 * 24 * 60 * 60 * 1000)); // Add 30 days to startDate
+
+            // send a success email
+            const successHtml = successfulSubscription(
+                link,
+                firstName,
+                subscription.planName,
+                subscription.startDate.toDateString(),
+                subscription.endDate.toDateString()
+            );
+
+            const successMailOptions = {
+                email: host.email,
+                subject: "Subscription Successful",
+                html: successHtml,
+            };
+
+            await sendMail(successMailOptions);
+            await subscription.save()
+
+            console.log(`Subscription ${subscription.id} updated to Success`);
+            res.status(200).json({
+                message: "Subscription is successful",
+            });
+
+        } else {
+            subscription.status = "Failed";
+
+            // Prepare failed email
+            const failedeHtml = failedSubscription(
+                link,
+                firstName,
+                subscription.planName
+            );
+
+            const failureMailOptions = {
+                email: host.email,
+                subject: "Subscription Failed",
+                html: failedeHtml,
+            };
+
+            await sendMail(failureMailOptions);
+            await subscription.save();
+
+            console.log(`Subscription ${subscription.id} updated to Failed`);
+            res.status(200).json({
+                message: "Subscription failed",
+            });
+        }
+    } catch (error) {
+        console.error(`Error verifying subscription: ${error.message}`);
         res.status(500).json({
-            message: "Error renewing subscription",
-            data: error.message,
+            message: "Error verifying subscription",
         });
     }
 };
+
+exports.getAllSubscription = async (req, res) => {
+    try {
+        const { hostId } = req.params;
+        const host = await Host.findById(hostId);
+        if (!host) {
+            return res.status(404).json({
+                message: "Host Not found"
+            })
+        }
+
+        const allSubscription = await Subscription.findAll({ where: { hostId } });
+
+        res.status(200).json({
+            message: "All subscriptions for this host in the database",
+            date: allSubscription
+        })
+
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            message: "Error Fetching Subscriptions ",
+            data: error.message
+        })
+    }
+};
+
+exports.retrieveCurrentStatus = async (req, res) => {
+    try {
+        // subscription = 
+    } catch (error) {
+
+    }
+}
