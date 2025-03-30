@@ -4,13 +4,11 @@ const spaceModel = require("../models/space")
 const cloudinary = require('cloudinary').v2;
 const fs = require("fs")
 
-
-
 exports.addSpace = async (req, res) => {
     try {
         const {hostId} = req.user
         const {locationId, categoryId } = req.params;
-        const { name, description, amenities, price, availability } = req.body;
+        const { name, overView, amenities, pricePerHour, pricePerDay,availability } = req.body;
         const files = req.files
 
         // Check if files are uploaded
@@ -55,7 +53,9 @@ exports.addSpace = async (req, res) => {
             name,
             description,
             amenities,
-            price,
+            overView,
+            pricePerDay,
+            pricePerHour,
             availability,
             spaceImages: uploadedImages
         });

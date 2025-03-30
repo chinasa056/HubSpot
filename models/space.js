@@ -21,23 +21,33 @@ Space.init(
       allowNull: false
     },
 
-    description: {
+    overView: {
       type: DataTypes.STRING,
       allowNull: false
     },
 
-    price: {
+    pricePerHour: {
       type: DataTypes.NUMBER,
       allowNull: false
     },
 
-    amenties: {
-      type: DataTypes.STRING,
+    pricePerDay: {
+      type: DataTypes.NUMBER,
+      allowNull: false
+    },
+    
+    capacity: {
+      type: DataTypes.NUMBER,
+      allowNull: false
+    },
+
+    amenities: {
+      type: DataTypes.JSON,
       allowNull: false
     },
 
     availability: {
-      type: DataTypes.STRING,
+      type: DataTypes.JSON,
       allowNull: false
     },
 
