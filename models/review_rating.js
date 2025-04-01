@@ -1,8 +1,7 @@
-const { Model, DataTypes } = require('sequelize');
+const { Model, DataTypes, UUIDV4 } = require('sequelize');
 const sequelize = require('../database/dbConnect');
-const Space = require('./space');
-const User = require('./user');
-class Review extends Model { }
+
+class Review extends Model {}
 
 Review.init(
   {
@@ -10,50 +9,50 @@ Review.init(
       allowNull: false,
       primaryKey: true,
       type: DataTypes.UUID,
-      defaultValue: UUIDV4
+      defaultValue: UUIDV4,
     },
 
     spaceId: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: Space,
+        model: 'Spaces', 
         key: 'id',
       },
     },
 
     spaceName: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
 
     userId: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: User,
+        model: 'Users', 
         key: 'id',
       },
     },
 
     userName: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
 
     rating: {
       type: DataTypes.INTEGER,
       allowNull: false,
       validate: {
-        min: 1, 
-        max: 5, 
-        isInt: true, 
+        min: 1,
+        max: 5,
+        isInt: true,
       },
     },
 
     reviewText: {
-      type: DataTypes.STRING, 
-      allowNull: true,
+      type: DataTypes.STRING,
+      allowNull: false,
     },
 
     createdAt: {
@@ -76,8 +75,9 @@ Review.init(
   }
 );
 
-User.hasMany(Review, { foreignKey: 'userId' });
-Review.belongsTo(Space, { foreignKey: 'spaceId' });
-Review.belongsTo(User, { foreignKey: 'userId' });
+// // Associations without importing the models directly
+// Review.belongsTo('Space', { foreignKey: 'spaceId' });
+// Review.belongsTo('User', { foreignKey: 'userId' });
+// User.hasMany(Review, { foreignKey: 'userId' });
 
 module.exports = Review;

@@ -17,16 +17,16 @@ module.exports = {
         allowNull: false
       },
       pricePerHour: {
-        type: Sequelize.NUMBER,
+        type: Sequelize.INTEGER,
         allowNull: false
       },
 
       pricePerDay: {
-        type: Sequelize.NUMBER,
+        type: Sequelize.INTEGER,
         allowNull: false
       },
       capacity: {
-        type: Sequelize.NUMBER,
+        type: Sequelize.INTEGER,
         allowNull: false
       },
       amenities: {
@@ -46,7 +46,7 @@ module.exports = {
         allowNull: false
       },
       hostId: {
-        type: Sequelize.STRING,
+        type: Sequelize.UUID,
         allowNull: false
       },
       spaceImages: {

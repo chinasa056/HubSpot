@@ -1,5 +1,5 @@
 const { Sequelize, DataTypes, Model } = require('sequelize');
-const sequelize = require('../database/sequelize');
+const sequelize = require('../database/dbConnect');
 
 class User extends Model {}
 
@@ -7,7 +7,6 @@ User.init(
   {
     id: {
       allowNull: false,
-      autoIncrement: true,
       primaryKey: true,
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4
@@ -21,10 +20,6 @@ User.init(
       type: DataTypes.STRING,
       allowNull: false
 
-    },
-    gender:{
-       type:DataTypes.ENUM('Male','Female'),
-       allowNull:false
     },
     email: {
       type: DataTypes.STRING,

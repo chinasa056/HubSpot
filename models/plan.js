@@ -1,6 +1,6 @@
 const { Sequelize, DataTypes, Model } = require('sequelize');
 const sequelize = require("../database/dbConnect");
-const Subscription = require('./subscription');
+// const Subscription = require('./subscription');
 
 class Plan extends Model {}
 
@@ -37,6 +37,6 @@ Plan.init(
   },
 );
 
-Plan.hasMany(Subscription, { foreignKey: 'PlanId'});
+// Plan.hasMany(Subscription, { foreignKey: 'PlanId'});
 
 module.exports = Plan

@@ -1,18 +1,20 @@
-const{register, verifyUser, login, forgottenPassword, resetPassword, changePassword, loggedOut} = require('../controllers/userController')
+const{ verifyUser, login, forgottenPassword, resetPassword, changePassword, loggedOut, registerUser} = require('../controllers/userController');
+const { authenticate } = require('../middleware/authentication');
+const { registerUserValidator, loginValidator, changePasswordValidator } = require('../middleware/validator');
 
 const router = require('express').Router(); 
 
-router.post('/register-user', register);
+router.post('/users/register',registerUserValidator, registerUser);
 
-router.get("/user/verify", verifyUser);
+router.get("/users/verify/:token", verifyUser);
 
-router.post("/user/login", login);
+router.post("/users/login",loginValidator, login);
 
-router.post("/user/forgot-password", forgottenPassword);
+router.post("/users/forgot-password", forgottenPassword);
 
 router.post("/users/reset-password/:token", resetPassword);
 
-router.patch("/users/change-password/:userId", changePassword);
+router.patch("/users/change-password/:userId",authenticate, changePasswordValidator, changePassword);
 
 router.patch("/users/logout", loggedOut);
 

@@ -1,6 +1,7 @@
 const User = require("../models/user");
 const Host = require("../models/host");
 const jwt = require('jsonwebtoken');
+const Admin = require("../models/admin");
 
 exports.authenticate = async (req, res, next) => {
   try {
@@ -23,6 +24,9 @@ exports.authenticate = async (req, res, next) => {
       if (!user) {
           user = await Host.findByPk(decodedToken.userId);
       }
+      if (!user) {
+        user = await Admin.findByPk(decodedToken.userId);
+    }
       if (!user) {
           return res.status(404).json({
               message: "Authentication Failed: User not found",
@@ -86,16 +90,16 @@ exports.hostAuth = async (req, res, next) => {
 };
 
 
-// exports.isAdmin = async (req, res, next) => {
-//     try {
-//         if (!req.user.isAdmin) {
-//             return res.status(403).json({
-//                 message: 'Unauthorized: User is not an Admin'
-//             })
-//         } else{
-//             next();
-//         }
-//     } catch (error) {
-//         res.status(500).json({ message: 'Error authenticating Admin: ' + error.message })
-//     }
-// }
+exports.isAdmin = async (req, res, next) => {
+    try {
+        if (req.user.isAdmin === false) {
+            return res.status(403).json({
+                message: 'Unauthorized: User is not an Admin'
+            })
+        } else{
+            next();
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Error authenticating Admin: ' + error.message })
+    }
+}

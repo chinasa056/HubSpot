@@ -1,6 +1,5 @@
 const { Sequelize, DataTypes, Model } = require('sequelize');
 const sequelize = require("../database/dbConnect");
-const Space = require('./space');
 
 class Location extends Model {}
 
@@ -25,8 +24,5 @@ Location.init(
     timestamps: true,
   },
 );
-
-Location.hasMany(Space, { foreignKey: 'locationId' });
-
 
 module.exports = Location
