@@ -3,7 +3,7 @@ const Location = require("../models/location");
 const Category = require("../models/category");
 const Location = require("../models/location");
 const spaceModel = require("../models/space")
-const cloudinary = require('cloudinary').v2;
+const cloudinary = require("../database/cloudinary");
 const fs = require("fs")
 
 

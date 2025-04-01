@@ -1,6 +1,5 @@
 const { Sequelize, DataTypes, Model } = require('sequelize');
 const sequelize = require("../database/dbConnect");
-const Space = require('./space');
 
 class Category extends Model {}
 
@@ -12,26 +11,29 @@ Category.init(
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4
     },
-    
     name: {
       type: DataTypes.STRING,
       allowNull: false
     },
 
-    description: {
-      type: DataTypes.STRING,
-      allowNull: true,
+    createdAt: {
+      allowNull: false,
+      type: DataTypes.DATE
     },
-
+    
+    updatedAt: {
+      allowNull: false,
+      type: DataTypes.DATE
+    }
   },
   {
-    // Other model options go here
-    sequelize, // We need to pass the connection instance
-    modelName: 'Category', // We need to choose the model name
+    sequelize,
+    modelName: 'Category',
     timestamps: true,
   },
 );
 
-Category.hasMany(Space, { foreignKey: 'categoryId'});
+// Association defined after model initialization to break circular dependency
+// Category.hasMany(require('./space'), { foreignKey: 'categoryId'});
 
-module.exports = Category
+module.exports = Category;

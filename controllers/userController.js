@@ -5,6 +5,7 @@ const { send_mail, sendMail } = require("../middleware/nodemailer");
 const cloudinary = require("../database/cloudinary")
 const fs = require('fs');
 const User = require("../models/user");
+const { resetPasswordMail } = require("../utils/reset-password-mail");
 
 exports.registerUser = async (req, res) => {
     try {
@@ -50,10 +51,10 @@ exports.registerUser = async (req, res) => {
             profileImage: profileImageUrl,
         };
 
-        const user = await userModel.create(userData);
+        const user = await User.create(userData);
 
         const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: "1d" });
-        const link = `${req.protocol}://${req.get("host")}/user/verify/${token}`;
+        const link = `${req.protocol}://${req.get("host")}/api/v1/users/verify/${token}`;
         const firstName = user.fullName.split(" ")[0];
 
         const mailOptions = {
@@ -69,12 +70,13 @@ exports.registerUser = async (req, res) => {
             data: user,
         });
     } catch (error) {
-        console.error(error.message);
+        console.error(error);
         if (req.file) {
             fs.unlinkSync(req.file.path);
         }
         res.status(500).json({
             message: "Error registering user",
+            data: error.message
         });
     }
 };
@@ -108,8 +110,8 @@ exports.verifyUser = async (req, res) => {
                     }
 
                     // Generate a new token and send verification email
-                    const newToken = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: "5m" });
-                    const link = `${req.protocol}://${req.get("host")}/api/v1/verify/user/${newToken}`;
+                    const newToken = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: "1hour" });
+                    const link = `${req.protocol}://${req.get("host")}/api/v1/users/verify/${newToken}`;
                     const firstName = user.fullName.split(" ")[0];
 
                     const mailOptions = {
@@ -118,14 +120,14 @@ exports.verifyUser = async (req, res) => {
                         html: verify(link, firstName),
                     };
 
-                    await send_mail(mailOptions);
+                    await sendMail(mailOptions);
 
                     return res.status(200).json({
                         message: "Session expired: A new verification link has been sent to your email.",
                     });
                 }
             } else {
-                const user = await userModel.findByPk(payload.userId);
+                const user = await User.findByPk(payload.userId);
 
                 if (!user) {
                     return res.status(404).json({
@@ -190,22 +192,18 @@ exports.login = async (req, res) => {
             });
         }
 
-        user.isLoggedIn = true;
+        user.isLoggedin = true;
         const token = jwt.sign(
             { userId: user.id, isLoggedIn: user.isLoggedIn },
             process.env.JWT_SECRET,
-            { expiresIn: "1day" }
+            { expiresIn: "2d" }
         );
 
         await user.save();
 
         res.status(200).json({
             message: "Account successfully logged in",
-            data: {
-                id: user.id,
-                email: user.email,
-                fullName: user.fullName,
-            },
+            data: user,
             token,
         });
     } catch (error) {
@@ -235,23 +233,16 @@ exports.forgottenPassword = async (req, res) => {
             });
         }
 
-        // Ensure the user is logged in before allowing password reset
-        if (!user.isLoggedIn) {
-            return res.status(401).json({
-                message: "Authentication failed: User is not logged in",
-            });
-        }
-
         // Generate reset token and link
-        const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: "5m" });
-        const link = `${req.protocol}://${req.get("host")}/api/v1/user/reset_password/${token}`;
+        const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: "1day" });
+        const link = `${req.protocol}://${req.get("host")}/api/v1/users/reset-password/${token}`;
         const firstName = user.fullName.split(" ")[0];
 
         // Prepare and send reset email
         const mailOptions = {
             email: user.email,
             subject: "Reset Password",
-            html: verify(link, firstName),
+            html: resetPasswordMail(link, firstName),
         };
 
         await sendMail(mailOptions);
@@ -293,7 +284,7 @@ exports.resetPassword = async (req, res) => {
 
         const { userId } = jwt.verify(token, process.env.JWT_SECRET);
 
-        const user = await userModel.findByPk(userId);
+        const user = await User.findByPk(userId);
         if (!user) {
             return res.status(404).json({
                 message: "Account not found",
@@ -310,7 +301,7 @@ exports.resetPassword = async (req, res) => {
             message: "Password reset successfully. You can now log in with your new password.",
         });
     } catch (error) {
-        console.error(error.message);
+        console.error(error);
 
         if (error instanceof jwt.JsonWebTokenError) {
             return res.status(400).json({
@@ -320,6 +311,7 @@ exports.resetPassword = async (req, res) => {
 
         res.status(500).json({
             message: "Error resetting password",
+            data: error.message
         });
     }
 };

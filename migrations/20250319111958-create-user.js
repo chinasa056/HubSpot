@@ -17,10 +17,6 @@ module.exports = {
         allowNull: false
 
       },
-      gender:{
-             type:Sequelize.ENUM('Male','Female'),
-             allowNull:false
-          },
       email: {
         type: Sequelize.STRING,
         allowNull: false
