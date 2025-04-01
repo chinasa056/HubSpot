@@ -21,11 +21,11 @@ module.exports = {
         allowNull: true
       },
       duration: {
-        type: Sequelize.NUMBER,
+        type: Sequelize.INTEGER,
         allowNull: true
       },
       status: {
-        type: Sequelize.NUMBER,
+        type: Sequelize.INTEGER,
         allowNull: true
       },
       createdAt: {

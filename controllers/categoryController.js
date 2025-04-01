@@ -1,9 +1,19 @@
+const Admin = require("../models/admin");
 const categoryModel = require("../models/category");
 const Space = require("../models/space");
 
 exports.createCategory = async (req, res) => {
     try {
-        const { name, description } = req.body
+        const {userId} = req.user
+        const { name } = req.body
+
+        const user = await Admin.findByPk(userId)
+        if (!user) {
+            return res.status(404).json({
+                message: "user not found"
+            })
+        }
+
 
         const category = await categoryModel.findOne({ where: { name } })
         if (category) {
@@ -13,11 +23,10 @@ exports.createCategory = async (req, res) => {
         }
 
         const newCategory = await categoryModel.create({
-            name,
-            description
+            name
         })
 
-        res.status(201).jspn({
+        res.status(201).json({
             message: "New Category Created",
             data: newCategory
         })
@@ -86,7 +95,7 @@ exports.getOneCategory = async (req, res) => {
 exports.updateCategory = async (req, res) => {
     try {
         const { categoryId } = req.params;
-        const { name, description } = req.body
+        const { name } = req.body
 
         const category = await categoryModel.findByPk(categoryId)
         if (!category) {
@@ -95,7 +104,7 @@ exports.updateCategory = async (req, res) => {
             })
         };
 
-        const updatedCategory = await category.update({ name, description });
+        const updatedCategory = await category.update({ name });
 
         res.status(200).json({
             message: "Category Updated Successfully",

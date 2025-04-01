@@ -1,8 +1,8 @@
 const { Sequelize, DataTypes, Model } = require('sequelize');
-const sequelize = require("../database/dbConnect");
-const Location = require('./location');
-const Category = require('./category');
-const Booking = require('./booking');
+const sequelize = require('../database/dbConnect');
+// const Location = require('./location');
+// const Host = require('./host');
+// const Review = require('./review_rating');
 
 class Space extends Model { }
 
@@ -13,80 +13,87 @@ Space.init(
       primaryKey: true,
       type: DataTypes.UUID
     },
-
     name: {
       type: DataTypes.STRING,
       allowNull: false
     },
-
     description: {
       type: DataTypes.STRING,
       allowNull: false
     },
-
-    price: {
-      type: DataTypes.NUMBER,
+    pricePerHour: {
+      type: DataTypes.INTEGER,
       allowNull: false
     },
-
-    amenties: {
-      type: DataTypes.STRING,
+    pricePerDay: {
+      type: DataTypes.INTEGER,
       allowNull: false
     },
-
+    capacity: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    amenities: {
+      type: DataTypes.JSON,
+      allowNull: false
+    },
     availability: {
       type: DataTypes.STRING,
       allowNull: false
     },
-
     locationId: {
       type: DataTypes.UUID,
       references: {
-        model: 'Location',
+        model: "Locations",
         key: 'id'
       },
       onUpdate: 'CASCADE',
       onDelete: 'CASCADE'
     },
-
     categoryId: {
       type: DataTypes.UUID,
       references: {
-        model: 'Cateory',
+        model: "Categories",
         key: 'id'
       },
       onUpdate: 'CASCADE',
       onDelete: 'CASCADE'
     },
-
     hostId: {
       type: DataTypes.UUID,
       references: {
-        model: 'Host',
+        model: "Hosts",
         key: 'id'
       },
       onUpdate: 'CASCADE',
       onDelete: 'CASCADE'
     },
-
     spaceImages: {
-      type: DataTypes.JSON, // JSON type to store multiple URLs
-      allowNull: true,
+      type: DataTypes.JSON,
+      allowNull: false,
     },
-
+    averageRating: {
+      type: DataTypes.FLOAT,
+    },
+    createdAt: {
+      allowNull: false,
+      type: DataTypes.DATE
+    },
+    updatedAt: {
+      allowNull: false,
+      type: DataTypes.DATE
+    }
   },
   {
-    // Other model options go here
-    sequelize, // We need to pass the connection instance
-    modelName: 'Space', // We need to choose the model name
+    sequelize,
+    modelName: 'Space',
     timestamps: true,
   },
 );
 
-Space.belongsTo(Location, { foreignKey: 'locationId' });
-Space.belongsTo(Category, { foreignKey: 'categoryId' });
-Space.belongsTo(Host, { foreignKey: 'hostId' });
-Space.hasMany(Booking, { foreignKey: 'spaceId' });
+// Space.belongsTo(Location, { foreignKey: "locationId" });
+// Space.belongsTo(require('./category'), { foreignKey: "categoryId" });
+// Space.belongsTo(Host, { foreignKey: "hostId" });
+// Space.hasMany(Review, { foreignKey: "spaceId" });
 
-
-module.exports = Space
+module.exports = Space;

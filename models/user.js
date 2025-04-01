@@ -1,5 +1,5 @@
 const { Sequelize, DataTypes, Model } = require('sequelize');
-const sequelize = new Sequelize('sqlite::memory:');
+const sequelize = require('../database/dbConnect');
 
 class User extends Model {}
 
@@ -7,7 +7,6 @@ User.init(
   {
     id: {
       allowNull: false,
-      autoIncrement: true,
       primaryKey: true,
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4
@@ -26,6 +25,22 @@ User.init(
       type: DataTypes.STRING,
       allowNull: false
 
+    },
+    isVerified:{
+        type:DataTypes.BOOLEAN,
+        defaultValue:false
+  },
+  isLoggedin:{
+        type:DataTypes.BOOLEAN,
+        defaultValue:false
+  },
+    createdAt: {
+      allowNull: false,
+      type: DataTypes.DATE
+    },
+    updatedAt: {
+      allowNull: false,
+      type: DataTypes.DATE
     },
   },
   {

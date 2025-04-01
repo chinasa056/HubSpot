@@ -1,7 +1,7 @@
 const { Sequelize, DataTypes, Model } = require('sequelize');
 const sequelize = require("../database/dbConnect");
-const Space = require('./space');
-const User = require('./user')
+// const Space = require('./space');
+// const User = require('./user')
 
 class Booking extends Model {}
 
@@ -16,7 +16,7 @@ Booking.init(
     userId: {
       type: DataTypes.UUID,
       references: {
-        model: 'User',
+        model: 'Users',
         key: 'id'
       },
       onUpdate: 'CASCADE',
@@ -26,7 +26,7 @@ Booking.init(
     spaceId: {
       type: DataTypes.UUID,
       references: {
-        model: 'Space',
+        model: 'Spaces',
         key: 'id'
       },
       onUpdate: 'CASCADE',
@@ -38,16 +38,21 @@ Booking.init(
       allowNull: true
     },
 
-    duration: {
-      type: DataTypes.NUMBER,
+    checkin: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+
+    checkout: {
+      type: DataTypes.INTEGER,
       allowNull: true
     },
 
     status: {
-      type: DataTypes.STRING,
-      allowNull: true
+      type: DataTypes.ENUM,
+      values: ['active', 'pending', 'expired'], 
+      defaultValue: 'pending', 
     },
-
   },
   {
     // Other model options go here
@@ -57,7 +62,7 @@ Booking.init(
   },
 );
 
-Booking.belongsTo(User, { foreignKey: 'userId' });
-Booking.belongsTo(Space, { foreignKey: 'spaceId' });
+// Booking.belongsTo(User, { foreignKey: 'userId' });
+// Booking.belongsTo(Space, { foreignKey: 'spaceId' });
 
 module.exports = Booking

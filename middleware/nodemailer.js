@@ -1,6 +1,6 @@
-const nodemailer = require("nodemailer");
+const nodemailer = require("nodemailer")
 
-exports.send_mail = async (recipient) => {
+exports.sendMail = async (option) => {
   const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     service: process.env.SERVICE,
@@ -17,12 +17,12 @@ exports.send_mail = async (recipient) => {
     // send mail with defined transport object
     const info = await transporter.sendMail({
       from: process.env.APP_USERNAME, // sender address
-      to: recipient.email, // list of receivers
-      subject: recipient.subject, // Subject line
-      html: recipient.html, // html body
+      to: option.email, // list of receivers
+      subject: option.subject, // Subject line
+      html: option.html, // html body
     });
 
-    console.log("Message sent: ", recipient.email);
+    console.log("Message sent: ", option.email);
     // Message sent: <d786aa62-4e0a-070a-47ed-0b0666549519@ethereal.email>
   }
 

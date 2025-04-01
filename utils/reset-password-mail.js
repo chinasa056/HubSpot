@@ -1,11 +1,11 @@
-exports.verify = (link, firstName) => {
+exports.resetPasswordMail = (link, firstName) => {
     return `
        <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cohort 5 Class </title>
+    <title>Reset Your Password</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -42,7 +42,7 @@ exports.verify = (link, firstName) => {
         }
         .button {
             display: inline-block;
-            background-color:  #fc7e7e; /* Green background */
+            background-color: #fc7e7e; /* Button color */
             color: #131111;
             padding: 15px 30px;
             font-size: 18px;
@@ -68,25 +68,23 @@ exports.verify = (link, firstName) => {
 <body>
     <div class="container">
         <div class="header">
-            <h1>Welcome To HubSpot!</h1>
+            <h1>Password Reset Request</h1>
         </div>
         <div class="content">
             <p>Hello ${firstName},</p>
-            <p>Thank you for signing up on HubSpot App. We are excited to have you on board.</p>
-            <p>Please click the button below to verify your account:</p>
+            <p>We received a request to reset your password for your HubSpot account.</p>
+            <p>Please click the button below to reset your password:</p>
             <div class="button-container">
-                <a href="${link}" class="button">Verify My Account</a>
+                <a href="${link}" class="button">Reset My Password</a>
             </div>
-            <p>If you did not sign up on our platform, kindly ignore this email.</p>
+            <p>If you did not request this password reset, you can safely ignore this email.</p>
             <p>Best regards,<br>HubSpot Team</p>
         </div>
         <div class="footer">
-            <p>&copy; ${new Date().getFullYear()} . All rights reserved.</p>
+            <p>&copy; ${new Date().getFullYear()}. All rights reserved.</p>
         </div>  
     </div>
 </body>
 </html>
-        
-
-  `
-}
+    `;
+};

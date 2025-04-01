@@ -2,61 +2,44 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Spaces', {
+    await queryInterface.createTable('Hosts', {
       id: {
         allowNull: false,
         primaryKey: true,
         type: Sequelize.UUID
       },
-      name: {
+      fullName: {
         type: Sequelize.STRING,
         allowNull: false
       },
-      description: {
+      password: {
         type: Sequelize.STRING,
         allowNull: false
       },
-      pricePerHour: {
-        type: Sequelize.INTEGER,
-        allowNull: false
-      },
-
-      pricePerDay: {
-        type: Sequelize.INTEGER,
-        allowNull: false
-      },
-      capacity: {
-        type: Sequelize.INTEGER,
-        allowNull: false
-      },
-      amenities: {
-        type: Sequelize.JSON,
-        allowNull: false
-      },
-      availability: {
+      email: {
         type: Sequelize.STRING,
         allowNull: false
       },
-      locationId: {
+      companyName: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+      companyAddress: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+      tpyeOfSpace: {
         type: Sequelize.STRING,
         allowNull: false
       },
-      categoryId: {
+      identification: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: true
       },
-      hostId: {
-        type: Sequelize.UUID,
-        allowNull: false
-      },
-      spaceImages: {
+      profileImage: {
         type: Sequelize.JSON, // This allows storing multiple image URLs in a JSON array
-        allowNull: false,
+        allowNull: true,
       },
-      averageRating: {
-        type: Sequelize.FLOAT, // This allows storing multiple image URLs in a JSON array
-      },
-
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
@@ -68,6 +51,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Spaces');
+    await queryInterface.dropTable('Hosts');
   }
 };
