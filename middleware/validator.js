@@ -1,6 +1,6 @@
 const joi = require("joi");
 
-exports.registerUserValidator = (req, res, next) => {
+exports.registerValidator = (req, res, next) => {
     const schema = joi.object({
         fullName: joi.string().trim().min(5).pattern(/^[A-Za-z\s]+$/).required().messages({
             "any.required": "Full name is required.",
