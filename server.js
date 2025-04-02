@@ -6,7 +6,7 @@ const cors = require("cors");
 const userRouter = require('./routes/userRoute');
 const adminRoute = require('./routes/adminRoute');
 const categoryRoute = require('./routes/categoryRoute');
-
+const hostRoute = require('./routes/hostRoutes')
 const PORT = process.env.PORT || 7039;
 
 const app = express();
@@ -15,7 +15,7 @@ app.use(express.json());
 app.use('/api/v1', userRouter);
 app.use('/api/v1', adminRoute);
 app.use('/api/v1', categoryRoute);
-
+app.use('/api/v1', hostRoute);
 app.use(cors());
 
 const server = async () => {

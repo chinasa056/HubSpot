@@ -1,23 +1,25 @@
-const bcrypt = require("bcrypt");
+const Host = require("../models/host");
+const cloudinary = require("../config/cloudinary")
 const jwt = require("jsonwebtoken");
-const { verify, } = require("../utils/mailTemplate");
+const bcrypt = require("bcrypt");
+const { verify,} = require("../utils/mailTemplate");
 const { sendMail } = require("../middleware/nodemailer");
-const cloudinary = require("../database/cloudinary")
+const {resetPasswordMail} = require("../utils/reset-password-mail")
 const fs = require('fs');
-const User = require("../models/user");
-const { resetPasswordMail } = require("../utils/reset-password-mail");
+const Host = require("../models/host");
 
-exports.registerUser = async (req, res) => {
+
+exports.register = async (req, res) => {
     try {
-        const { fullName, email, password, confirmPassword } = req.body;
+        const { fullName, email, password, confirmPassword,} = req.body;
         const file = req.file;
 
-        const userExists = await User.findOne({ where: { email: email.toLowerCase() } });
+        const hostExists = await Host.findOne({ where: { email: email.toLowerCase() } });
 
-        if (userExists) {
+        if (hostExists) {
             if (file) fs.unlinkSync(file.path);
             return res.status(400).json({
-                message: `User with email: ${email} already exists`,
+                message: `Host with email: ${email} already exists`,
             });
         }
 
@@ -37,173 +39,175 @@ exports.registerUser = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, salt);
 
         let profileImageUrl = null; // Initialize profileImage URL
-
+        let identificationUrl = null;
         if (file) {
             const result = await cloudinary.uploader.upload(file.path)
             profileImageUrl = result.secure_url;
+            identificationUrl = result.secure_url;
             fs.unlinkSync(file.path);
         }
 
-        const userData = {
+        const hostData= {
             fullName,
             email: email.toLowerCase(),
             password: hashedPassword,
+            companyName,
+            companyAddress,
             profileImage: profileImageUrl,
+            identification:identificationUrl,
         };
-
-        const user = await User.create(userData);
-
-        const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: "1d" });
-        const link = `${req.protocol}://${req.get("host")}/api/v1/users/verify/${token}`;
-        const firstName = user.fullName.split(" ")[0];
-
-        const mailOptions = {
+  
+        const Host = await Host.create(hostData)
+        const token = jwt.sign({ hostId: Host.id }, process.env.JWT_SECRET, { expiresIn: "1d" });
+        const link = `${req.protocol}://${req.get("host")}/host/verify/${token}`;
+        const firstName = Host.fullName.split(" ")[0];
+`
+        const mailOptions` = {
             email: user.email,
             subject: "Account Verification",
             html: verify(link, firstName),
         };
-
+        
         await sendMail(mailOptions);
-
+        
         res.status(201).json({
             message: "Account registered successfully. Please check your email for verification.",
-            data: user,
+            data: Host,
         });
     } catch (error) {
-        console.error(error);
+        console.error(error.message);
         if (req.file) {
             fs.unlinkSync(req.file.path);
         }
         res.status(500).json({
-            message: "Error registering user",
-            data: error.message
+            message: "Error registering host",
         });
     }
 };
-
-exports.verifyUser = async (req, res) => {
+exports.verify = async (req, res) => {
     try {
-        const { token } = req.params;
-
-        if (!token) {
+      const { token } = req.params;
+  
+      if (!token) {
+        return res.status(404).json({
+          message: 'Token not found'
+        })
+      };
+  
+      jwt.verify(token, process.env.JWT_SECRET, async (error, payload) => {
+        if (error) {
+          if (error instanceof jwt.JsonWebTokenError) {
+            const { hostId } = jwt.decode(token);
+            const host = await Host.findById(hostId);
+  
+            if (!host) {
+              return res.status(404).json({
+                message: 'Account not found'
+              })
+            };
+  
+            if (host.isVerified === true) {
+              return res.status(400).json({
+                message: 'Account is verified already'
+              })
+            };
+  
+            const newToken = jwt.sign({ hostId: host._id }, process.env.JWT_SECRET, { expiresIn: '5mins' });
+            const link = `${req.protocol}://${req.get('host')}/api/v1/verify/host/${newToken}`;
+            const firstName = host.fullName.split(' ')[0];
+  
+            const mailOptions = {
+              email: host.email,
+              subject: 'Resend: Account Verification',
+              html: verify(link, firstName)
+            };
+  
+            await resetPasswordMail(mailOptions);
+            res.status(200).json({
+              message: 'Session expired: Link has been sent to email address'
+            })
+          }
+        } else {
+          const host = await Host.findByPk(payload.hostId);
+  
+          if (!host) {
             return res.status(404).json({
-                message: "Verification token is missing",
-            });
-        }
-
-        jwt.verify(token, process.env.JWT_SECRET, async (error, payload) => {
-            if (error) {
-                if (error instanceof jwt.JsonWebTokenError) {
-                    const { userId } = jwt.decode(token); // Decode token to fetch user ID
-                    const user = await userModel.findByPk(userId);
-
-                    if (!user) {
-                        return res.status(404).json({
-                            message: "Account not found",
-                        });
-                    }
-
-                    if (user.isVerified) {
-                        return res.status(400).json({
-                            message: "Account is already verified",
-                        });
-                    }
-
-                    // Generate a new token and send verification email
-                    const newToken = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: "1hour" });
-                    const link = `${req.protocol}://${req.get("host")}/api/v1/users/verify/${newToken}`;
-                    const firstName = user.fullName.split(" ")[0];
-
-                    const mailOptions = {
-                        email: user.email,
-                        subject: "Resend: Account Verification",
-                        html: verify(link, firstName),
-                    };
-
-                    await sendMail(mailOptions);
-
-                    return res.status(200).json({
-                        message: "Session expired: A new verification link has been sent to your email.",
-                    });
-                }
-            } else {
-                const user = await User.findByPk(payload.userId);
-
-                if (!user) {
-                    return res.status(404).json({
-                        message: "Account not found",
-                    });
-                }
-
-                if (user.isVerified) {
-                    return res.status(400).json({
-                        message: "Account is already verified",
-                    });
-                }
-
-                user.isVerified = true;
-                await user.save();
-
-                res.status(200).json({
-                    message: "Account verified successfully",
-                });
-            }
-        });
-    } catch (error) {
-        console.error(error.message);
-        if (error instanceof jwt.JsonWebTokenError) {
+              message: 'Account not found'
+            })
+          };
+  
+          if (host.isVerified === true) {
             return res.status(400).json({
-                message: "Session expired: A new link has been sent to your email address.",
-            });
+              message: 'Account is verified already'
+            })
+          };
+  
+          host.isVerified = true;
+          await host.save();
+  
+          res.status(200).json({
+            message: 'Account verified successfully'
+          })
         }
-        res.status(500).json({
-            message: "Error verifying user",
-        });
+      });
+    } catch (error) {
+      console.log(error.message);
+      if (error instanceof jwt.JsonWebTokenError) {
+        return res.status(400).json({
+          message: 'Session expired: link has been sent to email address'
+        })
+      }
+      res.status(500).json({
+        message: 'Error Verifying user'
+      })
     }
-};
-
+  };
 exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
         if (!email || !password) {
             return res.status(400).json({
-                message: "Please input both email and password",
+                message: "you need both email and password",
             });
         }
 
-        const user = await User.findOne({ where: { email: email.toLowerCase() } });
-        if (!user) {
+        const host = await host.findOne({ where: { email: email.toLowerCase() } });
+        if (!host) {
             return res.status(404).json({
-                message: "User not found",
+                message: "host not found",
             });
         }
 
-        const isCorrectPassword = await bcrypt.compare(password, user.password);
+        const isCorrectPassword = await bcrypt.compare(password, host.password);
         if (!isCorrectPassword) {
             return res.status(400).json({
                 message: "Incorrect password",
             });
         }
 
-        if (!user.isVerified) {
+        if (!host.isVerified) {
             return res.status(400).json({
                 message: "Account is not verified. Please check your email for the verification link.",
             });
         }
 
-        user.isLoggedin = true;
+        host.isLoggedIn = true;
         const token = jwt.sign(
-            { userId: user.id, isLoggedIn: user.isLoggedIn },
+            { hostId: host.id, isLoggedIn: host.isLoggedIn },
             process.env.JWT_SECRET,
-            { expiresIn: "2d" }
+            { expiresIn: "1day" }
         );
 
-        await user.save();
+        await host.save();
 
         res.status(200).json({
             message: "Account successfully logged in",
-            data: user,
+            data: {
+                id: host.id,
+                email: host.email,
+                fullName: host.fullName,
+            },
             token,
         });
     } catch (error) {
@@ -225,27 +229,34 @@ exports.forgottenPassword = async (req, res) => {
         }
 
         // Find the user by email
-        const user = await User.findOne({ where: { email: email.toLowerCase() } });
+        const host = await host.findOne({ where: { email: email.toLowerCase() } });
 
-        if (!user) {
+        if (!host) {
             return res.status(404).json({
                 message: "Account not found",
             });
         }
 
+        // Ensure the user is logged in before allowing password reset
+        if (!host.isLoggedIn) {
+            return res.status(401).json({
+                message: "Authentication failed: host is not logged in",
+            });
+        }
+
         // Generate reset token and link
-        const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: "1day" });
-        const link = `${req.protocol}://${req.get("host")}/api/v1/users/reset-password/${token}`;
-        const firstName = user.fullName.split(" ")[0];
+        const token = jwt.sign({ hostId: host.id }, process.env.JWT_SECRET, { expiresIn: "5m" });
+        const link = `${req.protocol}://${req.get("host")}/api/v1/host/reset_password/${token}`;
+        const firstName = host.fullName.split(" ")[0];
 
         // Prepare and send reset email
         const mailOptions = {
-            email: user.email,
+            email: host.email,
             subject: "Reset Password",
-            html: resetPasswordMail(link, firstName),
+            html: verify(link, firstName),
         };
 
-        await sendMail(mailOptions);
+        await resetPasswordMail(mailOptions);
 
         res.status(200).json({
             message: "A password reset link has been sent to your email address",
@@ -282,10 +293,10 @@ exports.resetPassword = async (req, res) => {
             });
         }
 
-        const { userId } = jwt.verify(token, process.env.JWT_SECRET);
+        const { hostId } = jwt.verify(token, process.env.JWT_SECRET);
 
-        const user = await User.findByPk(userId);
-        if (!user) {
+        const host = await userModel.findByPk(hostId);
+        if (!host) {
             return res.status(404).json({
                 message: "Account not found",
             });
@@ -294,14 +305,14 @@ exports.resetPassword = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-        user.password = hashedPassword;
-        await user.save();
+        host.password = hashedPassword;
+        await host.save();
 
         res.status(200).json({
             message: "Password reset successfully. You can now log in with your new password.",
         });
     } catch (error) {
-        console.error(error);
+        console.error(error.message);
 
         if (error instanceof jwt.JsonWebTokenError) {
             return res.status(400).json({
@@ -311,14 +322,13 @@ exports.resetPassword = async (req, res) => {
 
         res.status(500).json({
             message: "Error resetting password",
-            data: error.message
         });
     }
 };
 
 exports.changePassword = async (req, res) => {
     try {
-        const { userId } = req.params;
+        const { hostId } = req.params;
         const { password, newPassword, confirmPassword } = req.body;
 
         if (!password || !newPassword || !confirmPassword) {
@@ -327,20 +337,20 @@ exports.changePassword = async (req, res) => {
             });
         }
 
-        const user = await User.findByPk(userId);
-        if (!user) {
+        const host = await host.findByPk(hostId);
+        if (!host) {
             return res.status(404).json({
-                message: "User not found",
+                message: "Host not found",
             });
         }
 
-        if (!user.isLoggedIn) {
+        if (!host.isLoggedIn) {
             return res.status(401).json({
-                message: "Authentication Failed: User is not logged in",
+                message: "Authentication Failed: Host is not logged in",
             });
         }
 
-        const isCorrectPassword = await bcrypt.compare(password, user.password);
+        const isCorrectPassword = await bcrypt.compare(password, host.password);
         if (!isCorrectPassword) {
             return res.status(400).json({
                 message: "Current password is incorrect",
@@ -356,8 +366,8 @@ exports.changePassword = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-        user.password = hashedPassword;
-        await user.save();
+        host.password = hashedPassword;
+        await host.save();
 
         res.status(200).json({
             message: "Password changed successfully",
@@ -380,19 +390,19 @@ exports.loggedOut = async (req, res) => {
             });
         }
 
-        const user = await User.findOne({ where: { email: email.toLowerCase() } });
+        const host = await host.findOne({ where: { email: email.toLowerCase() } });
 
-        if (!user) {
+        if (!host) {
             return res.status(404).json({
-                message: "User does not exist",
+                message: "host does not exist",
             });
         }
 
-        user.isLoggedIn = false;
-        await user.save();
+        host.isLoggedIn = false;
+        await host.save();
 
         res.status(200).json({
-            message: "User logged out successfully",
+            message: "host logged out successfully",
         });
     } catch (error) {
         console.error("Error logging out:", error.message);

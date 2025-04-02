@@ -1,10 +1,10 @@
 const{ verifyUser, login, forgottenPassword, resetPassword, changePassword, loggedOut, registerUser} = require('../controllers/userController');
 const { authenticate } = require('../middleware/authentication');
-const { registerUserValidator, loginValidator, changePasswordValidator } = require('../middleware/validator');
+const { registerValidator, loginValidator, changePasswordValidator } = require('../middleware/validator');
 
 const router = require('express').Router(); 
 
-router.post('/users/register',registerUserValidator, registerUser);
+router.post('/users/register',registerValidator, registerUser);
 
 router.get("/users/verify/:token", verifyUser);
 
