@@ -37,8 +37,16 @@ module.exports = {
         allowNull: true
       },
       profileImage: {
-        type: Sequelize.JSON, // This allows storing multiple image URLs in a JSON array
+        type: Sequelize.JSON,
         allowNull: true,
+      },
+      isVerified: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
+      },
+      isLoggedin: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
       },
       createdAt: {
         allowNull: false,

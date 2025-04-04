@@ -30,11 +30,11 @@ module.exports = {
         allowNull: false
       },
       amenities: {
-        type: Sequelize.JSON,
+        type: Sequelize.TEXT,
         allowNull: false
       },
       availability: {
-        type: Sequelize.STRING,
+        type: Sequelize.TEXT,
         allowNull: false
       },
       locationId: {
@@ -50,11 +50,16 @@ module.exports = {
         allowNull: false
       },
       spaceImages: {
-        type: Sequelize.JSON, // This allows storing multiple image URLs in a JSON array
+        type: Sequelize.TEXT,
         allowNull: false,
       },
+      listingStatus: {
+        type: Sequelize.ENUM,
+        values: ['approved', 'pending','rejected'],
+        defaultValue: 'pending',
+      },
       averageRating: {
-        type: Sequelize.FLOAT, // This allows storing multiple image URLs in a JSON array
+        type: Sequelize.FLOAT,
       },
 
       createdAt: {

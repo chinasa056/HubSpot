@@ -38,7 +38,7 @@ Host.init(
       allowNull: true,
     },
     profileImage: {
-      type: DataTypes.JSON, // This allows storing multiple image URLs in a JSON array
+      type: DataTypes.JSON,
       allowNull: true,
     },
     isVerified: {
@@ -49,6 +49,14 @@ Host.init(
       type: DataTypes.BOOLEAN,
       defaultValue: false
     },
+    createdAt: {
+      allowNull: false,
+      type: DataTypes.DATE
+    },
+    updatedAt: {
+      allowNull: false,
+      type: DataTypes.DATE
+    }
   },
   {
     sequelize, // We need to pass the connection instance
