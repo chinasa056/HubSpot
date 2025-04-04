@@ -68,11 +68,11 @@ const options = {
       version: '1.0.0',
       description: "Documentation for HubSpot, a platform simplifying the finding and bookin of co working hubs and creative spaces",
       license: {
-        name: 'BASE_URL:https://express-buy-swagger-documenttion.onrender.com',
+        name: 'BASE_URL:https://hubspot-k95r.onrender.com',
       },
       contact: {
         name: "Chinasa Acha",
-        // url: "ddjdjhdggdgdg"
+         url: 'https://hubspot-k95r.onrender.com/documentation'
       }
     },
     components: {
@@ -87,7 +87,7 @@ const options = {
     security: [{ BearerAuth: [] }],
     servers: [
       {
-        url: "https://express-buy-swagger-documenttion.onrender.com",
+        url: "https://hubspot-k95r.onrender.com",
         description: "Production Server"
       },
       {
