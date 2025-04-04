@@ -49,7 +49,7 @@ Space.init(
         key: 'id'
       },
       onUpdate: 'CASCADE',
-      onDelete: 'CASCADE'
+     // onDelete: 'CASCADE'
     },
     categoryId: {
       type: DataTypes.UUID,
@@ -72,6 +72,11 @@ Space.init(
     spaceImages: {
       type: DataTypes.JSON,
       allowNull: false,
+    },
+    listingStatus: {
+      type: DataTypes.ENUM,
+      values: ['approved', 'pending','rejected'],
+      defaultValue: 'pending',
     },
     averageRating: {
       type: DataTypes.FLOAT,
