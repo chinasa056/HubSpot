@@ -3,9 +3,16 @@ const sequelize = require("./database/dbConnect");
 require("./models/association");
 const express = require("express");
 const cors = require("cors");
+
 const userRouter = require('./routes/userRoute');
 const adminRoute = require('./routes/adminRoute');
 const categoryRoute = require('./routes/categoryRoute');
+const locationRoute = require('./routes/locationRoute');
+const planRoute = require("./routes/planRoute")
+const spaceRoute = require("./routes/spaceRoute")
+const subscriptionRoute = require("./routes/subscriptionRoute")
+
+
 const hostRoute = require('./routes/hostRoutes')
 const PORT = process.env.PORT || 7039;
 
@@ -14,7 +21,16 @@ const app = express();
 app.use(express.json());
 app.use('/api/v1', userRouter);
 app.use('/api/v1', adminRoute);
+app.use('/api/v1', locationRoute);
 app.use('/api/v1', categoryRoute);
+app.use('/api/v1', planRoute);
+app.use('/api/v1', spaceRoute);
+app.use('/api/v1', subscriptionRoute);
+
+
+
+
+
 app.use('/api/v1', hostRoute);
 app.use(cors());
 
@@ -32,6 +48,67 @@ const server = async () => {
 };
 
 server();
+
+app.use((error, req, res, next) => {
+  if(error){
+     return res.status(400).json({message:  error.message})
+  }
+  next()
+})
+
+
+const swaggerJsdoc = require("swagger-jsdoc");
+const swagger_UI = require("swagger-ui-express")
+
+const options = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: "HubSpot Documentation",
+      version: '1.0.0',
+      description: "Documentation for HubSpot, a platform simplifying the finding and bookin of co working hubs and creative spaces",
+      license: {
+        name: 'BASE_URL:https://express-buy-swagger-documenttion.onrender.com',
+      },
+      contact: {
+        name: "Chinasa Acha",
+        // url: "ddjdjhdggdgdg"
+      }
+    },
+    components: {
+      securitySchemes: {
+        BearerAuth: {
+          type: "http",
+          scheme: "bearer",
+           bearerFormat: "JWT"
+        }
+      }
+    }, 
+    security: [{ BearerAuth: [] }],
+    servers: [
+      {
+        url: "https://express-buy-swagger-documenttion.onrender.com",
+        description: "Production Server"
+      },
+      {
+        url: "http://localhost:7667",
+        description: "Development Server"
+      }
+    ],
+    
+  },
+  apis: ["./routes/*.js"]
+};
+
+const openapiSpecification = swaggerJsdoc(options);
+app.use("/documentation", swagger_UI.serve, swagger_UI.setup(openapiSpecification))
+
+const cron = require('node-cron');
+const { checkSubscriptionStatus } = require("./controllers/subscriptionController");
+
+cron.schedule('0 0 * * *', () => {
+checkSubscriptionStatus()
+});
 
 app.listen(PORT, () => {
   console.log(`server is listening to port: ${PORT}`);

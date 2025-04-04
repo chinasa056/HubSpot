@@ -38,11 +38,11 @@ module.exports = {
         allowNull: false
       },
       locationId: {
-        type: Sequelize.STRING,
+        type: Sequelize.UUID,
         allowNull: false
       },
       categoryId: {
-        type: Sequelize.STRING,
+        type: Sequelize.UUID,
         allowNull: false
       },
       hostId: {

@@ -1,4 +1,4 @@
-const { Sequelize, DataTypes, Model } = require('sequelize');
+const { Sequelize, DataTypes, Model, UUIDV4 } = require('sequelize');
 const sequelize = require('../database/dbConnect');
 // const Location = require('./location');
 // const Host = require('./host');
@@ -11,7 +11,8 @@ Space.init(
     id: {
       allowNull: false,
       primaryKey: true,
-      type: DataTypes.UUID
+      type: DataTypes.UUID,
+      defaultValue: UUIDV4
     },
     name: {
       type: DataTypes.STRING,
@@ -38,7 +39,7 @@ Space.init(
       allowNull: false
     },
     availability: {
-      type: DataTypes.STRING,
+      type: DataTypes.JSON,
       allowNull: false
     },
     locationId: {
