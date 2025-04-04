@@ -1,4 +1,5 @@
 const Admin = require("../models/admin");
+const Category = require("../models/category");
 const categoryModel = require("../models/category");
 const Space = require("../models/space");
 
@@ -143,4 +144,4 @@ exports.deleteCategory = async (req, res) => {
             data: error.message
         })
     }
-}
+};

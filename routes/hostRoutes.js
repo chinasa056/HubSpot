@@ -1,22 +1,22 @@
-const{ verifyUser, login, forgottenPassword, resetPassword, changePassword, loggedOut, registerUser} = require('../controllers/userController');
+const { registerHost, verifyHost, loginHost, forgottenPasswordHost, resetPasswordHost, changePasswordHost, loggedOutHost } = require('../controllers/hostController');
 const { authenticate } = require('../middleware/authentication');
-const { registerValidator, loginValidator, changePasswordValidator } = require('../middleware/validator');
+const { registerValidator, loginValidator, resetPasswordValidator, changePasswordValidator } = require('../middleware/validator');
 
 const router = require('express').Router(); 
 
 /**
  * @swagger
  * tags:
- *   name: Users
- *   description: Endpoints related to user registration
+ *   name: Host
+ *   description: Endpoints related to host registration
  */
 
 /**
  * @swagger
- * /api/v1/users/register:
+ * /api/v1/host/register:
  *   post:
- *     summary: Register a new user
- *     tags: [Users]
+ *     summary: Register a new host
+ *     tags: [Host]
  *     requestBody:
  *       required: true
  *       content:
@@ -26,23 +26,31 @@ const router = require('express').Router();
  *             properties:
  *               fullName:
  *                 type: string
- *                 description: Full name of the user
- *                 example: Jane Doe
+ *                 description: Full name of the host
+ *                 example: John Doe
  *               email:
  *                 type: string
- *                 description: Email address of the user
- *                 example: jane.doe@gmail.com
+ *                 description: Email address of the host
+ *                 example: john.doe@company.com
  *               password:
  *                 type: string
- *                 description: Password for the user
- *                 example: Password123!
+ *                 description: Password for the host
+ *                 example: StrongPassword123!
  *               confirmPassword:
  *                 type: string
- *                 description: Confirm the user's password
- *                 example: Password123!
+ *                 description: Confirmation of the password
+ *                 example: StrongPassword123!
+ *               companyName:
+ *                 type: string
+ *                 description: Name of the host's company
+ *                 example: Acme Inc.
+ *               companyAddress:
+ *                 type: string
+ *                 description: Address of the host's company
+ *                 example: 123 Business Street, City, Country
  *     responses:
  *       201:
- *         description: Account registered successfully
+ *         description: Host registered successfully
  *         content:
  *           application/json:
  *             schema:
@@ -50,12 +58,12 @@ const router = require('express').Router();
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Account registered successfully. Please check your email for verification.
+ *                   example: "Account registered successfully. Please check your email for verification."
  *                 data:
  *                   type: object
- *                   description: User details
+ *                   description: Details of the registered host
  *       400:
- *         description: Bad request, validation error
+ *         description: Validation error or duplicate email
  *         content:
  *           application/json:
  *             schema:
@@ -63,9 +71,9 @@ const router = require('express').Router();
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Passwords do not match
+ *                   example: "Host with email: john.doe@company.com already exists"
  *       500:
- *         description: Server error during registration
+ *         description: Internal server error during registration
  *         content:
  *           application/json:
  *             schema:
@@ -73,31 +81,31 @@ const router = require('express').Router();
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Error registering user
+ *                   example: "Error registering host: [error details]"
  */
 
-router.post('/users/register',registerValidator, registerUser);
+router.post('/host/register',registerValidator, registerHost);
 
 /**
  * @swagger
  * tags:
- *   name: Users
- *   description: Endpoints related to user verification
+ *   name: Host
+ *   description: Endpoints related to host account verification
  */
 
 /**
  * @swagger
- * /api/v1/users/verify/{token}:
+ * /api/v1/host/verify/{token}:
  *   get:
- *     summary: Verify a user's account
- *     tags: [Users]
+ *     summary: Verify a host's account
+ *     tags: [Host]
  *     parameters:
  *       - in: path
  *         name: token
  *         required: true
  *         schema:
  *           type: string
- *         description: Verification token sent to the user's email
+ *         description: Verification token sent to the host's email
  *     responses:
  *       200:
  *         description: Account verified successfully
@@ -110,7 +118,7 @@ router.post('/users/register',registerValidator, registerUser);
  *                   type: string
  *                   example: "Account verified successfully"
  *       400:
- *         description: Bad request or session expired
+ *         description: Session expired or validation error
  *         content:
  *           application/json:
  *             schema:
@@ -118,7 +126,7 @@ router.post('/users/register',registerValidator, registerUser);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Session expired: A new link has been sent to your email address."
+ *                   example: "Session expired: A new verification link has been sent to your email address."
  *       404:
  *         description: Account not found or missing token
  *         content:
@@ -138,26 +146,24 @@ router.post('/users/register',registerValidator, registerUser);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Error verifying user"
+ *                   example: "Error verifying host"
  */
 
-
-router.get("/users/verify/:token", verifyUser);
-
+router.get("/host/verify/:token", verifyHost);
 
 /**
  * @swagger
  * tags:
- *   name: Users
- *   description: Endpoints related to user authentication
+ *   name: Host
+ *   description: Endpoints related to host authentication
  */
 
 /**
  * @swagger
- * /api/v1/users/login:
+ * /api/v1/host/login:
  *   post:
- *     summary: Log in to a user account
- *     tags: [Users]
+ *     summary: Log in to a host account
+ *     tags: [Host]
  *     requestBody:
  *       required: true
  *       content:
@@ -167,12 +173,12 @@ router.get("/users/verify/:token", verifyUser);
  *             properties:
  *               email:
  *                 type: string
- *                 description: Email address of the user
- *                 example: jane.doe@gmail.com
+ *                 description: Email address of the host
+ *                 example: john.doe@company.com
  *               password:
  *                 type: string
- *                 description: Password for the user account
- *                 example: Password123!
+ *                 description: Password for the host account
+ *                 example: StrongPassword123!
  *     responses:
  *       200:
  *         description: Account successfully logged in
@@ -186,12 +192,12 @@ router.get("/users/verify/:token", verifyUser);
  *                   example: "Account successfully logged in"
  *                 data:
  *                   type: object
- *                   description: User details
+ *                   description: Details of the logged-in host
  *                 token:
  *                   type: string
  *                   description: JWT token for authentication
  *       400:
- *         description: Bad request or validation error
+ *         description: Validation error, incorrect credentials, or account not verified
  *         content:
  *           application/json:
  *             schema:
@@ -201,7 +207,7 @@ router.get("/users/verify/:token", verifyUser);
  *                   type: string
  *                   example: "Incorrect password"
  *       404:
- *         description: User not found
+ *         description: Host not found
  *         content:
  *           application/json:
  *             schema:
@@ -209,9 +215,9 @@ router.get("/users/verify/:token", verifyUser);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "User not found"
+ *                   example: "Host not found"
  *       500:
- *         description: Internal server error
+ *         description: Internal server error during login
  *         content:
  *           application/json:
  *             schema:
@@ -222,21 +228,21 @@ router.get("/users/verify/:token", verifyUser);
  *                   example: "Internal server error"
  */
 
-router.post("/users/login",loginValidator, login);
+router.post("/host/login",loginValidator, loginHost);
 
 /**
  * @swagger
  * tags:
- *   name: Users
- *   description: Endpoints related to user account recovery
+ *   name: Host
+ *   description: Endpoints related to host account recovery
  */
 
 /**
  * @swagger
- * /api/v1/users/forgot-password:
+ * /api/v1/host/forgot-password:
  *   post:
- *     summary: Request a password reset link
- *     tags: [Users]
+ *     summary: Request a password reset link for a host
+ *     tags: [Host]
  *     requestBody:
  *       required: true
  *       content:
@@ -246,11 +252,11 @@ router.post("/users/login",loginValidator, login);
  *             properties:
  *               email:
  *                 type: string
- *                 description: Email address of the user requesting password reset
- *                 example: jane.doe@gmail.com
+ *                 description: Email address of the host requesting the password reset
+ *                 example: host.email@company.com
  *     responses:
  *       200:
- *         description: Password reset link sent to the user's email address
+ *         description: Password reset link sent to the host's email address
  *         content:
  *           application/json:
  *             schema:
@@ -270,7 +276,7 @@ router.post("/users/login",loginValidator, login);
  *                   type: string
  *                   example: "Please provide your email address"
  *       404:
- *         description: Account not found
+ *         description: Host account not found
  *         content:
  *           application/json:
  *             schema:
@@ -280,7 +286,7 @@ router.post("/users/login",loginValidator, login);
  *                   type: string
  *                   example: "Account not found"
  *       500:
- *         description: Server error during password recovery
+ *         description: Internal server error during password recovery
  *         content:
  *           application/json:
  *             schema:
@@ -291,21 +297,21 @@ router.post("/users/login",loginValidator, login);
  *                   example: "Forgotten password failed"
  */
 
-router.post("/users/forgot-password", forgottenPassword);
+router.post("/host/forgot-password", forgottenPasswordHost);
 
 /**
  * @swagger
  * tags:
- *   name: Users
- *   description: Endpoints related to password management
+ *   name: Host
+ *   description: Endpoints related to host password management
  */
 
 /**
  * @swagger
- * /api/v1/users/reset-password/{token}:
+ * /api/v1/host/reset-password/{token}:
  *   post:
- *     summary: Reset a user's password
- *     tags: [Users]
+ *     summary: Reset a host's password
+ *     tags: [Host]
  *     parameters:
  *       - in: path
  *         name: token
@@ -322,7 +328,7 @@ router.post("/users/forgot-password", forgottenPassword);
  *             properties:
  *               newPassword:
  *                 type: string
- *                 description: The new password for the user
+ *                 description: The new password for the host
  *                 example: NewPassword123!
  *               confirmPassword:
  *                 type: string
@@ -350,7 +356,7 @@ router.post("/users/forgot-password", forgottenPassword);
  *                   type: string
  *                   example: "Passwords do not match"
  *       404:
- *         description: Account not found
+ *         description: Host account not found
  *         content:
  *           application/json:
  *             schema:
@@ -360,7 +366,7 @@ router.post("/users/forgot-password", forgottenPassword);
  *                   type: string
  *                   example: "Account not found"
  *       500:
- *         description: Server error during password reset
+ *         description: Internal server error during password reset
  *         content:
  *           application/json:
  *             schema:
@@ -371,28 +377,28 @@ router.post("/users/forgot-password", forgottenPassword);
  *                   example: "Error resetting password"
  */
 
-router.post("/users/reset-password/:token", resetPassword);
+router.post("/host/reset-password/:token",resetPasswordValidator, resetPasswordHost);
 
 /**
  * @swagger
  * tags:
- *   name: Users
- *   description: Endpoints related to password management
+ *   name: Host
+ *   description: Endpoints related to host password management
  */
 
 /**
  * @swagger
- * /api/v1/users/change-password/{userId}:
+ * /api/v1/host/change-password/{userId}:
  *   patch:
- *     summary: Change a user's password
- *     tags: [Users]
+ *     summary: Change a host's password
+ *     tags: [Host]
  *     parameters:
  *       - in: path
  *         name: userId
  *         required: true
  *         schema:
  *           type: string
- *         description: ID of the user whose password needs to be changed
+ *         description: ID of the host whose password needs to be changed
  *     requestBody:
  *       required: true
  *       content:
@@ -402,11 +408,11 @@ router.post("/users/reset-password/:token", resetPassword);
  *             properties:
  *               password:
  *                 type: string
- *                 description: The current password of the user
+ *                 description: The current password of the host
  *                 example: OldPassword123!
  *               newPassword:
  *                 type: string
- *                 description: The new password for the user
+ *                 description: The new password for the host
  *                 example: NewPassword123!
  *               confirmPassword:
  *                 type: string
@@ -424,7 +430,7 @@ router.post("/users/reset-password/:token", resetPassword);
  *                   type: string
  *                   example: "Password changed successfully"
  *       400:
- *         description: Bad request or validation error
+ *         description: Validation error or incorrect current password
  *         content:
  *           application/json:
  *             schema:
@@ -434,7 +440,7 @@ router.post("/users/reset-password/:token", resetPassword);
  *                   type: string
  *                   example: "New passwords do not match"
  *       401:
- *         description: Authentication failed
+ *         description: Authentication failed (host not logged in)
  *         content:
  *           application/json:
  *             schema:
@@ -442,9 +448,9 @@ router.post("/users/reset-password/:token", resetPassword);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Authentication Failed: User is not logged in"
+ *                   example: "Authentication Failed: Host is not logged in"
  *       404:
- *         description: User not found
+ *         description: Host not found
  *         content:
  *           application/json:
  *             schema:
@@ -452,9 +458,9 @@ router.post("/users/reset-password/:token", resetPassword);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "User not found"
+ *                   example: "Host not found"
  *       500:
- *         description: Server error during password change
+ *         description: Internal server error during password change
  *         content:
  *           application/json:
  *             schema:
@@ -465,21 +471,21 @@ router.post("/users/reset-password/:token", resetPassword);
  *                   example: "Error changing password"
  */
 
-router.patch("/users/change-password/:userId",authenticate, changePasswordValidator, changePassword);
+router.patch("/host/change-password/:userId",authenticate, changePasswordValidator, changePasswordHost);
 
 /**
  * @swagger
  * tags:
- *   name: Users
- *   description: Endpoints related to user session management
+ *   name: Host
+ *   description: Endpoints related to host session management
  */
 
 /**
  * @swagger
- * /api/v1/users/logout:
+ * /api/v1/host/logout:
  *   patch:
- *     summary: Log out a user
- *     tags: [Users]
+ *     summary: Log out a host
+ *     tags: [Host]
  *     requestBody:
  *       required: true
  *       content:
@@ -489,11 +495,11 @@ router.patch("/users/change-password/:userId",authenticate, changePasswordValida
  *             properties:
  *               email:
  *                 type: string
- *                 description: Email address of the user who wants to log out
- *                 example: jane.doe@gmail.com
+ *                 description: Email address of the host who wants to log out
+ *                 example: host.email@company.com
  *     responses:
  *       200:
- *         description: User logged out successfully
+ *         description: Host logged out successfully
  *         content:
  *           application/json:
  *             schema:
@@ -501,7 +507,7 @@ router.patch("/users/change-password/:userId",authenticate, changePasswordValida
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "User logged out successfully"
+ *                   example: "Host logged out successfully"
  *       400:
  *         description: Email address is missing or invalid
  *         content:
@@ -513,7 +519,7 @@ router.patch("/users/change-password/:userId",authenticate, changePasswordValida
  *                   type: string
  *                   example: "Email is required"
  *       404:
- *         description: User does not exist
+ *         description: Host does not exist
  *         content:
  *           application/json:
  *             schema:
@@ -521,7 +527,7 @@ router.patch("/users/change-password/:userId",authenticate, changePasswordValida
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "User does not exist"
+ *                   example: "Host does not exist"
  *       500:
  *         description: Internal server error during logout
  *         content:
@@ -534,7 +540,7 @@ router.patch("/users/change-password/:userId",authenticate, changePasswordValida
  *                   example: "Internal server error"
  */
 
-router.patch("/users/logout", loggedOut);
+router.patch("/host/logout", loggedOutHost);
 
 
 module.exports = router;

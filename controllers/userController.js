@@ -1,7 +1,7 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { verify, reset } = require("../utils/mailTemplate");
-const { send_mail, sendMail } = require("../middleware/nodemailer");
+const { verify, } = require("../utils/mailTemplate");
+const { sendMail } = require("../middleware/nodemailer");
 const cloudinary = require("../database/cloudinary")
 const fs = require('fs');
 const User = require("../models/user");

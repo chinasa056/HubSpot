@@ -1,6 +1,6 @@
 const joi = require("joi");
 
-exports.registerUserValidator = (req, res, next) => {
+exports.registerValidator = (req, res, next) => {
     const schema = joi.object({
         fullName: joi.string().trim().min(5).pattern(/^[A-Za-z\s]+$/).required().messages({
             "any.required": "Full name is required.",
@@ -67,6 +67,30 @@ exports.changePasswordValidator = (req, res, next) => {
             "string.empty": "Password cannot be empty.",
             "string.min": "Password must be at least 6 characters long.",
         }),
+        newPassword: joi.string().min(6).required().messages({
+            "any.required": "Password is required.",
+            "string.empty": "Password cannot be empty.",
+            "string.min": "Password must be at least 6 characters long.",
+        }),
+        confirmPassword: joi.string().valid(joi.ref("newPassword")).required().messages({
+            "any.only": "Confirm Password must match Password",
+            "any.required": "confirm password is required",
+            "string.empty": "confirm password cannot be empty.",
+        })
+    });
+
+    const { error } = schema.validate(req.body, { abortEarly: false });
+    if (error) {
+        return res.status(400).json({
+            message: "Validation errors occurred.",
+            errors: error.details.map(detail => detail.message) // Collect all error messages.
+        });
+    }
+    next();
+};
+
+exports.resetPasswordValidator = (req, res, next) => {
+    const schema = joi.object({
         newPassword: joi.string().min(6).required().messages({
             "any.required": "Password is required.",
             "string.empty": "Password cannot be empty.",
