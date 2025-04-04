@@ -46,7 +46,7 @@ Subscription.init(
     },
     status: {
       type: DataTypes.ENUM,
-      values: ['active', 'pending', 'expired'], 
+      values: ['active', 'pending','failed', 'expired'], 
       defaultValue: 'pending', 
     },
     reference: {

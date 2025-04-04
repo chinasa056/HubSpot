@@ -3,7 +3,7 @@ const sequelize = require('../database/dbConnect');
 // const Space = require('./space'); // Import Space here
 // const Subscription = require('./subscription'); // Import Subscription here
 
-class Host extends Model {}
+class Host extends Model { }
 
 Host.init(
   {
@@ -33,10 +33,6 @@ Host.init(
       type: DataTypes.STRING,
       allowNull: true,
     },
-    typeOfSpace: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
     identification: {
       type: DataTypes.STRING,
       allowNull: true,
@@ -44,6 +40,14 @@ Host.init(
     profileImage: {
       type: DataTypes.JSON, // This allows storing multiple image URLs in a JSON array
       allowNull: true,
+    },
+    isVerified: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
+    isLoggedin: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
     },
   },
   {
