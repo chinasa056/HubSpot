@@ -101,7 +101,7 @@ const options = {
 };
 
 const openapiSpecification = swaggerJsdoc(options);
-app.use("/documentation", swagger_UI.serve, swagger_UI.setup(openapiSpecification))
+app.use("/appdocumentation", swagger_UI.serve, swagger_UI.setup(openapiSpecification))
 
 const cron = require('node-cron');
 const { checkSubscriptionStatus } = require("./controllers/subscriptionController");
