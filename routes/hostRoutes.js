@@ -1,6 +1,7 @@
-const { registerHost, verifyHost, loginHost, forgottenPasswordHost, resetPasswordHost, changePasswordHost, loggedOutHost } = require('../controllers/hostController');
-const { authenticate } = require('../middleware/authentication');
+const { registerHost, verifyHost, loginHost, forgottenPasswordHost, resetPasswordHost, changePasswordHost, loggedOutHost, updateHostDetails, deleteHostAccount, getSpacesByHost, getHostListings, getSpaceBookings, getBookingCategories, manageListings } = require('../controllers/hostController');
+const { authenticate, hostAuth, isAdmin } = require('../middleware/authentication');
 const { registerValidator, loginValidator, resetPasswordValidator, changePasswordValidator } = require('../middleware/validator');
+const upload = require("../utils/multer")
 
 const router = require('express').Router(); 
 
@@ -540,7 +541,18 @@ router.patch("/host/change-password/:userId",authenticate, changePasswordValidat
  *                   example: "Internal server error"
  */
 
-router.patch("/host/logout", loggedOutHost);
+router.patch("/host/logout",hostAuth, loggedOutHost);
 
+router.put('/host/update/:hostId', upload.single('profileImage'),hostAuth,updateHostDetails);
+
+router.delete('/host/delete/:hostId', hostAuth,deleteHostAccount);
+
+router.get("/host/getspaces/:hostId", hostAuth, getSpacesByHost);
+
+router.get("/host/listings/:hostId", hostAuth, manageListings);
+
+router.get("/host/spacebookings/:hostId", hostAuth, getSpaceBookings);
+
+router.get("/host/bookingcategories/:hostId", hostAuth, getBookingCategories);
 
 module.exports = router;

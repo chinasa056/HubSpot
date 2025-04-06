@@ -22,22 +22,39 @@ module.exports = {
       },
       companyName: {
         type: Sequelize.STRING,
-        allowNull: true
+        allowNull: false
       },
       companyAddress: {
         type: Sequelize.STRING,
-        allowNull: true
-      },
-      tpyeOfSpace: {
-        type: Sequelize.STRING,
         allowNull: false
       },
-      identification: {
-        type: Sequelize.STRING,
-        allowNull: true
+      meansOfIdentification: {
+        type: Sequelize.ENUM,
+        values: ["Nin', 'Passport', 'Driver's License"],
+        defaultValue: 'Nin',
+      },
+      idCardNumber: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+      },
+      ninImage: {
+        type: Sequelize.JSON,
+        allowNull: false,
       },
       profileImage: {
         type: Sequelize.JSON,
+        allowNull: true,
+      },
+      bankName: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+      bankAccountNumber: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+      },
+      bankAccountName: {
+        type: Sequelize.STRING,
         allowNull: true,
       },
       isVerified: {

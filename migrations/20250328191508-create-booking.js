@@ -16,17 +16,38 @@ module.exports = {
         type: Sequelize.UUID,
         allowNull: true
       },
-      bookingDate: {
+      userName: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+
+      StartDate: {
         type: Sequelize.DATE,
-        allowNull: true
+        allowNull: false
       },
-      duration: {
+      endDate: {
+        type: Sequelize.DATE,
+        allowNull: false
+      },
+
+      checkinTime: {
+        type: Sequelize.TIME,
+        allowNull: false
+      },
+
+      checkoutTime: {
+        type: Sequelize.TIME,
+        allowNull: false
+      },
+      amount: {
         type: Sequelize.INTEGER,
-        allowNull: true
+        allowNull: false
       },
+
       status: {
-        type: Sequelize.INTEGER,
-        allowNull: true
+        type: DataTypes.ENUM,
+        values: ['active', 'pending', 'expired'],
+        defaultValue: 'pending',
       },
       createdAt: {
         allowNull: false,
