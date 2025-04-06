@@ -13,42 +13,78 @@ Host.init(
       type: DataTypes.UUID,
       defaultValue: UUIDV4,
     },
+
     fullName: {
       type: DataTypes.STRING,
       allowNull: false,
     },
+
     password: {
       type: DataTypes.STRING,
       allowNull: false,
     },
+
     email: {
       type: DataTypes.STRING,
       allowNull: false,
     },
+
     companyName: {
       type: DataTypes.STRING,
-      allowNull: true,
+      allowNull: false,
     },
+
     companyAddress: {
       type: DataTypes.STRING,
-      allowNull: true,
+      allowNull: false,
     },
-    identification: {
-      type: DataTypes.STRING,
-      allowNull: true,
+   
+    meansOfIdentification: {
+      type: DataTypes.ENUM,
+      values: ["Nin', 'Passport', 'Driver's License"],
+      defaultValue: 'Nin',
     },
+
+    idCardNumber: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+
+    ninImage: {
+      type: DataTypes.JSON,
+      allowNull: false,
+    },
+
     profileImage: {
       type: DataTypes.JSON,
       allowNull: true,
     },
+
+    bankName: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+
+    bankAccountNumber: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+
+    bankAccountName: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    
     isVerified: {
       type: DataTypes.BOOLEAN,
       defaultValue: false
     },
+
     isLoggedin: {
       type: DataTypes.BOOLEAN,
       defaultValue: false
     },
+
     createdAt: {
       allowNull: false,
       type: DataTypes.DATE
