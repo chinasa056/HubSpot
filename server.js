@@ -12,12 +12,10 @@ const planRoute = require("./routes/planRoute")
 const spaceRoute = require("./routes/spaceRoute")
 const subscriptionRoute = require("./routes/subscriptionRoute")
 
-
 const hostRoute = require('./routes/hostRoutes')
 const PORT = process.env.PORT || 7039;
 
 const app = express();
-
 app.use(express.json());
 app.use('/api/v1', userRouter);
 app.use('/api/v1', adminRoute);
@@ -26,9 +24,6 @@ app.use('/api/v1', categoryRoute);
 app.use('/api/v1', planRoute);
 app.use('/api/v1', spaceRoute);
 app.use('/api/v1', subscriptionRoute);
-
-
-
 
 
 app.use('/api/v1', hostRoute);

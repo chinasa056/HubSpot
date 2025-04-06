@@ -55,7 +55,7 @@ module.exports = {
       },
       listingStatus: {
         type: Sequelize.ENUM,
-        values: ['approved', 'pending','rejected'],
+        values: ['active', 'pending','rejected'],
         defaultValue: 'pending',
       },
       averageRating: {

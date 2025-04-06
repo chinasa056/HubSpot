@@ -4,7 +4,6 @@ const spaceModel = require("../models/space")
 const cloudinary = require("../database/cloudinary");
 const fs = require("fs");
 const Host = require("../models/host");
-const { UUIDV4 } = require("sequelize");
 
 exports.addSpace = async (req, res) => {
     try {
@@ -79,8 +78,6 @@ exports.addSpace = async (req, res) => {
         });
     }
 };
-
-
 
 exports.getAllSpaces = async (req, res) => {
     try {
@@ -196,18 +193,15 @@ exports.getSpacesByHost = async (req, res) => {
     try {
         const { hostId } = req.params;
 
-        // Fetch all spaces for the given host
         const spaces = await spaceModel.findAll({
             where: { hostId },
             include: [
                 {
                     model: hostModel,
-                    attributes: ['id', 'name', 'businessName'], // Optionally include host details
                 },
             ],
         });
 
-        // Check if the host has listed any spaces
         if (!spaces.length) {
             return res.status(404).json({
                 message: "No Spaces Found for This Host",
@@ -313,3 +307,5 @@ exports.deleteSpace = async (req, res) => {
         });
     }
 };
+
+

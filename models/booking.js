@@ -1,4 +1,4 @@
-const { Sequelize, DataTypes, Model } = require('sequelize');
+const { Sequelize, DataTypes, Model, UUIDV4 } = require('sequelize');
 const sequelize = require("../database/dbConnect");
 // const Space = require('./space');
 // const User = require('./user')
@@ -10,7 +10,8 @@ Booking.init(
     id: {
       allowNull: false,
       primaryKey: true,
-      type: DataTypes.UUID
+      type: DataTypes.UUID,
+      defaultValue: UUIDV4
     },
 
     userId: {
@@ -32,20 +33,32 @@ Booking.init(
       onUpdate: 'CASCADE',
       onDelete: 'CASCADE'
     },
+    userName: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
 
-    bookingDate: {
+    startDate: {
       type: DataTypes.DATE,
-      allowNull: true
+      allowNull: false
+    },
+    endDate: {
+      type: DataTypes.DATE,
+      allowNull: false
     },
 
-    checkin: {
-      type: DataTypes.INTEGER,
-      allowNull: true
+    checkinTime: {
+      type: DataTypes.TIME,
+      allowNull: false
     },
 
-    checkout: {
+    checkoutTime: {
+      type: DataTypes.TIME,
+      allowNull: false
+    },
+    amount: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: false
     },
 
     status: {

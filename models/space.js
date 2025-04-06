@@ -75,7 +75,7 @@ Space.init(
     },
     listingStatus: {
       type: DataTypes.ENUM,
-      values: ['approved', 'pending','rejected'],
+      values: ['active', 'pending','rejected'],
       defaultValue: 'pending',
     },
     averageRating: {
