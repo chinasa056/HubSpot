@@ -75,6 +75,12 @@ Host.init(
       allowNull: true,
     },
     
+    currentBalance: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+      allowNull: true,
+    },
+
     isVerified: {
       type: DataTypes.BOOLEAN,
       defaultValue: false

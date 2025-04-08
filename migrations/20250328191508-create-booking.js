@@ -45,7 +45,7 @@ module.exports = {
       },
 
       status: {
-        type: DataTypes.ENUM,
+        type: Sequelize.ENUM,
         values: ['active', 'pending', 'expired'],
         defaultValue: 'pending',
       },

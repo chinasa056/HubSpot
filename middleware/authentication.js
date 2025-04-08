@@ -1,6 +1,5 @@
 const User = require("../models/user");
 const jwt = require('jsonwebtoken');
-const Admin = require("../models/admin");
 const Host = require("../models/host");
 
 exports.hostAuth = async (req, res, next) => {
@@ -21,16 +20,14 @@ exports.hostAuth = async (req, res, next) => {
 
       let user;
       user = await User.findByPk(decodedToken.userId);
-      if (user) {return res.status(403).json({
+      if (user && user.isAdmin === false) {return res.status(403).json({
         message: "Unauthorized"
       })
     }
       if (!user) {
           user = await Host.findByPk(decodedToken.userId);
       }
-      if (!user) {
-        user = await Admin.findByPk(decodedToken.userId);
-    }
+  
       if (!user) {
           return res.status(404).json({
               message: "Authentication Failed: User not found",
@@ -72,9 +69,6 @@ exports.authenticate = async (req, res, next) => {
       if (!user) {
           user = await Host.findByPk(decodedToken.userId);
       }
-      if (!user) {
-        user = await Admin.findByPk(decodedToken.userId);
-    }
       if (!user) {
           return res.status(404).json({
               message: "Authentication Failed: User not found",

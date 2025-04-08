@@ -61,7 +61,14 @@ module.exports = {
       averageRating: {
         type: Sequelize.FLOAT,
       },
-
+    isAvailable: {
+      type:Sequelize.BOOLEAN,
+      defaultValue: true
+    },
+    bookingCount: {
+      type:Sequelize.INTEGER,
+      defaultValue: 0
+    },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

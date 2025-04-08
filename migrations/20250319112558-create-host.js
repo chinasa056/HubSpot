@@ -30,8 +30,7 @@ module.exports = {
       },
       meansOfIdentification: {
         type: Sequelize.ENUM,
-        values: ["Nin', 'Passport', 'Driver's License"],
-        defaultValue: 'Nin',
+        values: ["Nin', 'Passport', 'Driver's License"]
       },
       idCardNumber: {
         type: Sequelize.INTEGER,
@@ -55,6 +54,11 @@ module.exports = {
       },
       bankAccountName: {
         type: Sequelize.STRING,
+        allowNull: true,
+      },
+      currentBalance: {
+        type: Sequelize.INTEGER,
+        defaultValue: 0,
         allowNull: true,
       },
       isVerified: {

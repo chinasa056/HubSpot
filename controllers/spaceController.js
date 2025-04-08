@@ -4,6 +4,7 @@ const spaceModel = require("../models/space")
 const cloudinary = require("../database/cloudinary");
 const fs = require("fs");
 const Host = require("../models/host");
+const Space = require("../models/space");
 
 exports.addSpace = async (req, res) => {
     try {
@@ -303,9 +304,35 @@ exports.deleteSpace = async (req, res) => {
         console.error(error);
         res.status(500).json({
             message: "Error Deleting Space",
-            data: error.message,
+            data: error.message
         });
     }
 };
+
+// OUR TOP RATED SPACES
+exports.getTopRatedSpaces = async (req, res) => {
+    try {
+
+const spaces = await Space.findAll();
+const topRatedSpaces = spaces.filter((space) => space.averageRating >= 4.5);
+
+if(topRatedSpaces.length === 0) {
+    return res.status(404).json({
+        message: "No average rating found"
+    })
+};
+
+res.status(200).json({
+    message: "Our top rated spaces",
+    data: topRatedSpaces
+})
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: "Error Deleting Space",
+            data: error.message
+        });
+    }
+}
 
 

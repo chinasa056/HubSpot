@@ -1,14 +1,13 @@
-const Admin = require("../models/admin");
-const Category = require("../models/category");
 const categoryModel = require("../models/category");
 const Space = require("../models/space");
+const User = require("../models/user");
 
 exports.createCategory = async (req, res) => {
     try {
         const {userId} = req.user
         const { name } = req.body
 
-        const user = await Admin.findByPk(userId)
+        const user = await User.findByPk(userId)
         if (!user) {
             return res.status(404).json({
                 message: "user not found"

@@ -1,7 +1,7 @@
 const { Sequelize, DataTypes, Model } = require('sequelize');
 const sequelize = require('../database/dbConnect');
 
-class User extends Model {}
+class User extends Model { }
 
 User.init(
   {
@@ -10,7 +10,6 @@ User.init(
       primaryKey: true,
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4
-
     },
     fullName: {
       type: DataTypes.STRING,
@@ -26,14 +25,19 @@ User.init(
       allowNull: false
 
     },
-    isVerified:{
-        type:DataTypes.BOOLEAN,
-        defaultValue:false
-  },
-  isLoggedin:{
-        type:DataTypes.BOOLEAN,
-        defaultValue:false
-  },
+    isVerified: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
+    isAdmin: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false
+    },
+    isLoggedin: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
     createdAt: {
       allowNull: false,
       type: DataTypes.DATE

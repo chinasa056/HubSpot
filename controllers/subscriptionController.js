@@ -295,12 +295,6 @@ exports.getAllSubscription = async (req, res) => {
   }
 };
 
-exports.retrieveCurrentStatus = async (req, res) => {
-  try {
-    // subscription =
-  } catch (error) { }
-};
-
 exports.checkSubscriptionStatus = async (req, res) => {
   try {
     const activeSubscriptions = await Subscription.findAll({
@@ -311,13 +305,14 @@ exports.checkSubscriptionStatus = async (req, res) => {
       console.log("No current subscriptions found");
       return res.status(200).json({ message: "No subscriptions found" });
     }
-    
+
     // console.log('Active: ',activeSubscriptions)
     const currentDate = new Date();
 
     for (const subscription of activeSubscriptions) {
       const hostId = subscription.hostId;
-console.log('Subscription: ',subscription)
+      console.log('Subscription: ', subscription)
+      
       if (currentDate > new Date(subscription.endDate)) {
         subscription.status = "expired";
         await subscription.save();
@@ -327,7 +322,7 @@ console.log('Subscription: ',subscription)
           console.error(`Host not found for ID: ${hostId}`);
           continue;
         }
-console.log("host:" ,host.dataValues);
+        console.log("host:", host.dataValues);
 
         const link = `${req.protocol}://${req.get("host")}/api/v1/renew-subscription`;
         const firstName = host.fullName.split(' ')[0];
