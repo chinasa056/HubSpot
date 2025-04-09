@@ -41,12 +41,11 @@ Host.init(
    
     meansOfIdentification: {
       type: DataTypes.ENUM,
-      values: ["Nin', 'Passport', 'Driver's License"],
-      defaultValue: 'Nin',
+      values: ["Nin", "Passport", "Driver's License"],
     },
 
     idCardNumber: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.BIGINT,
       allowNull: false,
     },
 
@@ -74,7 +73,13 @@ Host.init(
       type: DataTypes.STRING,
       allowNull: true,
     },
-    
+
+    currentBalance: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+      allowNull: true,
+    },
+
     isVerified: {
       type: DataTypes.BOOLEAN,
       defaultValue: false

@@ -1,4 +1,4 @@
-const{ verifyUser, login, forgottenPassword, resetPassword, changePassword, loggedOut, registerUser} = require('../controllers/userController');
+const{ verifyUser, login, forgottenPassword, resetPassword, changePassword, loggedOut, registerUser, logOut} = require('../controllers/userController');
 const { authenticate } = require('../middleware/authentication');
 const { registerValidator, loginValidator, changePasswordValidator } = require('../middleware/validator');
 
@@ -534,7 +534,9 @@ router.patch("/users/change-password/:userId",authenticate, changePasswordValida
  *                   example: "Internal server error"
  */
 
-router.patch("/users/logout", loggedOut);
+router.patch("/users/logout", authenticate,logOut);
+
+
 
 
 module.exports = router;

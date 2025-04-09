@@ -1,4 +1,4 @@
-const { Sequelize, DataTypes, Model, UUIDV4 } = require('sequelize');
+const { Sequelize, DataTypes, Model, UUIDV4, BOOLEAN } = require('sequelize');
 const sequelize = require('../database/dbConnect');
 // const Location = require('./location');
 // const Host = require('./host');
@@ -80,6 +80,18 @@ Space.init(
     },
     averageRating: {
       type: DataTypes.FLOAT,
+    },
+    isAvailable: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true
+    },
+    bookingCount: {
+      type:DataTypes.INTEGER,
+      defaultValue: 0
+    },
+    isApproved: {
+      type:DataTypes.BOOLEAN,
+      defaultValue: false
     },
     createdAt: {
       allowNull: false,

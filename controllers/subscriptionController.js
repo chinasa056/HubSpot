@@ -206,17 +206,19 @@ exports.verifySubscription = async (req, res) => {
 
     if (data?.status && data.data?.status === "success") {
       subscription.status = "active";
-      const currentDate = new Date();
-      const yesterday = new Date(currentDate);
-      yesterday.setDate(currentDate.getDate() - 1);
-      subscription.startDate = yesterday;
+     subscription.startDate = new Date()
+     subscription.endDate = new Date(subscription.startDate.getTime() + 1 * 60 * 60 * 1000); // Add 1 hour
+    //  subscription.endDate = new Date(
+    //    subscription.startDate.getTime() + 30 * 24 * 60 * 60 * 1000
+    //  ); // Add 30 days to startDate
 
-      // Set endDate to be 1 hour from the backdated startDate
-      subscription.endDate = new Date(subscription.startDate.getTime() + 1 * 60 * 60 * 1000); // Add 1 hour
+    //  const currentDate = new Date();
+    //  const yesterday = new Date(currentDate);
+    //  yesterday.setDate(currentDate.getDate() - 1);
+    //  subscription.startDate = yesterday;
+    //   // Set endDate to be 1 hour from the backdated startDate
+    //   subscription.endDate = new Date(subscription.startDate.getTime() + 1 * 60 * 60 * 1000); // Add 1 hour
 
-      // subscription.endDate = new Date(
-      //   subscription.startDate.getTime() + 30 * 24 * 60 * 60 * 1000
-      // ); // Add 30 days to startDate
 
       // send a success email
       const successHtml = successfulSubscription(
@@ -295,12 +297,6 @@ exports.getAllSubscription = async (req, res) => {
   }
 };
 
-exports.retrieveCurrentStatus = async (req, res) => {
-  try {
-    // subscription =
-  } catch (error) { }
-};
-
 exports.checkSubscriptionStatus = async (req, res) => {
   try {
     const activeSubscriptions = await Subscription.findAll({
@@ -311,13 +307,14 @@ exports.checkSubscriptionStatus = async (req, res) => {
       console.log("No current subscriptions found");
       return res.status(200).json({ message: "No subscriptions found" });
     }
-    
+
     // console.log('Active: ',activeSubscriptions)
     const currentDate = new Date();
 
     for (const subscription of activeSubscriptions) {
       const hostId = subscription.hostId;
-console.log('Subscription: ',subscription)
+      console.log('Subscription: ', subscription)
+      
       if (currentDate > new Date(subscription.endDate)) {
         subscription.status = "expired";
         await subscription.save();
@@ -327,7 +324,7 @@ console.log('Subscription: ',subscription)
           console.error(`Host not found for ID: ${hostId}`);
           continue;
         }
-console.log("host:" ,host.dataValues);
+        console.log("host:", host.dataValues);
 
         const link = `${req.protocol}://${req.get("host")}/api/v1/renew-subscription`;
         const firstName = host.fullName.split(' ')[0];

@@ -8,83 +8,63 @@ const Host = require("../models/host");
 const { resetPasswordMail } = require("../utils/reset-password-mail");
 const Space = require("../models/space");
 const Booking = require("../models/booking");
+const sequelize = require("../database/dbConnect");
 
 exports.registerHost = async (req, res) => {
   try {
-    const {
-      fullName,
-      email,
-      password,
-      confirmPassword,
-      companyName,
-      companyAddress,
-    } = req.body;
+    const { fullName, email, password, confirmPassword, companyName, companyAddress, meansOfIdentification, idCardNumber } = req.body;
     const file = req.file;
 
-    // Check if host already exists
+    const name = fullName?.split(' ');
+    const nameFormat = name.map((e) => { return e.slice(0, 1).toUpperCase() + e.slice(1).toLowerCase() }).join(' ');
+
     const hostExists = await Host.findOne({ where: { email: email.toLowerCase() } });
 
     if (hostExists) {
-      if (file) fs.unlinkSync(file.path);
+      fs.unlinkSync(file.path);
       return res.status(400).json({
         message: `Host with email: ${email} already exists`,
       });
     }
 
-    // Validate required fields
-    if (!fullName || !email || !password || !confirmPassword) {
-      return res.status(400).json({
-        message: "All fields are required",
-      });
-    }
-
-    // Check password confirmation
     if (password !== confirmPassword) {
       return res.status(400).json({
         message: "Passwords do not match",
       });
     }
 
-    // Hash the password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Handle profile image and identification uploads
-    let profileImageUrl = null;
-    // let identificationUrl = null;
-
-    if (file) {
-      try {
-        const result = await cloudinary.uploader.upload(file.path);
-        profileImageUrl = result.secure_url;
-      } catch (uploadError) {
-        fs.unlinkSync(file.path);
-        return res.status(500).json({ message: "Error uploading image" });
-      }
-    }
+    // console.log("I GOT HERE", file.path);
+    const result = await cloudinary.uploader.upload(file.path);
     fs.unlinkSync(file.path);
 
 
-    // Create host data object
     const hostData = {
-      fullName,
+      fullName: nameFormat,
       email: email.toLowerCase(),
       password: hashedPassword,
       companyName,
       companyAddress,
-      profileImage: profileImageUrl,
-      //   identification: identificationUrl,
+      // profileImage: profileImageUrl,
+      meansOfIdentification,
+      idCardNumber,
+      ninImage: {
+        secureUrl: result.secure_url,
+        publicId: result.public_id
+      }
     };
 
-    // Create new host
+    // console.log(req.body.meansOfIdentification);
+
+
     const host = await Host.create(hostData);
 
-    // Generate verification token
     const token = jwt.sign({ hostId: host.id }, process.env.JWT_SECRET, { expiresIn: "1d" });
     const link = `${req.protocol}://${req.get("host")}/api/v1/host/verify/${token}`;
     const firstName = host.fullName.split(" ")[0];
 
-    // Prepare verification email
     const mailOptions = {
       email: email,
       subject: "Account Verification",
@@ -97,15 +77,16 @@ exports.registerHost = async (req, res) => {
       message: "Account registered successfully. Please check your email for verification.",
       data: host,
     });
+
   } catch (error) {
     console.error(error);
-    if (req.file) {
-      fs.unlinkSync(req.file.path);
-    }
+    // fs.unlinkSync(file.path);
     res.status(500).json({
-      message: `Error registering host: ${error.message}`,
+      message: "Error Registering User",
+      error: error.message
     });
   }
+
 };
 
 exports.verifyHost = async (req, res) => {
@@ -222,8 +203,7 @@ exports.loginHost = async (req, res) => {
       });
     }
 
-    // Update login status
-    host.isLoggedin = true; // Ensure the Host model includes an `isLoggedIn` field
+    host.isLoggedin = true;
     const token = jwt.sign(
       { userId: host.id, isLoggedIn: host.isLoggedIn },
       process.env.JWT_SECRET,
@@ -255,7 +235,6 @@ exports.forgottenPasswordHost = async (req, res) => {
       });
     }
 
-    // Find the host by email
     const host = await Host.findOne({ where: { email: email.toLowerCase() } });
 
     if (!host) {
@@ -264,12 +243,10 @@ exports.forgottenPasswordHost = async (req, res) => {
       });
     }
 
-    // Generate reset token and link
     const token = jwt.sign({ userId: host.id }, process.env.JWT_SECRET, { expiresIn: "1day" });
     const link = `${req.protocol}://${req.get("host")}/api/v1/host/reset-password/${token}`;
     const firstName = host.fullName.split(" ")[0];
 
-    // Prepare and send reset email
     const mailOptions = {
       email: host.email,
       subject: "Reset Password",
@@ -314,10 +291,8 @@ exports.resetPasswordHost = async (req, res) => {
       });
     }
 
-    // Verify token and extract hostId
     const { userId } = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Find host by primary key
     const host = await Host.findByPk(userId);
     if (!host) {
       return res.status(404).json({
@@ -325,11 +300,9 @@ exports.resetPasswordHost = async (req, res) => {
       });
     }
 
-    // Hash the new password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-    // Update host password
     host.password = hashedPassword;
     await host.save();
 
@@ -363,7 +336,6 @@ exports.changePasswordHost = async (req, res) => {
       });
     }
 
-    // Find the host by ID
     const host = await Host.findByPk(hostId);
     if (!host) {
       return res.status(404).json({
@@ -377,7 +349,6 @@ exports.changePasswordHost = async (req, res) => {
       });
     }
 
-    // Validate current password
     const isCorrectPassword = await bcrypt.compare(password, host.password);
     if (!isCorrectPassword) {
       return res.status(400).json({
@@ -391,11 +362,9 @@ exports.changePasswordHost = async (req, res) => {
       });
     }
 
-    // Hash the new password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-    // Update host's password
     host.password = hashedPassword;
     await host.save();
 
@@ -457,11 +426,18 @@ exports.updateHostDetails = async (req, res) => {
       });
     }
 
+    let profileImageUrl = []
     if (file) {
       try {
         const result = await cloudinary.uploader.upload(file.path);
-        updates.profileImage = result.secure_url;
+        const profileImageDetails = {
+          secureUrl: result.secure_url,
+          publicId: result.public_id
+        };
+        profileImageUrl.push(profileImageDetails)
+        updates.profileImage = profileImageUrl
         fs.unlinkSync(file.path);
+
       } catch (uploadError) {
         fs.unlinkSync(file.path);
         return res.status(500).json({
@@ -491,19 +467,28 @@ exports.deleteHostAccount = async (req, res) => {
     const host = await Host.findByPk(hostId);
     if (!host) {
       return res.status(404).json({
-        message: "Host not found",
+        message: "host not found",
       });
     }
+
+    if (host.profileImage && host.profileImage.publicId) {
+
+      // const publicId = host.profileImage.split("/").pop().split(".")[0];
+
+      await cloudinary.uploader.destroy(host.profileImage.publicId);
+    }
+
 
     await host.destroy();
 
     res.status(200).json({
-      message: "Host deleted successfully",
+      message: "User and profile image deleted successfully",
     });
   } catch (error) {
     console.error(error.message);
     res.status(500).json({
-      message: "Error deleting host",
+      message: "Error deleting user account",
+      error: error.message,
     });
   }
 };
@@ -512,19 +497,14 @@ exports.deleteHostAccount = async (req, res) => {
 // GET THE TOTAL NUMBER OF SPACES AND THEIR COUNT
 exports.getSpacesByHost = async (req, res) => {
   try {
-    const { hostId } = req.params;
+    const { userId: hostId } = req.user;
 
     const spaces = await Space.findAll({
-      where: { hostId },
-      include: [
-        {
-          model: Host,
-        },
-      ],
+      where: { hostId }
     });
 
     const spaceCount = spaces.length
-    if (!spaces.length) {
+    if (spaceCount === 0) {
       return res.status(404).json({
         message: "No Spaces Found for This Host",
       });
@@ -544,64 +524,6 @@ exports.getSpacesByHost = async (req, res) => {
   }
 };
 
-// (MANAGE LISTING)
-exports.manageListings = async (req, res) => {
-  try {
-    const { hostId } = req.params;
-
-    const host = await Host.findByPk(hostId, {
-      attributes: {
-        include: [
-          [
-            // Count total spaces listed by the host
-            Sequelize.fn("COUNT", Sequelize.col("spaces.id")),
-            "totalSpaces",
-          ],
-        ],
-      },
-      include: [
-        {
-          model: Space, // Include associated spaces
-          attributes: ["name", "createdAt", "capacity", "status"],
-          include: [
-            {
-              model: Booking, // Include associated bookings
-              attributes: [], // We don't need individual booking details, just the count
-            },
-          ],
-          attributes: {
-            include: [
-              [
-                // Count total bookings for each space
-                Sequelize.fn("COUNT", Sequelize.col("bookings.id")),
-                "totalBookings",
-              ],
-            ],
-          },
-        },
-      ],
-      group: ["Host.id", "spaces.id"], // Group by host and spaces to calculate counts correctly
-    });
-
-    if (!host) {
-      return res.status(404).json({
-        message: "Host not found",
-      });
-    }
-
-    res.status(200).json({
-      message: "Host details and listings retrieved successfully",
-      data: host,
-    });
-  } catch (error) {
-    console.error(error.message);
-    res.status(500).json({
-      message: "Error retrieving host details",
-      data: error.message,
-    });
-  }
-};
-
 // MANAGE BOOKINGS
 exports.getSpaceBookings = async (req, res) => {
   try {
@@ -611,7 +533,7 @@ exports.getSpaceBookings = async (req, res) => {
       include: [
         {
           model: Booking,
-          attributes: ['userName', 'startDate', 'status'],
+          attributes: ['userName', 'startDate', 'endDate', 'status'],
         },
       ],
     });
@@ -630,14 +552,54 @@ exports.getSpaceBookings = async (req, res) => {
     console.error(error.message);
     res.status(500).json({
       message: "Error fetching space bookings",
+      error: error.message
     });
   }
 };
 
+// MANAGE LISTING
+exports.manageListing = async (req, res) => {
+  try {
+    const { userId: hostId } = req.user;
+
+    const host = await Host.findByPk(hostId);
+    if (!host) {
+      return res.status(404).json({
+        message: "Host not found"
+      })
+    };
+
+    const spaces = await Space.findAll({
+      where: { hostId },
+      attributes: ["name", "bookingCount", "createdAt", "capacity", "listingStatus"]
+    });
+
+    if (spaces.length === 0) {
+      return res.status(400).json({
+        message: "No spaces listed for this host"
+      })
+    };
+
+    res.status(200).json({
+      message: "Space listings for this host",
+      data: spaces
+    })
+
+
+
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({
+      message: "Error categorizing bookings",
+      error: error.message
+    });
+  }
+}
+
 // HOST DASHbOARD (DASHBOARD)
 exports.getBookingCategories = async (req, res) => {
   try {
-    const { hostId } = req.params;
+    const { userId: hostId } = req.user;
     const currentDate = new Date();
 
     const spaces = await Space.findAll({
@@ -650,36 +612,55 @@ exports.getBookingCategories = async (req, res) => {
       ],
     });
 
+
     const upcomingBookings = [];
     const activeBookings = [];
     const completedBookings = [];
+    //  const spaceId =  spaces.map((space) => space.id)
+    for (const space of spaces) {
+      const booking = await Booking.findOne({ where: { spaceId: space.id } });
+      if (new Date(booking.startDate) > currentDate) {
+        upcomingBookings.push(booking);
+      } else if (
+        new Date(booking.startDate) <= currentDate &&
+        new Date(booking.endDate) >= currentDate
+      ) {
+        activeBookings.push(booking);
+      } else if (new Date(booking.endDate) < currentDate) {
+        completedBookings.push(booking);
+      }
 
-    spaces.forEach((space) => {
-      space.Bookings.forEach((booking) => {
-        const { startDate, endDate } = booking;
-        if (new Date(startDate) > currentDate) {
-          upcomingBookings.push(booking);
-        } else if (
-          new Date(startDate) <= currentDate &&
-          new Date(endDate) >= currentDate
-        ) {
-          activeBookings.push(booking);
-        } else if (new Date(endDate) < currentDate) {
-          completedBookings.push(booking);
-        }
-      });
-    });
+    };
 
     const upcomingCount = upcomingBookings.length;
     const activeCount = activeBookings.length;
     const completedCount = completedBookings.length;
 
+
+    // spaces.forEach((space) => {
+    //   space.Bookings.forEach((booking) => {
+    //     const { startDate, endDate } = booking;
+    //     if (new Date(startDate) > currentDate) {
+    //       upcomingBookings.push(booking);
+    //     } else if (
+    //       new Date(startDate) <= currentDate &&
+    //       new Date(endDate) >= currentDate
+    //     ) {
+    //       activeBookings.push(booking);
+    //     } else if (new Date(endDate) < currentDate) {
+    //       completedBookings.push(booking);
+    //     }
+    //   });
+    // });
+
+
+
     res.status(200).json({
       message: "Bookings categorized successfully",
       data: {
-        upcomingBookings,
-        activeBookings,
-        completedBookings,
+        // upcomingBookings,
+        // activeBookings,
+        // completedBookings,
         counts: {
           upcoming: upcomingCount,
           active: activeCount,

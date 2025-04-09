@@ -20,16 +20,24 @@ module.exports = {
       email: {
         type: Sequelize.STRING,
         allowNull: false
-
       },
-      isVerified:{
-              type:Sequelize.BOOLEAN,
-              defaultValue:false
-        },
-        isLoggedin:{
-              type:Sequelize.BOOLEAN,
-              defaultValue:false
-    },
+      // profileImage: {
+      //   type: Sequelize.JSON,
+      //   allowNull: true
+      // },
+      isVerified: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
+      },
+      isAdmin: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+      },
+      isLoggedin: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

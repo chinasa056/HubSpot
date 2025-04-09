@@ -1,240 +1,22 @@
-const { registerHost, verifyHost, loginHost, forgottenPasswordHost, resetPasswordHost, changePasswordHost, loggedOutHost, updateHostDetails, deleteHostAccount, getSpacesByHost, getHostListings, getSpaceBookings, getBookingCategories, manageListings } = require('../controllers/hostController');
-const { authenticate, hostAuth, isAdmin } = require('../middleware/authentication');
-const { registerValidator, loginValidator, resetPasswordValidator, changePasswordValidator } = require('../middleware/validator');
+const { registerHost, verifyHost, loginHost, forgottenPasswordHost, resetPasswordHost, changePasswordHost, loggedOutHost, updateHostDetails, deleteHostAccount, getSpacesByHost, getBookingCategories, manageListing, getSpaceBookings } = require('../controllers/hostController');
+
+const { authenticate, hostAuth } = require('../middleware/authentication');
+const { loginValidator, resetPasswordValidator, changePasswordValidator, registerHostValidator } = require('../middleware/validator');
+
 const upload = require("../utils/multer")
 
-const router = require('express').Router(); 
+const router = require('express').Router();
 
-/**
- * @swagger
- * tags:
- *   name: Host
- *   description: Endpoints related to host registration
- */
-
-/**
- * @swagger
- * /api/v1/host/register:
- *   post:
- *     summary: Register a new host
- *     tags: [Host]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               fullName:
- *                 type: string
- *                 description: Full name of the host
- *                 example: John Doe
- *               email:
- *                 type: string
- *                 description: Email address of the host
- *                 example: john.doe@company.com
- *               password:
- *                 type: string
- *                 description: Password for the host
- *                 example: StrongPassword123!
- *               confirmPassword:
- *                 type: string
- *                 description: Confirmation of the password
- *                 example: StrongPassword123!
- *               companyName:
- *                 type: string
- *                 description: Name of the host's company
- *                 example: Acme Inc.
- *               companyAddress:
- *                 type: string
- *                 description: Address of the host's company
- *                 example: 123 Business Street, City, Country
- *     responses:
- *       201:
- *         description: Host registered successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Account registered successfully. Please check your email for verification."
- *                 data:
- *                   type: object
- *                   description: Details of the registered host
- *       400:
- *         description: Validation error or duplicate email
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Host with email: john.doe@company.com already exists"
- *       500:
- *         description: Internal server error during registration
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Error registering host: [error details]"
- */
-
-router.post('/host/register',registerValidator, registerHost);
-
-/**
- * @swagger
- * tags:
- *   name: Host
- *   description: Endpoints related to host account verification
- */
-
-/**
- * @swagger
- * /api/v1/host/verify/{token}:
- *   get:
- *     summary: Verify a host's account
- *     tags: [Host]
- *     parameters:
- *       - in: path
- *         name: token
- *         required: true
- *         schema:
- *           type: string
- *         description: Verification token sent to the host's email
- *     responses:
- *       200:
- *         description: Account verified successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Account verified successfully"
- *       400:
- *         description: Session expired or validation error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Session expired: A new verification link has been sent to your email address."
- *       404:
- *         description: Account not found or missing token
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Account not found"
- *       500:
- *         description: Server error during verification
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Error verifying host"
- */
+router.post('/host/register', upload.single("ninImage"), registerHostValidator, registerHost);
 
 router.get("/host/verify/:token", verifyHost);
 
-/**
- * @swagger
- * tags:
- *   name: Host
- *   description: Endpoints related to host authentication
- */
-
-/**
- * @swagger
- * /api/v1/host/login:
- *   post:
- *     summary: Log in to a host account
- *     tags: [Host]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *                 description: Email address of the host
- *                 example: john.doe@company.com
- *               password:
- *                 type: string
- *                 description: Password for the host account
- *                 example: StrongPassword123!
- *     responses:
- *       200:
- *         description: Account successfully logged in
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Account successfully logged in"
- *                 data:
- *                   type: object
- *                   description: Details of the logged-in host
- *                 token:
- *                   type: string
- *                   description: JWT token for authentication
- *       400:
- *         description: Validation error, incorrect credentials, or account not verified
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Incorrect password"
- *       404:
- *         description: Host not found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Host not found"
- *       500:
- *         description: Internal server error during login
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Internal server error"
- */
-
-router.post("/host/login",loginValidator, loginHost);
+router.post("/host/login", loginValidator, loginHost);
 
 /**
  * @swagger
  * tags:
- *   name: Host
+ *   name: Hosts
  *   description: Endpoints related to host account recovery
  */
 
@@ -243,7 +25,7 @@ router.post("/host/login",loginValidator, loginHost);
  * /api/v1/host/forgot-password:
  *   post:
  *     summary: Request a password reset link for a host
- *     tags: [Host]
+ *     tags: [Hosts]
  *     requestBody:
  *       required: true
  *       content:
@@ -303,7 +85,7 @@ router.post("/host/forgot-password", forgottenPasswordHost);
 /**
  * @swagger
  * tags:
- *   name: Host
+ *   name: Hosts
  *   description: Endpoints related to host password management
  */
 
@@ -312,7 +94,7 @@ router.post("/host/forgot-password", forgottenPasswordHost);
  * /api/v1/host/reset-password/{token}:
  *   post:
  *     summary: Reset a host's password
- *     tags: [Host]
+ *     tags: [Hosts]
  *     parameters:
  *       - in: path
  *         name: token
@@ -378,12 +160,12 @@ router.post("/host/forgot-password", forgottenPasswordHost);
  *                   example: "Error resetting password"
  */
 
-router.post("/host/reset-password/:token",resetPasswordValidator, resetPasswordHost);
+router.post("/host/reset-password/:token", resetPasswordValidator, resetPasswordHost);
 
 /**
  * @swagger
  * tags:
- *   name: Host
+ *   name: Hosts
  *   description: Endpoints related to host password management
  */
 
@@ -392,7 +174,7 @@ router.post("/host/reset-password/:token",resetPasswordValidator, resetPasswordH
  * /api/v1/host/change-password/{userId}:
  *   patch:
  *     summary: Change a host's password
- *     tags: [Host]
+ *     tags: [Hosts]
  *     parameters:
  *       - in: path
  *         name: userId
@@ -472,12 +254,12 @@ router.post("/host/reset-password/:token",resetPasswordValidator, resetPasswordH
  *                   example: "Error changing password"
  */
 
-router.patch("/host/change-password/:userId",authenticate, changePasswordValidator, changePasswordHost);
+router.patch("/host/change-password/:userId", authenticate, changePasswordValidator, changePasswordHost);
 
 /**
  * @swagger
  * tags:
- *   name: Host
+ *   name: Hosts
  *   description: Endpoints related to host session management
  */
 
@@ -486,7 +268,7 @@ router.patch("/host/change-password/:userId",authenticate, changePasswordValidat
  * /api/v1/host/logout:
  *   patch:
  *     summary: Log out a host
- *     tags: [Host]
+ *     tags: [Hosts]
  *     requestBody:
  *       required: true
  *       content:
@@ -541,17 +323,17 @@ router.patch("/host/change-password/:userId",authenticate, changePasswordValidat
  *                   example: "Internal server error"
  */
 
-router.patch("/host/logout",hostAuth, loggedOutHost);
+router.patch("/host/logout", hostAuth, loggedOutHost);
 
-router.put('/host/update/:hostId', upload.single('profileImage'),hostAuth,updateHostDetails);
+router.put('/host/update/:hostId', upload.single('profileImage'), hostAuth, updateHostDetails);
 
-router.delete('/host/delete/:hostId', hostAuth,deleteHostAccount);
+router.delete('/host/delete/:hostId', hostAuth, deleteHostAccount);
 
-router.get("/host/getspaces/:hostId", hostAuth, getSpacesByHost);
+router.get("/host/getspaces/", hostAuth, getSpacesByHost);
 
-router.get("/host/listings/:hostId", hostAuth, manageListings);
+router.get("/host/listings", hostAuth, manageListing);
 
-router.get("/host/spacebookings/:hostId", hostAuth, getSpaceBookings);
+router.get("/host/spacebookings/:spaceId", hostAuth, getSpaceBookings);
 
 router.get("/host/bookingcategories/:hostId", hostAuth, getBookingCategories);
 

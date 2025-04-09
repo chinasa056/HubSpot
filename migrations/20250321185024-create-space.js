@@ -30,11 +30,11 @@ module.exports = {
         allowNull: false
       },
       amenities: {
-        type: Sequelize.TEXT,
+        type: Sequelize.JSON,
         allowNull: false
       },
       availability: {
-        type: Sequelize.TEXT,
+        type: Sequelize.JSON,
         allowNull: false
       },
       locationId: {
@@ -50,18 +50,29 @@ module.exports = {
         allowNull: false
       },
       spaceImages: {
-        type: Sequelize.TEXT,
+        type: Sequelize.JSON,
         allowNull: false,
       },
       listingStatus: {
         type: Sequelize.ENUM,
-        values: ['active', 'pending','rejected'],
+        values: ['active', 'pending', 'rejected'],
         defaultValue: 'pending',
       },
       averageRating: {
         type: Sequelize.FLOAT,
       },
-
+      isAvailable: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: true
+      },
+      bookingCount: {
+        type: Sequelize.INTEGER,
+        defaultValue: 0
+      },
+      isApproved: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

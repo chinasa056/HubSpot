@@ -1,5 +1,5 @@
 const { createCategory, getAllCategory, getOneCategory, updateCategory, deleteCategory, getAvailability } = require("../controllers/categoryController");
-const { authenticate, isAdmin } = require("../middleware/authentication");
+const { authenticate, isAdmin, hostAuth } = require("../middleware/authentication");
 
 const router = require("express").Router()
 
@@ -93,7 +93,7 @@ const router = require("express").Router()
  *       bearerFormat: JWT
  */
 
-router.post("/category/one/create",authenticate,isAdmin, createCategory)
+router.post("/category/one/create",hostAuth, createCategory)
 
 /**
  * @swagger
@@ -311,7 +311,7 @@ router.get("/category/getOne/:categoryId", getOneCategory);
  *       bearerFormat: JWT
  */
 
-router.patch("/category/update/:categoryId",authenticate,isAdmin, updateCategory);
+router.patch("/category/update/:categoryId",hostAuth,updateCategory);
 
 /**
  * @swagger
@@ -390,7 +390,7 @@ router.patch("/category/update/:categoryId",authenticate,isAdmin, updateCategory
  *       bearerFormat: JWT
  */
 
-router.delete("/category/delete/:categoryId",authenticate,isAdmin, deleteCategory)
+router.delete("/category/delete/:categoryId",hostAuth,deleteCategory)
 
 // router.post("/availability", getAvailability)
 

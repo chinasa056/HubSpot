@@ -1,7 +1,7 @@
 const { Sequelize, DataTypes, Model } = require('sequelize');
 const sequelize = require("../database/dbConnect");
 
-class Category extends Model {}
+class Category extends Model { }
 
 Category.init(
   {
@@ -20,7 +20,6 @@ Category.init(
       allowNull: false,
       type: DataTypes.DATE
     },
-    
     updatedAt: {
       allowNull: false,
       type: DataTypes.DATE
