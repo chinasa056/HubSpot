@@ -3,29 +3,16 @@ const { authenticate, isAdmin, hostAuth } = require("../middleware/authenticatio
 
 const router = require("express").Router()
 
-/**
- * @swagger
- * tags:
- *   name: Category
- *   description: Endpoints related to category management
- */
 
 /**
  * @swagger
  * /api/v1/category/one/create:
  *   post:
- *     summary: Create a new category (authenticated and authorized)
- *     description: |
- *       - This route requires **authentication** via a valid JWT token.
- *       - The JWT token must be included in the `Authorization` header as follows:
- *         ```
- *         Authorization: Bearer [YourJWTToken]
- *         ```
- *       - Replace `[YourJWTToken]` with the token received upon login or account verification.
- *       - Only users with **admin privileges** can access this route.
- *     tags: [Category]
+ *     summary: Create a new category
+ *     description: This route allows a host to create a new category. It requires authorization for a host account.
+ *     tags: [Admin]
  *     security:
- *       - bearerAuth: [] # Requires a valid JWT token
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -35,11 +22,11 @@ const router = require("express").Router()
  *             properties:
  *               name:
  *                 type: string
- *                 description: Name of the category to be created
- *                 example: Technology
+ *                 description: The name of the category to create.
+ *                 example: "Luxury"
  *     responses:
  *       201:
- *         description: Category created successfully
+ *         description: Category successfully created
  *         content:
  *           application/json:
  *             schema:
@@ -50,9 +37,15 @@ const router = require("express").Router()
  *                   example: "New Category Created"
  *                 data:
  *                   type: object
- *                   description: Details of the newly created category
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                       example: 1
+ *                     name:
+ *                       type: string
+ *                       example: "Luxury"
  *       400:
- *         description: Validation error or category already exists
+ *         description: Category already exists
  *         content:
  *           application/json:
  *             schema:
@@ -62,7 +55,7 @@ const router = require("express").Router()
  *                   type: string
  *                   example: "This Category Already Exists"
  *       404:
- *         description: Admin user not found
+ *         description: User not found
  *         content:
  *           application/json:
  *             schema:
@@ -70,9 +63,9 @@ const router = require("express").Router()
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "User not found"
+ *                   example: "user not found"
  *       500:
- *         description: Internal server error during category creation
+ *         description: Server error while creating category
  *         content:
  *           application/json:
  *             schema:
@@ -81,36 +74,20 @@ const router = require("express").Router()
  *                 message:
  *                   type: string
  *                   example: "Error Creating category"
+ *                 data:
+ *                   type: string
+ *                   example: "Error message details"
  */
 
-/**
- * @swagger
- * components:
- *   securitySchemes:
- *     bearerAuth:
- *       type: http
- *       scheme: bearer
- *       bearerFormat: JWT
- */
-
-router.post("/category/one/create",hostAuth, createCategory)
-
-/**
- * @swagger
- * tags:
- *   name: Category
- *   description: Endpoints related to category management
- */
+router.post("/category/one/create",authenticate, isAdmin, createCategory)
 
 /**
  * @swagger
  * /api/v1/category/all:
  *   get:
- *     summary: Retrieve all categories
- *     description: |
- *       This endpoint retrieves all available categories from the database.
- *       It does not require authentication or authorization and can be accessed publicly.
- *     tags: [Category]
+ *     summary: Get all categories
+ *     description: This route retrieves all available categories from the database.
+ *     tags: [Users]
  *     responses:
  *       200:
  *         description: Successfully retrieved all categories
@@ -126,9 +103,15 @@ router.post("/category/one/create",hostAuth, createCategory)
  *                   type: array
  *                   items:
  *                     type: object
- *                     description: Details of the categories
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                         example: 1
+ *                       name:
+ *                         type: string
+ *                         example: "Luxury"
  *       500:
- *         description: Server error during category retrieval
+ *         description: Server error while retrieving categories
  *         content:
  *           application/json:
  *             schema:
@@ -139,39 +122,28 @@ router.post("/category/one/create",hostAuth, createCategory)
  *                   example: "Error retrieving categories"
  *                 data:
  *                   type: string
- *                   description: Error message
+ *                   example: "Error message details"
  */
-
 router.get("/category/all", getAllCategory);
-
-
-/**
- * @swagger
- * tags:
- *   name: Category
- *   description: Endpoints related to category management
- */
 
 /**
  * @swagger
  * /api/v1/category/getOne/{categoryId}:
  *   get:
- *     summary: Retrieve details of a specific category
- *     description: |
- *       This endpoint retrieves the details of a specific category by its ID.
- *       The response includes related entities, such as spaces associated with the category.
- *       It can be accessed publicly and does not require authentication.
- *     tags: [Category]
+ *     summary: Get a specific category by ID
+ *     description: This route retrieves a specific category along with the associated spaces.
+ *     tags: [Users]
  *     parameters:
- *       - in: path
- *         name: categoryId
+ *       - name: categoryId
+ *         in: path
  *         required: true
+ *         description: The ID of the category to retrieve.
  *         schema:
- *           type: string
- *         description: The ID of the category to retrieve
+ *           type: integer
+ *           example: 1
  *     responses:
  *       200:
- *         description: Successfully retrieved the category details
+ *         description: Successfully retrieved the category
  *         content:
  *           application/json:
  *             schema:
@@ -182,7 +154,24 @@ router.get("/category/all", getAllCategory);
  *                   example: "Category Retrieved Successfully"
  *                 data:
  *                   type: object
- *                   description: Details of the specific category, including associated spaces
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                       example: 1
+ *                     name:
+ *                       type: string
+ *                       example: "Luxury"
+ *                     spaces:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: integer
+ *                             example: 101
+ *                           name:
+ *                             type: string
+ *                             example: "Beachfront Space"
  *       404:
  *         description: Category not found
  *         content:
@@ -194,7 +183,7 @@ router.get("/category/all", getAllCategory);
  *                   type: string
  *                   example: "Category Not Found"
  *       500:
- *         description: Internal server error during category retrieval
+ *         description: Server error while retrieving the category
  *         content:
  *           application/json:
  *             schema:
@@ -202,148 +191,52 @@ router.get("/category/all", getAllCategory);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Error retrieving this categories"
+ *                   example: "Error retrieving this category"
  *                 data:
  *                   type: string
- *                   description: Error details
+ *                   example: "Error message details"
  */
-
 router.get("/category/getOne/:categoryId", getOneCategory);
-
-/**
- * @swagger
- * tags:
- *   name: Category
- *   description: Endpoints related to category management
- */
 
 /**
  * @swagger
  * /api/v1/category/update/{categoryId}:
  *   patch:
- *     summary: Update an existing category (authenticated and authorized)
- *     description: |
- *       This endpoint allows **admin users** to update the details of an existing category.
- *       - **Authentication**: Requires a valid JWT token in the `Authorization` header.
- *       - **Authorization**: Only users with admin privileges can access this route.
- *       - Provide the `categoryId` in the path parameter and the updated name in the request body.
- *       - Example Authorization Header:
- *         ```
- *         Authorization: Bearer [YourJWTToken]
- *         ```
- *     tags: [Category]
+ *     summary: Update a category
+ *     description: This route allows you to update the name of a specific category.
+ *     tags: [Admin]
  *     security:
- *       - bearerAuth: [] # Indicates authentication using JWT
+ *       - bearerAuth: []
  *     parameters:
- *       - in: path
- *         name: categoryId
+ *       - name: categoryId
+ *         in: path
  *         required: true
+ *         description: The ID of the category to update.
  *         schema:
- *           type: string
- *         description: The ID of the category to be updated
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *                 description: Updated name for the category
- *                 example: Updated Technology
- *     responses:
- *       200:
- *         description: Successfully updated the category
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Category Updated Successfully"
- *                 data:
- *                   type: object
- *                   description: Details of the updated category
- *       400:
- *         description: Validation error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Validation error message"
- *       404:
- *         description: Category not found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Category Not Found"
- *       500:
- *         description: Internal server error during category update
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Error updating the category"
- *                 data:
- *                   type: string
- *                   description: Error details
- */
-
-/**
- * @swagger
- * components:
- *   securitySchemes:
- *     bearerAuth:
- *       type: http
- *       scheme: bearer
- *       bearerFormat: JWT
- */
-
-router.patch("/category/update/:categoryId",hostAuth,updateCategory);
-
-/**
- * @swagger
- * tags:
- *   name: Category
- *   description: Endpoints related to category management
- */
+ *           type: integer
+ *           example: 1
+ *       - name: name
+ *         in: body
+*/
+router.patch("/category/update/:categoryId",authenticate, isAdmin,updateCategory);
 
 /**
  * @swagger
  * /api/v1/category/delete/{categoryId}:
  *   delete:
- *     summary: Delete a specific category (authenticated and authorized)
- *     description: |
- *       This endpoint allows **admin users** to delete a specific category by its ID.
- *       - **Authentication**: Requires a valid JWT token in the `Authorization` header.
- *       - **Authorization**: Only users with admin privileges can access this route.
- *       - Provide the `categoryId` in the path parameter to specify the category to delete.
- *       - Example Authorization Header:
- *         ```
- *         Authorization: Bearer [YourJWTToken]
- *         ```
- *     tags: [Category]
+ *     summary: Delete a category
+ *     description: This route allows you to delete a specific category.
+ *     tags: [Admin]
  *     security:
- *       - bearerAuth: [] # Indicates authentication using JWT
+ *       - bearerAuth: []
  *     parameters:
- *       - in: path
- *         name: categoryId
+ *       - name: categoryId
+ *         in: path
  *         required: true
+ *         description: The ID of the category to delete.
  *         schema:
- *           type: string
- *         description: The ID of the category to delete
+ *           type: integer
+ *           example: 1
  *     responses:
  *       200:
  *         description: Successfully deleted the category
@@ -366,7 +259,7 @@ router.patch("/category/update/:categoryId",hostAuth,updateCategory);
  *                   type: string
  *                   example: "Category Not Found"
  *       500:
- *         description: Internal server error during category deletion
+ *         description: Server error while deleting the category
  *         content:
  *           application/json:
  *             schema:
@@ -377,21 +270,9 @@ router.patch("/category/update/:categoryId",hostAuth,updateCategory);
  *                   example: "Error deleting category"
  *                 data:
  *                   type: string
- *                   description: Error details
+ *                   example: "Error message details"
  */
-
-/**
- * @swagger
- * components:
- *   securitySchemes:
- *     bearerAuth:
- *       type: http
- *       scheme: bearer
- *       bearerFormat: JWT
- */
-
-router.delete("/category/delete/:categoryId",hostAuth,deleteCategory)
-
+router.delete("/category/delete/:categoryId", authenticate,isAdmin, deleteCategory);
 // router.post("/availability", getAvailability)
 
 module.exports = router
