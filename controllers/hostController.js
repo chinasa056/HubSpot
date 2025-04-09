@@ -618,7 +618,7 @@ exports.getBookingCategories = async (req, res) => {
     const completedBookings = [];
     //  const spaceId =  spaces.map((space) => space.id)
     for (const space of spaces) {
-      const booking = await Booking.findOne({ where: { spaceId: space.id } });
+      const booking = await Booking.findAll({ where: { spaceId: space.id } });
       if (new Date(booking.startDate) > currentDate) {
         upcomingBookings.push(booking);
       } else if (
