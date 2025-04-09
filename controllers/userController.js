@@ -7,12 +7,14 @@ const fs = require("fs");
 const User = require("../models/user");
 const { resetPasswordMail } = require("../utils/reset-password-mail");
 const Booking = require("../models/booking");
-const Space = require("../models/space");
 
 exports.registerUser = async (req, res) => {
     try {
         const { fullName, email, password, confirmPassword } = req.body;
         const file = req.file;
+
+        const name = fullName?.split(' ');
+        const nameFormat = name.map((e) => { return e.slice(0, 1).toUpperCase() + e.slice(1).toLowerCase() }).join(' ');
 
         const userExists = await User.findOne({
             where: { email: email.toLowerCase() },
@@ -46,7 +48,7 @@ exports.registerUser = async (req, res) => {
         }
 
         const userData = {
-            fullName,
+            fullName: nameFormat,
             email: email.toLowerCase(),
             password: hashedPassword,
             profileImage: profileImageUrl,
@@ -336,6 +338,147 @@ exports.resetPassword = async (req, res) => {
     }
 };
 
+
+exports.deleteUserAccount = async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        const user = await User.findByPk(userId);
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found",
+            });
+        }
+
+        if (user.profileImage && user.profileImage.publicId) {
+            await cloudinary.uploader.destroy(user.profileImage.publicId)
+        }
+
+        await user.destroy();
+
+        res.status(200).json({
+            message: "User and profile image deleted successfully",
+        });
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json({
+            message: "Error deleting user account",
+            error: error.message,
+        });
+    }
+};
+
+// USER DASHBOARD
+// MANAGE BOOKINGS (GET ALL BOOKINGS FOR A USER)
+exports.manageBookings = async (req, res) => {
+    try {
+        const { userId } = req.user;
+        const user = await User.findByPk(userId);
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found"
+            })
+        };
+
+        const userBookings = await Booking.findAll({ where: { userId } });
+
+        if (userBookings.length === 0) {
+            return res.status(200).json({
+                message: "No active booking for this user"
+            })
+        };
+
+        res.status(200).json({
+            message: "all bookings for this user",
+            data: userBookings
+        })
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: "Error Fetching Spaces by Host",
+            data: error.message,
+        });
+    }
+};
+
+// LOG OUT
+exports.logOut = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({
+                message: "Email is required",
+            });
+        }
+
+        const user = await User.findOne({ where: { email: email.toLowerCase() } });
+
+        if (!user) {
+            return res.status(404).json({
+                message: "User does not exist",
+            });
+        }
+
+        user.isLoggedIn = false;
+        await user.save();
+
+        res.status(200).json({
+            message: "User logged out successfully",
+        });
+    } catch (error) {
+        console.error("Error logging out:", error);
+        res.status(500).json({
+            message: "Error logging out user",
+            error: error.message
+        });
+    }
+};
+
+// MY ACCUNT SETTINGS
+exports.updateUser = async (req, res) => {
+    try {
+        const { userId } = req.user;
+        const { updatedData } = req.body;
+        const user = await User.findByPk(userId)
+
+        if (!user) {
+            return res.status(404).json({
+                message: "Update failed: user not found"
+            })
+        };
+
+        if (req.file) {
+            const result = await cloudinary.uploader.upload(req.file.path);
+
+            if (user.profileImage.publicId) {
+                await cloudinary.uploader.destroy(user.profileImage.publicId);
+            }
+            // Update the profile picture details
+            updatedData.profileImage = {
+                imageUrl: result.secure_url,
+                publicId: result.public_id
+            }
+            fs.unlinkSync(req.file.path)
+            user.profileImage = updatedData.profileImage
+
+        }
+
+        await user.update(updatedData)
+
+        res.status(200).json({
+            message: "User updated successfully",
+            data: user
+        })
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: "internal server error"
+        })
+    }
+};
+
 exports.changePassword = async (req, res) => {
     try {
         const { userId } = req.params;
@@ -355,7 +498,7 @@ exports.changePassword = async (req, res) => {
             });
         }
 
-        if (!user.isLoggedIn) {
+        if (!user.isLoggedin) {
             return res.status(401).json({
                 message: "Authentication Failed: User is not logged in",
             });
@@ -390,123 +533,3 @@ exports.changePassword = async (req, res) => {
         });
     }
 };
-
-exports.loggedOut = async (req, res) => {
-    try {
-        const { email } = req.body;
-
-        if (!email) {
-            return res.status(400).json({
-                message: "Email is required",
-            });
-        }
-
-        const user = await User.findOne({ where: { email: email.toLowerCase() } });
-
-        if (!user) {
-            return res.status(404).json({
-                message: "User does not exist",
-            });
-        }
-
-        user.isLoggedIn = false;
-        await user.save();
-
-        res.status(200).json({
-            message: "User logged out successfully",
-        });
-    } catch (error) {
-        console.error("Error logging out:", error.message);
-        res.status(500).json({
-            message: "Internal server error",
-        });
-    }
-};
-
-exports.deleteUserAccount = async (req, res) => {
-    try {
-        const { userId } = req.params;
-
-        const user = await User.findByPk(userId);
-        if (!user) {
-            return res.status(404).json({
-                message: "User not found",
-            });
-        }
-
-        if (user.profileImage) {
-            try {
-                const publicId = user.profileImage.split("/").pop().split(".")[0];
-
-                await cloudinary.uploader.destroy(publicId);
-
-            } catch (imageDeleteError) {
-                console.error("Error deleting image:", imageDeleteError.message);
-                return res.status(500).json({
-                    message: "Error deleting profile image",
-                });
-            }
-        }
-
-        await user.destroy();
-
-        res.status(200).json({
-            message: "User and profile image deleted successfully",
-        });
-    } catch (error) {
-        console.error(error.message);
-        res.status(500).json({
-            message: "Error deleting user account",
-            error: error.message,
-        });
-    }
-};
-
-// USER DASHBOARD
-exports.getOneUser = async (req, res) => {
-    try {
-        const { userId } = req.params;
-        const user = await User.findOne({ userId, include })
-        if (!user) {
-            return res.status(404).json({
-                message: "User not found"
-            })
-        };
-
-
-    } catch (error) {
-
-    }
-}
-
-// MANAGE BOOKINGS (GET ALL BOOKINGS FOR A USER)
-exports.manageBookings = async (req, res) => {
-    try {
-        const { userId } = req.user;
-        const user = await User.findByPk(userId);
-        if (!user) {
-            return res.status(404).json({
-                message: "User not found"
-            })
-        };
-
-        const userBookings = await Booking.findAll({ where: { userId } });
-
-        if (userBookings.length === 0) {
-            return res.status(200).json({
-                message: "No active booking for this user"
-            })
-        };
-
-        res.status(200).json({
-            message: "all bookings for this user",
-            data: userBookings
-        })
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({
-            message: "Error Fetching Spaces by Host",
-            data: error.message,
-        });
-    }
-}

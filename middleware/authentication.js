@@ -30,7 +30,7 @@ exports.hostAuth = async (req, res, next) => {
   
       if (!user) {
           return res.status(404).json({
-              message: "Authentication Failed: User not found",
+              message: "Authentication Failed: Host not found",
           });
       }
 

@@ -89,6 +89,10 @@ Space.init(
       type:DataTypes.INTEGER,
       defaultValue: 0
     },
+    isApproved: {
+      type:DataTypes.BOOLEAN,
+      defaultValue: false
+    },
     createdAt: {
       allowNull: false,
       type: DataTypes.DATE

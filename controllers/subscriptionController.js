@@ -206,17 +206,19 @@ exports.verifySubscription = async (req, res) => {
 
     if (data?.status && data.data?.status === "success") {
       subscription.status = "active";
-      const currentDate = new Date();
-      const yesterday = new Date(currentDate);
-      yesterday.setDate(currentDate.getDate() - 1);
-      subscription.startDate = yesterday;
+     subscription.startDate = new Date()
+     subscription.endDate = new Date(subscription.startDate.getTime() + 1 * 60 * 60 * 1000); // Add 1 hour
+    //  subscription.endDate = new Date(
+    //    subscription.startDate.getTime() + 30 * 24 * 60 * 60 * 1000
+    //  ); // Add 30 days to startDate
 
-      // Set endDate to be 1 hour from the backdated startDate
-      subscription.endDate = new Date(subscription.startDate.getTime() + 1 * 60 * 60 * 1000); // Add 1 hour
+    //  const currentDate = new Date();
+    //  const yesterday = new Date(currentDate);
+    //  yesterday.setDate(currentDate.getDate() - 1);
+    //  subscription.startDate = yesterday;
+    //   // Set endDate to be 1 hour from the backdated startDate
+    //   subscription.endDate = new Date(subscription.startDate.getTime() + 1 * 60 * 60 * 1000); // Add 1 hour
 
-      // subscription.endDate = new Date(
-      //   subscription.startDate.getTime() + 30 * 24 * 60 * 60 * 1000
-      // ); // Add 30 days to startDate
 
       // send a success email
       const successHtml = successfulSubscription(

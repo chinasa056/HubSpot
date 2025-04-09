@@ -30,10 +30,10 @@ module.exports = {
       },
       meansOfIdentification: {
         type: Sequelize.ENUM,
-        values: ["Nin', 'Passport', 'Driver's License"]
+        values: ["Nin", "Passport", "Driver's License"]
       },
       idCardNumber: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.BIGINT,
         allowNull: false,
       },
       ninImage: {

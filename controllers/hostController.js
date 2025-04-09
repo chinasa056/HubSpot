@@ -8,23 +8,22 @@ const Host = require("../models/host");
 const { resetPasswordMail } = require("../utils/reset-password-mail");
 const Space = require("../models/space");
 const Booking = require("../models/booking");
+const sequelize = require("../database/dbConnect");
 
 exports.registerHost = async (req, res) => {
   try {
-    const { fullName, email, password, confirmPassword, companyName, companyAddress, meansOfIdentification, idCardNumber, ninImage } = req.body;
+    const { fullName, email, password, confirmPassword, companyName, companyAddress, meansOfIdentification, idCardNumber } = req.body;
     const file = req.file;
 
+    const name = fullName?.split(' ');
+    const nameFormat = name.map((e) => { return e.slice(0, 1).toUpperCase() + e.slice(1).toLowerCase() }).join(' ');
+
     const hostExists = await Host.findOne({ where: { email: email.toLowerCase() } });
+
     if (hostExists) {
-      if (file) fs.unlinkSync(file.path);
+      fs.unlinkSync(file.path);
       return res.status(400).json({
         message: `Host with email: ${email} already exists`,
-      });
-    }
-
-    if (!fullName || !email || !password || !confirmPassword) {
-      return res.status(400).json({
-        message: "All fields are required",
       });
     }
 
@@ -37,30 +36,28 @@ exports.registerHost = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    let profileImageUrl = null;
-    if (file) {
-      try {
-        const result = await cloudinary.uploader.upload(file.path);
-        profileImageUrl = result.secure_url;
-      } catch (uploadError) {
-        fs.unlinkSync(file.path);
-        return res.status(500).json({ message: "Error uploading image" });
-      }
-    }
+    // console.log("I GOT HERE", file.path);
+    const result = await cloudinary.uploader.upload(file.path);
     fs.unlinkSync(file.path);
 
 
     const hostData = {
-      fullName,
+      fullName: nameFormat,
       email: email.toLowerCase(),
       password: hashedPassword,
       companyName,
       companyAddress,
-      profileImage: profileImageUrl,
+      // profileImage: profileImageUrl,
       meansOfIdentification,
       idCardNumber,
-      ninImage
+      ninImage: {
+        secureUrl: result.secure_url,
+        publicId: result.public_id
+      }
     };
+
+    // console.log(req.body.meansOfIdentification);
+
 
     const host = await Host.create(hostData);
 
@@ -80,15 +77,16 @@ exports.registerHost = async (req, res) => {
       message: "Account registered successfully. Please check your email for verification.",
       data: host,
     });
+
   } catch (error) {
     console.error(error);
-    if (req.file) {
-      fs.unlinkSync(req.file.path);
-    }
+    // fs.unlinkSync(file.path);
     res.status(500).json({
-      message: `Error registering host: ${error.message}`,
+      message: "Error Registering User",
+      error: error.message
     });
   }
+
 };
 
 exports.verifyHost = async (req, res) => {
@@ -205,9 +203,9 @@ exports.loginHost = async (req, res) => {
       });
     }
 
-    host.isLoggedin = true; 
+    host.isLoggedin = true;
     const token = jwt.sign(
-      { hostId: host.id, isLoggedIn: host.isLoggedIn },
+      { userId: host.id, isLoggedIn: host.isLoggedIn },
       process.env.JWT_SECRET,
       { expiresIn: "2d" }
     );
@@ -428,11 +426,18 @@ exports.updateHostDetails = async (req, res) => {
       });
     }
 
+    let profileImageUrl = []
     if (file) {
       try {
         const result = await cloudinary.uploader.upload(file.path);
-        updates.profileImage = result.secure_url;
+        const profileImageDetails = {
+          secureUrl: result.secure_url,
+          publicId: result.public_id
+        };
+        profileImageUrl.push(profileImageDetails)
+        updates.profileImage = profileImageUrl
         fs.unlinkSync(file.path);
+
       } catch (uploadError) {
         fs.unlinkSync(file.path);
         return res.status(500).json({
@@ -466,19 +471,13 @@ exports.deleteHostAccount = async (req, res) => {
       });
     }
 
-    if (host.profileImage) {
-      try {
-        const publicId = host.profileImage.split("/").pop().split(".")[0];
+    if (host.profileImage && host.profileImage.publicId) {
 
-        await cloudinary.uploader.destroy(publicId);
+      // const publicId = host.profileImage.split("/").pop().split(".")[0];
 
-      } catch (imageDeleteError) {
-        console.error("Error deleting image:", imageDeleteError.message);
-        return res.status(500).json({
-          message: "Error deleting profile image",
-        });
-      }
+      await cloudinary.uploader.destroy(host.profileImage.publicId);
     }
+
 
     await host.destroy();
 
@@ -498,7 +497,7 @@ exports.deleteHostAccount = async (req, res) => {
 // GET THE TOTAL NUMBER OF SPACES AND THEIR COUNT
 exports.getSpacesByHost = async (req, res) => {
   try {
-    const { hostId } = req.params;
+    const { userId: hostId } = req.user;
 
     const spaces = await Space.findAll({
       where: { hostId }
@@ -525,102 +524,46 @@ exports.getSpacesByHost = async (req, res) => {
   }
 };
 
-// (MANAGE LISTING)
-exports.manageListings = async (req, res) => {
+// MANAGE BOOKINGS
+exports.getSpaceBookings = async (req, res) => {
   try {
-    const { userId: hostId } = req.user;
-
-    const host = await Host.findByPk(hostId, {
-      attributes: {
-        include: [
-          [
-            // Count total spaces listed by the host
-            Sequelize.fn("COUNT", Sequelize.col("spaces.id")),
-            "totalSpaces",
-          ],
-        ],
-      },
+    const { spaceId } = req.params;
+    const space = await Space.findByPk(spaceId, {
+      attributes: ['name'],
       include: [
         {
-          model: Space, // Include associated spaces
-          attributes: ["name", "createdAt", "capacity", "status", "bookingCount"],
-          include: [
-            {
-              model: Booking, // Include associated bookings
-              attributes: [], // We don't need individual booking details, just the count
-            },
-          ],
-          attributes: {
-            include: [
-              [
-                // Count total bookings for each space
-                Sequelize.fn("COUNT", Sequelize.col("bookings.id")),
-                "totalBookings",
-              ],
-            ],
-          },
+          model: Booking,
+          attributes: ['userName', 'startDate', 'endDate', 'status'],
         },
       ],
-      group: ["Host.id", "spaces.id"], // Group by host and spaces to calculate counts correctly
     });
 
-    if (!host) {
+    if (!space) {
       return res.status(404).json({
-        message: "Host not found",
+        message: "Space not found",
       });
     }
 
     res.status(200).json({
-      message: "Host details and listings retrieved successfully",
-      data: host,
+      message: "Space and bookings retrieved successfully",
+      data: space,
     });
   } catch (error) {
     console.error(error.message);
     res.status(500).json({
-      message: "Error retrieving host details",
-      data: error.message,
+      message: "Error fetching space bookings",
+      error: error.message
     });
   }
 };
 
-// MANAGE BOOKINGS
-// exports.getSpaceBookings = async (req, res) => {
-//   try {
-//     const { spaceId } = req.params;
-//     const space = await Space.findByPk(spaceId, {
-//       attributes: ['name'],
-//       include: [
-//         {
-//           model: Booking,
-//           attributes: ['userName', 'startDate', 'endDate', 'status'],
-//         },
-//       ],
-//     });
-
-//     if (!space) {
-//       return res.status(404).json({
-//         message: "Space not found",
-//       });
-//     }
-
-//     res.status(200).json({
-//       message: "Space and bookings retrieved successfully",
-//       data: space,
-//     });
-//   } catch (error) {
-//     console.error(error.message);
-//     res.status(500).json({
-//       message: "Error fetching space bookings",
-//     });
-//   }
-// };
-
-exports.getSpaceBokings = async (req, res) => {
+// MANAGE LISTING
+exports.manageListing = async (req, res) => {
   try {
     const { userId: hostId } = req.user;
 
     const host = await Host.findByPk(hostId);
-    if(!host) {
+    if (!host) {
       return res.status(404).json({
         message: "Host not found"
       })
@@ -628,10 +571,10 @@ exports.getSpaceBokings = async (req, res) => {
 
     const spaces = await Space.findAll({
       where: { hostId },
-      attributes: ["name", "bookingCount", "createdAt", "capacity", "status"]
+      attributes: ["name", "bookingCount", "createdAt", "capacity", "listingStatus"]
     });
 
-    if(spaces.length === 0) {
+    if (spaces.length === 0) {
       return res.status(400).json({
         message: "No spaces listed for this host"
       })
@@ -642,7 +585,7 @@ exports.getSpaceBokings = async (req, res) => {
       data: spaces
     })
 
-  
+
 
   } catch (error) {
     console.error(error.message);
@@ -656,7 +599,7 @@ exports.getSpaceBokings = async (req, res) => {
 // HOST DASHbOARD (DASHBOARD)
 exports.getBookingCategories = async (req, res) => {
   try {
-    const { hostId } = req.params;
+    const { userId: hostId } = req.user;
     const currentDate = new Date();
 
     const spaces = await Space.findAll({

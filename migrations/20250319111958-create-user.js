@@ -20,8 +20,11 @@ module.exports = {
       email: {
         type: Sequelize.STRING,
         allowNull: false
-
       },
+      // profileImage: {
+      //   type: Sequelize.JSON,
+      //   allowNull: true
+      // },
       isVerified: {
         type: Sequelize.BOOLEAN,
         defaultValue: false

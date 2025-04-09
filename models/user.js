@@ -25,6 +25,10 @@ User.init(
       allowNull: false
 
     },
+    // profileImage: {
+    //   type: DataTypes.JSON,
+    //   allowNull: true
+    // },
     isVerified: {
       type: DataTypes.BOOLEAN,
       defaultValue: false

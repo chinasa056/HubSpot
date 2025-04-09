@@ -24,10 +24,8 @@ app.use('/api/v1', planRoute);
 app.use('/api/v1', spaceRoute);
 app.use('/api/v1', subscriptionRoute);
 app.use('/api/v1/favorites', favoriteRoute);
-
-
-
 app.use('/api/v1', hostRoute);
+
 app.use(cors());
 
 const server = async () => {
