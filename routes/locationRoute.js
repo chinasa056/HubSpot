@@ -1,22 +1,15 @@
 const { addLocation, getAllLocation, getOneLocation, deleteLocation } = require("../controllers/locationController");
-const { authenticate, isAdmin, hostAuth } = require("../middleware/authentication");
+const { authenticate, isAdmin } = require("../middleware/authentication");
 
 const router = require("express").Router();
-
-/**
- * @swagger
- * tags:
- *   name: Locations
- *   description: Endpoints related to managing locations
- */
 
 /**
  * @swagger
  * /api/v1/location/create:
  *   post:
  *     summary: Add a new location
- *     description: Allows an authenticated admin to create a new location. Prevents duplication by checking if the location already exists.
- *     tags: [Locations]
+ *     description: Allows an admin to add a new location. Checks if the location already exists before adding.
+ *     tags: [Admin]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -28,11 +21,11 @@ const router = require("express").Router();
  *             properties:
  *               name:
  *                 type: string
- *                 description: Name of the location
- *                 example: Conference Room A
+ *                 description: The name of the location to be added.
+ *                 example: "New York"
  *     responses:
  *       201:
- *         description: New Location Created
+ *         description: New location created successfully
  *         content:
  *           application/json:
  *             schema:
@@ -40,10 +33,16 @@ const router = require("express").Router();
  *               properties:
  *                 message:
  *                   type: string
- *                   example: New Location Created
+ *                   example: "New Location Created"
  *                 data:
  *                   type: object
- *                   description: Created location details
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                       example: 1
+ *                     name:
+ *                       type: string
+ *                       example: "New York"
  *       200:
  *         description: Location already exists
  *         content:
@@ -53,9 +52,9 @@ const router = require("express").Router();
  *               properties:
  *                 message:
  *                   type: string
- *                   example: You have added this location already
+ *                   example: "You have added this location already"
  *       500:
- *         description: Server error while adding location
+ *         description: Internal server error while adding location
  *         content:
  *           application/json:
  *             schema:
@@ -63,24 +62,23 @@ const router = require("express").Router();
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Error Adding Location
+ *                   example: "Error Adding Location"
  *                 data:
  *                   type: string
- *                   example: Sequelize validation or DB error message
+ *                   example: "Error message details"
  */
-
-router.post("/location/create",hostAuth,addLocation);
+router.post("/location/create", authenticate, isAdmin, addLocation);
 
 /**
  * @swagger
  * /api/v1/location/get:
  *   get:
  *     summary: Get all locations
- *     description: Retrieves a list of all available locations.
- *     tags: [Locations]
+ *     description: Retrieves all available locations. This route is accessible to users, admins, and hosts.
+ *     tags: [Users, Host]
  *     responses:
  *       200:
- *         description: All Location Available
+ *         description: Successfully retrieved all locations
  *         content:
  *           application/json:
  *             schema:
@@ -88,14 +86,20 @@ router.post("/location/create",hostAuth,addLocation);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: All Location Available
+ *                   example: "All Location Available"
  *                 data:
  *                   type: array
  *                   items:
  *                     type: object
- *                     description: Location data
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                         example: 1
+ *                       name:
+ *                         type: string
+ *                         example: "New York"
  *       500:
- *         description: Server error while fetching locations
+ *         description: Internal server error while retrieving locations
  *         content:
  *           application/json:
  *             schema:
@@ -103,87 +107,35 @@ router.post("/location/create",hostAuth,addLocation);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Error getting all Location
+ *                   example: "Error getting all Location"
  *                 data:
  *                   type: string
- *                   example: Sequelize error or database failure
+ *                   example: "Error message details"
  */
 
 router.get("/location/get", getAllLocation);
 
-/**
- * @swagger
- * /api/v1/location/getOne/{locationId}:
- *   get:
- *     summary: Get a single location by ID
- *     description: Retrieves a specific location by its ID, including all associated spaces.
- *     tags: [Locations]
- *     parameters:
- *       - in: path
- *         name: locationId
- *         required: true
- *         schema:
- *           type: string
- *         description: ID of the location to retrieve
- *     responses:
- *       200:
- *         description: Location Found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Locatio Found
- *                 data:
- *                   type: object
- *                   description: Location data with associated spaces
- *       404:
- *         description: Location not found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Locatio Not Found
- *       500:
- *         description: Server error while fetching the location
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Error getting Location
- *                 data:
- *                   type: string
- *                   example: Sequelize or database error
- */
-
-
 router.get("/location/getOne/:locationId", getOneLocation);
-
 /**
  * @swagger
  * /api/v1/location/delete/{locationId}:
  *   delete:
- *     summary: Delete a location by ID
- *     description: Deletes a specific location by its ID. Only works if the location exists.
- *     tags: [Locations]
+ *     summary: Delete a location
+ *     description: Deletes a location from the system. This route is authorized for admin and host users only.
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
- *       - in: path
- *         name: locationId
+ *       - name: locationId
+ *         in: path
  *         required: true
+ *         description: The ID of the location to delete.
  *         schema:
- *           type: string
- *         description: ID of the location to delete
+ *           type: integer
+ *           example: 1
  *     responses:
  *       200:
- *         description: Location Deleted Successfully
+ *         description: Location deleted successfully
  *         content:
  *           application/json:
  *             schema:
@@ -191,7 +143,7 @@ router.get("/location/getOne/:locationId", getOneLocation);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Location Deleted Successfully
+ *                   example: "Location Deleted Successfully"
  *       404:
  *         description: Location not found
  *         content:
@@ -201,7 +153,7 @@ router.get("/location/getOne/:locationId", getOneLocation);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Location Not Found
+ *                   example: "Location Not Found"
  *       500:
  *         description: Server error while deleting location
  *         content:
@@ -211,13 +163,11 @@ router.get("/location/getOne/:locationId", getOneLocation);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Error getting Location
+ *                   example: "Error deleting Location"
  *                 data:
  *                   type: string
- *                   example: Sequelize or database error
+ *                   example: "Error message details"
  */
-
-
-router.delete("/location/delete/:locationId",hostAuth, deleteLocation)
+router.delete("/location/delete/:locationId",authenticate, isAdmin, deleteLocation)
 
 module.exports = router
