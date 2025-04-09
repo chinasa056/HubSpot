@@ -1,5 +1,5 @@
 const { addLocation, getAllLocation, getOneLocation, deleteLocation } = require("../controllers/locationController");
-const { authenticate, isAdmin } = require("../middleware/authentication");
+const { authenticate, isAdmin, hostAuth } = require("../middleware/authentication");
 
 const router = require("express").Router();
 
@@ -69,7 +69,7 @@ const router = require("express").Router();
  *                   example: Sequelize validation or DB error message
  */
 
-router.post("/location/create",authenticate, isAdmin, addLocation);
+router.post("/location/create",hostAuth,addLocation);
 
 /**
  * @swagger
@@ -218,6 +218,6 @@ router.get("/location/getOne/:locationId", getOneLocation);
  */
 
 
-router.delete("/location/delete/:locationId", deleteLocation)
+router.delete("/location/delete/:locationId",hostAuth, deleteLocation)
 
 module.exports = router

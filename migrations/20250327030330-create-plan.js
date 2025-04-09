@@ -2,7 +2,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Plan', {
+    await queryInterface.createTable('Plans', {
        id: {
             allowNull: false,
             primaryKey: true,
@@ -35,6 +35,8 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Plan');
+    await queryInterface.dropTable('Plans');
   }
 };
+
+// npx sequelize-cli db:migrate:undo --name 20250327030330-create-plan.js
