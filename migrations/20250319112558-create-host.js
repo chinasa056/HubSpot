@@ -37,11 +37,11 @@ module.exports = {
         allowNull: false,
       },
       ninImage: {
-        type: Sequelize.JSON,
+        type: Sequelize.TEXT,
         allowNull: false,
       },
       profileImage: {
-        type: Sequelize.JSON,
+        type: Sequelize.TEXT,
         allowNull: true,
       },
       bankName: {

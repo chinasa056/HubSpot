@@ -21,10 +21,10 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
-      // profileImage: {
-      //   type: Sequelize.JSON,
-      //   allowNull: true
-      // },
+      profileImage: {
+        type: Sequelize.TEXT,
+        allowNull: true
+      },
       isVerified: {
         type: Sequelize.BOOLEAN,
         defaultValue: false
