@@ -65,8 +65,8 @@ const options = {
         name: 'BASE_URL:https://hubspot-k95r.onrender.com',
       },
       contact: {
-        name: "Chinasa Acha",
-         url: 'https://hubspot-k95r.onrender.com/documentation'
+        name: "HubSpot",
+         url: 'https://hubspot-k95r.onrender.com/appdocumentation'
       }
     },
     components: {
