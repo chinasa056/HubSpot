@@ -5,7 +5,7 @@ const { registerValidator, loginValidator, changePasswordValidator } = require('
 const router = require('express').Router(); 
 /**
  * @swagger
- * /users/register:
+ * /api/v1/users/register:
  *   post:
  *     summary: Register a new user
  *     description: This endpoint registers a new user by accepting their full name, email, password, and confirmation password in JSON format. It checks for existing users, hashes the password, creates the user, and sends a verification email.
@@ -48,8 +48,7 @@ const router = require('express').Router();
  *                 message:
  *                   type: string
  *                   example: "Account registered successfully. Please check your email for verification."
- *                 data:
- *                   $ref: '#/components/schemas/User'
+ *                 
  *       400:
  *         description: Email already exists or passwords do not match.
  *         content:
