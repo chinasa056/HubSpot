@@ -9,7 +9,7 @@ const router = require('express').Router();
  *   post:
  *     summary: Register a new user
  *     description: This endpoint registers a new user by accepting their full name, email, password, and confirmation password in JSON format. It checks for existing users, hashes the password, creates the user, and sends a verification email.
- *     tags: [Users]
+ *     tags: [Users, Admin]
  *     requestBody:
  *       required: true
  *       content:
