@@ -36,22 +36,10 @@ exports.registerUser = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        let profileImageUrl = null;
-        if (file) {
-            const result = await cloudinary.uploader.upload(file.path);
-            const picture = {
-                secureUrl: result.secure_url,
-                publicId: result.public_id,
-            };
-            profileImageUrl = picture;
-            fs.unlinkSync(file.path);
-        }
-
         const userData = {
             fullName: nameFormat,
             email: email.toLowerCase(),
             password: hashedPassword,
-            profileImage: profileImageUrl,
         };
 
         const user = await User.create(userData);
