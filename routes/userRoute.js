@@ -5,41 +5,41 @@ const { registerValidator, loginValidator, changePasswordValidator } = require('
 const router = require('express').Router(); 
 /**
  * @swagger
- * /api/v1/users/register:
+ * /users/register:
  *   post:
- *     summary: Register a new user and admin
- *     description: Allows a user to create an account by providing personal details and an optional profile image.
+ *     summary: Register a new user
+ *     description: This endpoint registers a new user by accepting their full name, email, password, and confirmation password in JSON format. It checks for existing users, hashes the password, creates the user, and sends a verification email.
  *     tags: [Users, Admin]
  *     requestBody:
  *       required: true
  *       content:
- *         multipart/form-data:
+ *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - fullName
+ *               - email
+ *               - password
+ *               - confirmPassword
  *             properties:
  *               fullName:
  *                 type: string
- *                 description: Full name of the user
- *                 example: Jane Doe
+ *                 example: "Jane Doe"
  *               email:
  *                 type: string
- *                 description: Email address of the user
- *                 example: jane.doe@gmail.com
+ *                 format: email
+ *                 example: "jane.doe@example.com"
  *               password:
  *                 type: string
- *                 description: Password for the user
- *                 example: Password123!
+ *                 format: password
+ *                 example: "securePassword123"
  *               confirmPassword:
  *                 type: string
- *                 description: Confirm the user's password
- *                 example: Password123!
- *               profileImage:
- *                 type: string
- *                 format: binary
- *                 description: Optional profile image upload
+ *                 format: password
+ *                 example: "securePassword123"
  *     responses:
  *       201:
- *         description: Account registered successfully
+ *         description: User registered successfully and verification email sent.
  *         content:
  *           application/json:
  *             schema:
@@ -47,12 +47,11 @@ const router = require('express').Router();
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Account registered successfully. Please check your email for verification.
+ *                   example: "Account registered successfully. Please check your email for verification."
  *                 data:
- *                   type: object
- *                   description: User object
+ *                   $ref: '#/components/schemas/User'
  *       400:
- *         description: Bad request, validation error (e.g. passwords don't match or user already exists)
+ *         description: Email already exists or passwords do not match.
  *         content:
  *           application/json:
  *             schema:
@@ -60,9 +59,9 @@ const router = require('express').Router();
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Passwords do not match
+ *                   example: "Passwords do not match"
  *       500:
- *         description: Server error during registration
+ *         description: Internal server error during registration.
  *         content:
  *           application/json:
  *             schema:
@@ -70,7 +69,11 @@ const router = require('express').Router();
  *               properties:
  *                 message:
  *                   type: string
-*/
+ *                   example: "Error registering user"
+ *                 data:
+ *                   type: string
+ *                   example: "Error message details"
+ */
 router.post('/users/register',registerValidator, registerUser);
 
 /**
