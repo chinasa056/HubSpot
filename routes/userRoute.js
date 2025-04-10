@@ -48,8 +48,7 @@ const router = require('express').Router();
  *                 message:
  *                   type: string
  *                   example: "Account registered successfully. Please check your email for verification."
- *                 data:
- *                   $ref: '#/components/schemas/User'
+ *                 
  *       400:
  *         description: Email already exists or passwords do not match.
  *         content:
