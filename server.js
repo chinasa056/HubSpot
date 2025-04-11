@@ -5,9 +5,6 @@ const express = require("express");
 const cors = require("cors");
 
 const userRouter = require('./routes/userRoute');
-const categoryRoute = require('./routes/categoryRoute');
-const locationRoute = require('./routes/locationRoute');
-const planRoute = require("./routes/planRoute")
 const spaceRoute = require("./routes/spaceRoute")
 const subscriptionRoute = require("./routes/subscriptionRoute");
 const favoriteRoute = require("./routes/favorite");
@@ -18,15 +15,12 @@ const PORT = process.env.PORT || 7039;
 const app = express();
 app.use(express.json());
 app.use('/api/v1', userRouter);
-app.use('/api/v1', locationRoute);
-app.use('/api/v1', categoryRoute);
-app.use('/api/v1', planRoute);
 app.use('/api/v1', spaceRoute);
 app.use('/api/v1', subscriptionRoute);
 app.use('/api/v1/favorites', favoriteRoute);
 app.use('/api/v1', hostRoute);
 
-app.use(cors());
+app.use(cors({origin: "*"}));
 
 const server = async () => {
   try {
