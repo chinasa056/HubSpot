@@ -3,7 +3,11 @@ const sequelize = require("./database/dbConnect");
 require("./models/association");
 const express = require("express");
 const cors = require("cors");
+const morgan = require("morgan")
+const passport = require("passport")
 
+require("./middleware/passport")
+const session = require("express-session")
 const userRouter = require('./routes/userRoute');
 const spaceRoute = require("./routes/spaceRoute")
 const subscriptionRoute = require("./routes/subscriptionRoute");
@@ -14,8 +18,19 @@ const PORT = process.env.PORT || 7039;
 
 const app = express();
 
-app.use(cors());
+
 app.use(express.json());
+app.use(cors());
+app.use(morgan('dev'))
+
+app.use(session({
+  saveUninitialized:false,
+  secret: "HubSpot",
+  resave: false
+}))
+app.use(passport.initialize())
+app.use(passport.session())
+
 app.use('/api/v1', userRouter);
 app.use('/api/v1', spaceRoute);
 app.use('/api/v1', subscriptionRoute);
