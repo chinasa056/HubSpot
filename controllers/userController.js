@@ -37,8 +37,8 @@ exports.registerUser = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, salt);
 
         const userData = {
-            fullName: nameFormat,
-            email: email.toLowerCase(),
+            fullName: nameFormat.trim(),
+            email: email.toLowerCase().trim(),
             password: hashedPassword,
         };
 
@@ -176,17 +176,17 @@ exports.login = async (req, res) => {
             });
         }
 
-        const user = await User.findOne({ where: { email: email.toLowerCase() } });
+        const user = await User.findOne({ where: { email: email.toLowerCase().trim() } });
         if (!user) {
             return res.status(404).json({
-                message: "User not found",
+                message: "User not found: Invalid Credentials",
             });
         }
 
         const isCorrectPassword = await bcrypt.compare(password, user.password);
         if (!isCorrectPassword) {
             return res.status(400).json({
-                message: "Incorrect password",
+                message: "User not found: Invalid Credentials",
             });
         }
 
@@ -208,13 +208,14 @@ exports.login = async (req, res) => {
 
         res.status(200).json({
             message: "Account successfully logged in",
-            data: user,
+            data: user.fullName,
             token,
         });
     } catch (error) {
-        console.error(error.message);
+        console.error(error);
         res.status(500).json({
-            message: "Internal server error",
+            message: "Error Logging in User",
+            error: error.message
         });
     }
 };
@@ -230,7 +231,7 @@ exports.forgottenPassword = async (req, res) => {
         }
 
         // Find the user by email
-        const user = await User.findOne({ where: { email: email.toLowerCase() } });
+        const user = await User.findOne({ where: { email: email.toLowerCase().trim() } });
 
         if (!user) {
             return res.status(404).json({
