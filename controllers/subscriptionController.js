@@ -11,7 +11,7 @@ const korapaySecret = process.env.KORAPAY_SECRET_KEY;
 const currentDate = new Date()
 
 
-exports.initializeSubscription = async (req, res) => {
+exports.initializeStandardSubscription = async (req, res) => {
   try {
     const { userId } = req.user;
 
@@ -58,7 +58,7 @@ exports.initializeSubscription = async (req, res) => {
   }
 };
 
-exports.verifySubscription = async (req, res) => {
+exports.verifyStandardSubscription = async (req, res) => {
   try {
     const { reference } = req.query;
 
