@@ -41,7 +41,7 @@ Host.init(
    
     meansOfIdentification: {
       type: DataTypes.ENUM,
-      values: ["Nin", "Passport", "Driver's License"],
+      values: ["NIN", "Passport", "Driver's License"],
     },
 
     idCardNumber: {
@@ -77,6 +77,16 @@ Host.init(
     currentBalance: {
       type: DataTypes.INTEGER,
       defaultValue: 0,
+      allowNull: true,
+    },
+    subscriptionExpired: {
+      type: DataTypes.DATE,
+      defaultValue: null,
+      allowNull: true,
+    },
+    subscription: {
+      type: DataTypes.STRING,
+      defaultValue: null,
       allowNull: true,
     },
 

@@ -36,18 +36,16 @@ exports.registerHost = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // console.log("I GOT HERE", file.path);
     const result = await cloudinary.uploader.upload(file.path);
     fs.unlinkSync(file.path);
 
 
     const hostData = {
-      fullName: nameFormat,
-      email: email.toLowerCase(),
+      fullName: nameFormat.trim(),
+      email: email.toLowerCase().trim(),
       password: hashedPassword,
       companyName,
       companyAddress,
-      // profileImage: profileImageUrl,
       meansOfIdentification,
       idCardNumber,
       ninImage: {
@@ -55,9 +53,6 @@ exports.registerHost = async (req, res) => {
         publicId: result.public_id
       }
     };
-
-    // console.log(req.body.meansOfIdentification);
-
 
     const host = await Host.create(hostData);
 
@@ -80,7 +75,6 @@ exports.registerHost = async (req, res) => {
 
   } catch (error) {
     console.error(error);
-    // fs.unlinkSync(file.path);
     res.status(500).json({
       message: "Error Registering User",
       error: error.message
@@ -184,7 +178,7 @@ exports.loginHost = async (req, res) => {
     const host = await Host.findOne({ where: { email: email.toLowerCase() } });
     if (!host) {
       return res.status(404).json({
-        message: "Host not found",
+        message: "login failed: incorrect credentials",
       });
     }
 
@@ -192,7 +186,7 @@ exports.loginHost = async (req, res) => {
     const isCorrectPassword = await bcrypt.compare(password, host.password);
     if (!isCorrectPassword) {
       return res.status(400).json({
-        message: "Incorrect password",
+        message: "Incorrect credentials",
       });
     }
 
@@ -214,7 +208,7 @@ exports.loginHost = async (req, res) => {
 
     res.status(200).json({
       message: "Account successfully logged in",
-      data: host,
+      data: host.fullName,
       token,
     });
   } catch (error) {

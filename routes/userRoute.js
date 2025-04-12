@@ -3,6 +3,7 @@ const { authenticate } = require('../middleware/authentication');
 const { registerValidator, loginValidator, changePasswordValidator } = require('../middleware/validator');
 
 const router = require('express').Router(); 
+
 /**
  * @swagger
  * /api/v1/users/register:
@@ -138,8 +139,8 @@ router.get("/users/verify/:token", verifyUser);
  * @swagger
  * /api/v1/users/login:
  *   post:
- *     summary: Login a user
- *     description: Authenticates a user using email and password. The account must be verified before login is allowed.
+ *     summary: Log in a user
+ *     description: Authenticates a user using email and password. Returns a token on successful login.
  *     tags: [Users, Admin]
  *     requestBody:
  *       required: true
@@ -147,18 +148,21 @@ router.get("/users/verify/:token", verifyUser);
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - email
+ *               - password
  *             properties:
  *               email:
  *                 type: string
- *                 description: Registered user's email
- *                 example: jane.doe@gmail.com
+ *                 format: email
+ *                 example: user@example.com
  *               password:
  *                 type: string
- *                 description: Password for the user
- *                 example: Password123!
+ *                 format: password
+ *                 example: password123
  *     responses:
  *       200:
- *         description: Login successful
+ *         description: Successful login
  *         content:
  *           application/json:
  *             schema:
@@ -166,15 +170,16 @@ router.get("/users/verify/:token", verifyUser);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Account successfully logged in
+ *                   example: "Account successfully logged in"
  *                 data:
- *                   type: object
- *                   description: Logged in user details
+ *                   type: string
+ *                   description: Full name of the logged in user
+ *                   example: "Jane Doe"
  *                 token:
  *                   type: string
- *                   description: JWT token for session authentication
+ *                   description: JWT token
  *       400:
- *         description: Missing credentials, incorrect password, or unverified account
+ *         description: Bad request or unverified account
  *         content:
  *           application/json:
  *             schema:
@@ -182,9 +187,9 @@ router.get("/users/verify/:token", verifyUser);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Account is not verified. Please check your email for the verification link.
+ *                   example: "Account is not verified. Please check your email for the verification link."
  *       404:
- *         description: User not found
+ *         description: Invalid credentials
  *         content:
  *           application/json:
  *             schema:
@@ -192,9 +197,9 @@ router.get("/users/verify/:token", verifyUser);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: User not found
+ *                   example: "Login Failed: Invalid Credentials"
  *       500:
- *         description: Server error
+ *         description: Internal server error
  *         content:
  *           application/json:
  *             schema:
@@ -202,7 +207,10 @@ router.get("/users/verify/:token", verifyUser);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Internal server error
+ *                   example: "Error Logging in User"
+ *                 error:
+ *                   type: string
+ *                   example: "Error details"
  */
 
 router.post("/users/login",loginValidator, login);
@@ -213,7 +221,7 @@ router.post("/users/login",loginValidator, login);
  *   post:
  *     summary: Send a password reset link
  *     description: Sends a password reset email to the user with a tokenized link. The user must exist in the database.
- *     tags: [Users, Admin]
+ *     tags: [Users]
  *     requestBody:
  *       required: true
  *       content:
@@ -277,7 +285,7 @@ router.post("/users/forgot-password", forgottenPassword);
  *   post:
  *     summary: Reset user password
  *     description: Resets a user's password using the token sent to their email. Password and confirmation must match.
- *     tags: [Users, Admin]
+ *     tags: [Users]
  *     parameters:
  *       - in: path
  *         name: token
@@ -343,6 +351,7 @@ router.post("/users/forgot-password", forgottenPassword);
  *                   example: Error resetting password
  */
 router.post("/users/reset-password/:token", resetPassword);
+
 /**
  * @swagger
  * /api/v1/users/change-password/{userId}:

@@ -30,7 +30,7 @@ module.exports = {
       },
       meansOfIdentification: {
         type: Sequelize.ENUM,
-        values: ["Nin", "Passport", "Driver's License"]
+        values: ["NIN", "Passport", "Driver's License"]
       },
       idCardNumber: {
         type: Sequelize.BIGINT,
@@ -59,6 +59,16 @@ module.exports = {
       currentBalance: {
         type: Sequelize.INTEGER,
         defaultValue: 0,
+        allowNull: true,
+      },
+      subscriptionExpired: {
+        type: Sequelize.DATE,
+        defaultValue: null,
+        allowNull: true,
+      },
+      subscription: {
+        type: Sequelize.STRING,
+        defaultValue: null,
         allowNull: true,
       },
       isVerified: {

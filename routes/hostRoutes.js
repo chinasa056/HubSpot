@@ -156,13 +156,12 @@ router.post('/host/register', upload.single("ninImage"), registerHostValidator, 
  */
 router.get("/host/verify/:token", verifyHost);
 
-
 /**
  * @swagger
  * /api/v1/host/login:
  *   post:
  *     summary: Host login
- *     description: This endpoint allows a host to log in by providing their email and password. If the account is not verified, an appropriate message is returned.
+ *     description: Authenticates a host using their email and password. Returns a token and the host's name upon successful login.
  *     tags: [Host]
  *     requestBody:
  *       required: true
@@ -170,13 +169,18 @@ router.get("/host/verify/:token", verifyHost);
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - email
+ *               - password
  *             properties:
  *               email:
  *                 type: string
+ *                 format: email
  *                 example: "host@example.com"
  *               password:
  *                 type: string
- *                 example: "password123"
+ *                 format: password
+ *                 example: "hostPassword123"
  *     responses:
  *       200:
  *         description: Account successfully logged in.
@@ -189,25 +193,15 @@ router.get("/host/verify/:token", verifyHost);
  *                   type: string
  *                   example: "Account successfully logged in"
  *                 data:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: integer
- *                       example: 1
- *                     fullName:
- *                       type: string
- *                       example: "John Doe"
- *                     email:
- *                       type: string
- *                       example: "host@example.com"
- *                     isLoggedin:
- *                       type: boolean
- *                       example: true
+ *                   type: string
+ *                   description: Host's full name
+ *                   example: "Jane Doe"
  *                 token:
  *                   type: string
- *                   example: "jwt.token.here"
+ *                   description: JWT token for authenticated host.
+ *                   example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
  *       400:
- *         description: Missing email or password, incorrect password, or unverified account.
+ *         description: Missing input fields, incorrect credentials, or account not verified.
  *         content:
  *           application/json:
  *             schema:
@@ -215,7 +209,7 @@ router.get("/host/verify/:token", verifyHost);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Incorrect password"
+ *                   example: "Incorrect credentials"
  *       404:
  *         description: Host not found.
  *         content:
@@ -225,7 +219,7 @@ router.get("/host/verify/:token", verifyHost);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Host not found"
+ *                   example: "login failed: incorrect credentials"
  *       500:
  *         description: Internal server error.
  *         content:
@@ -237,8 +231,8 @@ router.get("/host/verify/:token", verifyHost);
  *                   type: string
  *                   example: "Internal server error"
  */
-router.post("/host/login", loginValidator, loginHost);
 
+router.post("/host/login", loginValidator, loginHost);
 
 /**
  * @swagger
@@ -304,19 +298,18 @@ router.post("/host/login", loginValidator, loginHost);
  */
 router.post("/host/forgot-password", forgottenPasswordHost);
 
-
 /**
  * @swagger
  * /api/v1/host/reset-password/{token}:
  *   post:
- *     summary: Reset host password using a valid token
- *     description: This endpoint allows a host to reset their password by providing a valid reset token and new password. The reset token is sent via email in response to a forgotten password request.
+ *     summary: Reset host password
+ *     description: Resets the password of a host using a valid JWT token provided in the URL. The host must provide matching `newPassword` and `confirmPassword` fields in the request body.
  *     tags: [Host]
  *     parameters:
  *       - in: path
  *         name: token
  *         required: true
- *         description: The token sent to the host's email for password reset.
+ *         description: JWT token received from password reset email.
  *         schema:
  *           type: string
  *           example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
@@ -326,16 +319,21 @@ router.post("/host/forgot-password", forgottenPasswordHost);
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - newPassword
+ *               - confirmPassword
  *             properties:
  *               newPassword:
  *                 type: string
- *                 example: "newPassword123"
+ *                 format: password
+ *                 example: "newSecurePass123"
  *               confirmPassword:
  *                 type: string
- *                 example: "newPassword123"
+ *                 format: password
+ *                 example: "newSecurePass123"
  *     responses:
  *       200:
- *         description: Password reset successfully. Host can log in with the new password.
+ *         description: Password reset successfully.
  *         content:
  *           application/json:
  *             schema:
@@ -345,7 +343,7 @@ router.post("/host/forgot-password", forgottenPasswordHost);
  *                   type: string
  *                   example: "Password reset successfully. You can now log in with your new password."
  *       400:
- *         description: Invalid or expired token, or passwords do not match.
+ *         description: Bad request due to missing data, mismatched passwords, or expired/invalid token.
  *         content:
  *           application/json:
  *             schema:
@@ -353,9 +351,9 @@ router.post("/host/forgot-password", forgottenPasswordHost);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Token is required" / "Passwords do not match" / "Session expired. Please request a new password reset link."
+ *                   example: "Passwords do not match"
  *       404:
- *         description: Account not found with the provided token.
+ *         description: Host account not found.
  *         content:
  *           application/json:
  *             schema:
@@ -365,7 +363,7 @@ router.post("/host/forgot-password", forgottenPasswordHost);
  *                   type: string
  *                   example: "Account not found"
  *       500:
- *         description: Error occurred while processing the password reset.
+ *         description: Internal server error while resetting password.
  *         content:
  *           application/json:
  *             schema:
@@ -378,39 +376,49 @@ router.post("/host/forgot-password", forgottenPasswordHost);
  *                   type: string
  *                   example: "Error message details"
  */
-router.post("/host/reset-password/:token", resetPasswordValidator, resetPasswordHost);
+
+router.patch("/host/reset-password", resetPasswordHost)
 
 /**
  * @swagger
  * /api/v1/host/change-password/{userId}:
  *   patch:
- *     summary: Change host password
- *     description: This endpoint allows a host to change their password by providing the current password, new password, and confirming the new password. The host must be authenticated and logged in.
+ *     summary: Change host's password
+ *     description: This endpoint allows an authenticated host to change their password by providing the current password, new password, and confirmation of the new password.
  *     tags: [Host]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: userId
  *         required: true
- *         description: The unique identifier of the host whose password is to be changed.
+ *         description: The ID of the host whose password is being changed.
  *         schema:
- *           type: string
- *           example: "1"
+ *           type: integer
+ *           example: 1
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - password
+ *               - newPassword
+ *               - confirmPassword
  *             properties:
  *               password:
  *                 type: string
- *                 example: "oldPassword123"
+ *                 description: The current password of the host.
+ *                 example: "currentPassword123"
  *               newPassword:
  *                 type: string
- *                 example: "newPassword123"
+ *                 description: The new password the host wants to set.
+ *                 example: "newSecurePassword456"
  *               confirmPassword:
  *                 type: string
- *                 example: "newPassword123"
+ *                 description: Confirmation of the new password.
+ *                 example: "newSecurePassword456"
  *     responses:
  *       200:
  *         description: Password changed successfully.
@@ -423,7 +431,7 @@ router.post("/host/reset-password/:token", resetPasswordValidator, resetPassword
  *                   type: string
  *                   example: "Password changed successfully"
  *       400:
- *         description: Validation errors, incorrect current password, or new passwords do not match.
+ *         description: Invalid input or password mismatch.
  *         content:
  *           application/json:
  *             schema:
@@ -431,7 +439,7 @@ router.post("/host/reset-password/:token", resetPasswordValidator, resetPassword
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Current password is incorrect" / "New passwords do not match"
+ *                   example: "New passwords do not match"
  *       401:
  *         description: Host is not logged in.
  *         content:
@@ -443,7 +451,7 @@ router.post("/host/reset-password/:token", resetPasswordValidator, resetPassword
  *                   type: string
  *                   example: "Authentication Failed: Host is not logged in"
  *       404:
- *         description: Host account not found.
+ *         description: Host not found.
  *         content:
  *           application/json:
  *             schema:
@@ -453,7 +461,7 @@ router.post("/host/reset-password/:token", resetPasswordValidator, resetPassword
  *                   type: string
  *                   example: "Host not found"
  *       500:
- *         description: Server error while processing the password change.
+ *         description: Internal server error during password change.
  *         content:
  *           application/json:
  *             schema:
@@ -463,6 +471,7 @@ router.post("/host/reset-password/:token", resetPasswordValidator, resetPassword
  *                   type: string
  *                   example: "Error changing password"
  */
+
 router.patch("/host/change-password/:userId", authenticate, changePasswordValidator, changePasswordHost);
 
 
@@ -903,7 +912,7 @@ router.get("/host/spacebookings/:spaceId", hostAuth, getSpaceBookings);
 
 /**
  * @swagger
- * /host/bookingcategories/{hostId}:
+ * /api/v1/host/bookingcategories/{hostId}:
  *   get:
  *     summary: Retrieve categorized bookings for a specific host
  *     description: This endpoint allows the authenticated host to retrieve categorized bookings (upcoming, active, completed) associated with their spaces. The host must be authenticated to access this endpoint. If no bookings are found, the response will show counts of each category (upcoming, active, completed).

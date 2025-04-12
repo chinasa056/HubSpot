@@ -12,7 +12,7 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
-      description: {
+      overview: {
         type: Sequelize.STRING,
         allowNull: false
       },
@@ -30,28 +30,29 @@ module.exports = {
         allowNull: false
       },
       amenities: {
-        type: Sequelize.JSON,
+        type: Sequelize.TEXT,
         allowNull: false
       },
       availability: {
-        type: Sequelize.JSON,
+        type: Sequelize.TEXT,
         allowNull: false
       },
-      locationId: {
-        type: Sequelize.UUID,
+      location: {
+        type: Sequelize.TEXT,
         allowNull: false
       },
-      categoryId: {
-        type: Sequelize.UUID,
-        allowNull: false
-      },
+     spaceType: {
+         type: Sequelize.ENUM,
+         values: ['cowork space', 'creative spaces'],
+         allowNull: false
+       },
       hostId: {
         type: Sequelize.UUID,
         allowNull: false
       },
-      spaceImages: {
-        type: Sequelize.JSON,
-        allowNull: false,
+      images: {
+        type: Sequelize.TEXT,
+        allowNull: true,
       },
       listingStatus: {
         type: Sequelize.ENUM,
