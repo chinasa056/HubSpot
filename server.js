@@ -13,6 +13,8 @@ const hostRoute = require('./routes/hostRoutes')
 const PORT = process.env.PORT || 7039;
 
 const app = express();
+
+app.use(cors());
 app.use(express.json());
 app.use('/api/v1', userRouter);
 app.use('/api/v1', spaceRoute);
@@ -20,7 +22,6 @@ app.use('/api/v1', subscriptionRoute);
 app.use('/api/v1/favorites', favoriteRoute);
 app.use('/api/v1', hostRoute);
 
-app.use(cors({origin: "*"}));
 
 const server = async () => {
   try {
