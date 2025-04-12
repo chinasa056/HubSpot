@@ -1,8 +1,11 @@
-const{ verifyUser, login, forgottenPassword, resetPassword, changePassword, loggedOut, registerUser, logOut, manageBookings, updateUser, deleteUserAccount} = require('../controllers/userController');
+const router = require('express').Router(); 
+const passport = require("passport")
+const jwt = require("jsonwebtoken")
+
+const{ verifyUser, login, forgottenPassword, resetPassword, changePassword, registerUser, logOut, manageBookings, updateUser, deleteUserAccount} = require('../controllers/userController');
 const { authenticate } = require('../middleware/authentication');
 const { registerValidator, loginValidator, changePasswordValidator } = require('../middleware/validator');
 
-const router = require('express').Router(); 
 
 /**
  * @swagger
@@ -739,6 +742,17 @@ router.patch("/users/update", authenticate, updateUser);
 
 router.delete("/users/delete", authenticate, deleteUserAccount)
 
+
+router.get("/authenticate", passport.authenticate("google", { scope: ['profile', "email"] }))
+
+router.get("/users/login", passport.authenticate("google"), async (req, res) => {
+    const token = await jwt.sign({userId: req.user._id, isAdmin: req.user.isAdmin, isLoggedIn: req.user.isLoggedIn}, process.env.JWT_SECRET, {expiresIn: "1day"})
+    res.status(200).json({
+        message: "Login Successful",
+        data: req.user,
+        token
+    })
+});
 
 
 module.exports = router;
