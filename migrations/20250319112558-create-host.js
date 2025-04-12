@@ -61,6 +61,16 @@ module.exports = {
         defaultValue: 0,
         allowNull: true,
       },
+      subscriptionExpired: {
+        type: Sequelize.DATE,
+        defaultValue: null,
+        allowNull: true,
+      },
+      subscription: {
+        type: Sequelize.STRING,
+        defaultValue: null,
+        allowNull: true,
+      },
       isVerified: {
         type: Sequelize.BOOLEAN,
         defaultValue: false
