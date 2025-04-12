@@ -11,9 +11,10 @@ const favoriteRoute = require("./routes/favorite");
 
 const hostRoute = require('./routes/hostRoutes')
 const PORT = process.env.PORT || 7039;
-app.use(cors());
 
 const app = express();
+
+app.use(cors());
 app.use(express.json());
 app.use('/api/v1', userRouter);
 app.use('/api/v1', spaceRoute);
