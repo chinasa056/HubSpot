@@ -11,6 +11,7 @@ const favoriteRoute = require("./routes/favorite");
 
 const hostRoute = require('./routes/hostRoutes')
 const PORT = process.env.PORT || 7039;
+app.use(cors());
 
 const app = express();
 app.use(express.json());
@@ -20,7 +21,6 @@ app.use('/api/v1', subscriptionRoute);
 app.use('/api/v1/favorites', favoriteRoute);
 app.use('/api/v1', hostRoute);
 
-app.use(cors({origin: "*"}));
 
 const server = async () => {
   try {
