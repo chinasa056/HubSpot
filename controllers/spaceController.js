@@ -227,7 +227,7 @@ exports.getSpacesBySpaceType = async (req, res) => {
 
 exports.getSpacesByHost = async (req, res) => {
   try {
-    const { hostId } = req.user;
+    const { userId: hostId } = req.user;
 
     const spaces = await Space.findAll({
       where: { hostId },

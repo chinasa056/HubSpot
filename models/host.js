@@ -41,7 +41,7 @@ Host.init(
    
     meansOfIdentification: {
       type: DataTypes.ENUM,
-      values: ["Nin", "Passport", "Driver's License"],
+      values: ["NIN", "Passport", "Driver's License"],
     },
 
     idCardNumber: {
