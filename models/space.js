@@ -14,11 +14,20 @@ Space.init(
       type: DataTypes.UUID,
       defaultValue: UUIDV4
     },
+    hostId: {
+      type: DataTypes.UUID,
+      references: {
+        model: "Hosts",
+        key: 'id'
+      },
+      onUpdate: 'CASCADE',
+      onDelete: 'CASCADE'
+    },
     name: {
       type: DataTypes.STRING,
       allowNull: false
     },
-    description: {
+    overview: {
       type: DataTypes.STRING,
       allowNull: false
     },
@@ -35,43 +44,36 @@ Space.init(
       allowNull: false
     },
     amenities: {
-      type: DataTypes.JSON,
+      type: DataTypes.TEXT,
       allowNull: false
     },
     availability: {
-      type: DataTypes.JSON,
+      type: DataTypes.TEXT,
       allowNull: false
     },
-    locationId: {
-      type: DataTypes.UUID,
-      references: {
-        model: "Locations",
-        key: 'id'
-      },
-      onUpdate: 'CASCADE',
-     // onDelete: 'CASCADE'
+    spaceType: {
+      type: DataTypes.ENUM,
+      values: ['cowork space', 'creative spaces'],
+      allowNull: false
     },
-    categoryId: {
-      type: DataTypes.UUID,
-      references: {
-        model: "Categories",
-        key: 'id'
-      },
-      onUpdate: 'CASCADE',
-      onDelete: 'CASCADE'
+    location: {
+      type: DataTypes.STRING,
+      allowNull: false
     },
-    hostId: {
-      type: DataTypes.UUID,
-      references: {
-        model: "Hosts",
-        key: 'id'
+    images: {
+      type: DataTypes.TEXT,
+      allowNull: true, // No default value, can be null
+      get() {
+        const raw = this.getDataValue('images');
+        try {
+          return raw ? JSON.parse(raw) : [];
+        } catch (e) {
+          return []; // fallback if somehow stored invalid JSON
+        }
       },
-      onUpdate: 'CASCADE',
-      onDelete: 'CASCADE'
+      set(value) {
+        this.setDataValue('images', JSON.stringify(value));
     },
-    spaceImages: {
-      type: DataTypes.JSON,
-      allowNull: false,
     },
     listingStatus: {
       type: DataTypes.ENUM,
@@ -115,3 +117,5 @@ Space.init(
 // Space.hasMany(Review, { foreignKey: "spaceId" });
 
 module.exports = Space;
+
+// npx sequelize-cli db:migrate:undo --name 20250321185024-create-space.js

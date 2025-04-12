@@ -79,6 +79,16 @@ Host.init(
       defaultValue: 0,
       allowNull: true,
     },
+    subscriptionExpired: {
+      type: DataTypes.DATE,
+      defaultValue: null,
+      allowNull: true,
+    },
+    subscription: {
+      type: DataTypes.STRING,
+      defaultValue: null,
+      allowNull: true,
+    },
 
     isVerified: {
       type: DataTypes.BOOLEAN,
