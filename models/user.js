@@ -26,8 +26,19 @@ User.init(
 
     },
     profileImage: {
-      type: DataTypes.JSON,
-      allowNull: true
+      type: DataTypes.TEXT,
+      allowNull: true,
+      get() {
+        const raw = this.getDataValue('profileImage');
+        try {
+          return raw ? JSON.parse(raw) : [];
+        } catch (e) {
+          return []; // fallback if somehow stored invalid JSON
+        }
+      },
+      set(value) {
+        this.setDataValue('profileImage', JSON.stringify(value));
+    },
     },
     isVerified: {
       type: DataTypes.BOOLEAN,

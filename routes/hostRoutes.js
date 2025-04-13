@@ -377,7 +377,7 @@ router.post("/host/forgot-password", forgottenPasswordHost);
  *                   example: "Error message details"
  */
 
-router.patch("/host/reset-password", resetPasswordHost)
+router.patch("/host/reset-password",resetPasswordValidator, resetPasswordHost)
 
 /**
  * @swagger

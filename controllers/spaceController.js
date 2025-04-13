@@ -7,25 +7,25 @@ const User = require("../models/user");
 exports.addSpace = async (req, res) => {
   try {
     const { userId } = req.user;
-    const {
-      name,
-      overview,
-      amenities,
-      pricePerDay,
-      pricePerHour,
-      capacity,
-      availability,
-      averageRating,
-      spaceType,
-      location,
-      spaceAdress,
+    const { name, overview, amenities, pricePerDay, pricePerHour, capacity, availability, averageRating, spaceType, location, spaceAdress,
     } = req.body;
+
+    let parsedAvailability;
+
+    try {
+      if (!availability || typeof availability !== "string") {
+        throw new Error("Availability must be a valid JSON string");
+      }
+      parsedAvailability = JSON.parse(availability);
+    } catch (err) {
+      return res.status(400).json({ message: "Invalid availability format", error: err.message });
+    };
+
+
     const files = req.files;
 
     if (!files || files.length === 0) {
-      return res
-        .status(400)
-        .json({ message: "Please upload images for the space." });
+      return res.status(400).json({ message: "Please upload images for the space." });
     }
 
     const host = await Host.findByPk(userId);
@@ -98,7 +98,7 @@ exports.addSpace = async (req, res) => {
       pricePerDay,
       pricePerHour,
       capacity,
-      availability,
+      availability: parsedAvailability,
       averageRating,
       location,
       images: uploadedImages,
@@ -111,7 +111,6 @@ exports.addSpace = async (req, res) => {
   } catch (error) {
     console.error(error);
 
-    // Cleanup all local files if error occurs
     if (req.files && req.files.length > 0) {
       req.files.forEach((file) => {
         try {
@@ -177,7 +176,7 @@ exports.getOneSpace = async (req, res) => {
 
 exports.getSpacesByLocation = async (req, res) => {
   try {
-    const { location } = req.body;
+    const { location } = req.query;
 
     const spaces = await Space.findAll({ where: { location: location } });
 
@@ -202,7 +201,7 @@ exports.getSpacesByLocation = async (req, res) => {
 
 exports.getSpacesBySpaceType = async (req, res) => {
   try {
-    const { spaceType } = req.body;
+    const { spaceType } = req.query;
 
     const spaces = await Space.findAll({ where: { spaceType: spaceType.toLowerCase() } });
 
@@ -323,7 +322,13 @@ exports.deleteSpace = async (req, res) => {
       return res.status(404).json({
         message: "Space Not Found",
       });
-    }
+    };
+
+    if (space.bookingCount > 0) {
+      return res.status(400).json({
+        message: "This space has an active booking and cannot be deleted"
+      })
+    };
 
     if (space.images && space.images.length > 0) {
       for (const image of space.images) {
@@ -405,7 +410,7 @@ exports.approveSpace = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      message: "Error Deleting Space",
+      message: "Error approving  Space",
       data: error.message,
     });
   }

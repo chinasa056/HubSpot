@@ -159,11 +159,7 @@ exports.resetPasswordValidator = (req, res, next) => {
       "string.empty": "Password cannot be empty.",
       "string.min": "Password must be at least 6 characters long.",
     }),
-    confirmPassword: joi
-      .string()
-      .valid(joi.ref("newPassword"))
-      .required()
-      .messages({
+    confirmPassword: joi.string().valid(joi.ref("newPassword")).required().messages({
         "any.only": "Confirm Password must match Password",
         "any.required": "confirm password is required",
         "string.empty": "confirm password cannot be empty.",

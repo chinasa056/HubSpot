@@ -23,3 +23,6 @@ module.exports = {
   Host, 
   Review, 
 };
+
+// npx sequelize-cli db:migrate:undo --name 20240412084523-create-bookings.js
+// // 
