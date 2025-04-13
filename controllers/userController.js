@@ -52,7 +52,7 @@ exports.registerUser = async (req, res) => {
 
     // const link = `${req.protocol}://${req.get("host")}/api/v1/users/verify/${token}`;
 
-    const link = `https://hubspot-liard.vercel.app/verifyemail/:${token}`
+    const link = `https://hubspot-liard.vercel.app/verifyemail:${token}`
 
     const firstName = user.fullName.split(" ")[0];
 
