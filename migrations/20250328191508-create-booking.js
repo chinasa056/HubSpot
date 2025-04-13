@@ -21,6 +21,21 @@ module.exports = {
         allowNull: false
       },
 
+      spaceName: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+
+      durationPerDay: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+      },
+
+      durationPerHour: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+      },
+
       StartDate: {
         type: Sequelize.DATE,
         allowNull: false
@@ -34,11 +49,7 @@ module.exports = {
         type: Sequelize.TIME,
         allowNull: false
       },
-
-      checkoutTime: {
-        type: Sequelize.TIME,
-        allowNull: false
-      },
+      
       amount: {
         type: Sequelize.INTEGER,
         allowNull: false
