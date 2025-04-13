@@ -37,6 +37,20 @@ Booking.init(
       type: DataTypes.STRING,
       allowNull: false
     },
+    spaceName: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+
+    durationPerDay: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+
+    durationPerHour: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
 
     startDate: {
       type: DataTypes.DATE,
@@ -52,10 +66,6 @@ Booking.init(
       allowNull: false
     },
 
-    checkoutTime: {
-      type: DataTypes.TIME,
-      allowNull: false
-    },
     amount: {
       type: DataTypes.INTEGER,
       allowNull: false
