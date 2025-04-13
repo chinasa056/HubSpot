@@ -50,13 +50,35 @@ Host.init(
     },
 
     ninImage: {
-      type: DataTypes.JSON,
+      type: DataTypes.TEXT,
       allowNull: false,
+      get() {
+        const raw = this.getDataValue('ninImage');
+        try {
+          return raw ? JSON.parse(raw) : [];
+        } catch (e) {
+          return []; // fallback if somehow stored invalid JSON
+        }
+      },
+      set(value) {
+        this.setDataValue('ninImage', JSON.stringify(value));
+    },
     },
 
     profileImage: {
-      type: DataTypes.JSON,
+      type: DataTypes.TEXT,
       allowNull: true,
+      get() {
+        const raw = this.getDataValue('profileImage');
+        try {
+          return raw ? JSON.parse(raw) : [];
+        } catch (e) {
+          return []; // fallback if somehow stored invalid JSON
+        }
+      },
+      set(value) {
+        this.setDataValue('profileImage', JSON.stringify(value));
+    },
     },
 
     bankName: {

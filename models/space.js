@@ -45,11 +45,22 @@ Space.init(
     },
     amenities: {
       type: DataTypes.TEXT,
-      allowNull: false
+      allowNull: false,
     },
     availability: {
       type: DataTypes.TEXT,
-      allowNull: false
+      allowNull: false,
+      get() {
+        const raw = this.getDataValue('availability');
+        try {
+          return raw ? JSON.parse(raw) : [];
+        } catch (e) {
+          return []; // fallback if somehow stored invalid JSON
+        }
+      },
+      set(value) {
+        this.setDataValue('availability', JSON.stringify(value));
+    },
     },
     spaceType: {
       type: DataTypes.ENUM,
@@ -62,7 +73,7 @@ Space.init(
     },
     images: {
       type: DataTypes.TEXT,
-      allowNull: true, // No default value, can be null
+      allowNull: false, // No default value, can be null
       get() {
         const raw = this.getDataValue('images');
         try {
