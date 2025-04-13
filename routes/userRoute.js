@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken")
 
 const{ verifyUser, login, forgottenPassword, resetPassword, changePassword, registerUser, logOut, manageBookings, updateUser, deleteUserAccount} = require('../controllers/userController');
 const { authenticate } = require('../middleware/authentication');
-const { registerValidator, loginValidator, changePasswordValidator } = require('../middleware/validator');
+const { registerValidator, loginValidator, changePasswordValidator, resetPasswordValidator } = require('../middleware/validator');
 
 
 /**
@@ -353,7 +353,7 @@ router.post("/users/forgot-password", forgottenPassword);
  *                   type: string
  *                   example: Error resetting password
  */
-router.post("/users/reset-password/:token", resetPassword);
+router.post("/users/reset-password/:token",resetPasswordValidator, resetPassword);
 
 /**
  * @swagger

@@ -37,8 +37,12 @@ exports.registerHost = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const result = await cloudinary.uploader.upload(file.path);
-    fs.unlinkSync(file.path);
 
+    if (fs.existsSync(file.path)) {
+      fs.unlinkSync(file.path);
+    } else {
+      console.warn('File already deleted or missing:', file.path);
+    }
 
     const hostData = {
       fullName: nameFormat.trim(),
