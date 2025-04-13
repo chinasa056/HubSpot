@@ -50,9 +50,9 @@ exports.registerUser = async (req, res) => {
 
     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {expiresIn: "1d"});
 
-    // const link = `${req.protocol}://${req.get("host")}/api/v1/users/verify/${token}`;
+    const link = `${req.protocol}://${req.get("host")}/api/v1/users/verify/${token}`;
 
-    const link = `https://hubspot-liard.vercel.app/verifyemail/:${token}`
+    // const link = `https://hubspot-liard.vercel.app/verifyemail/:${token}`
 
     const firstName = user.fullName.split(" ")[0];
 
