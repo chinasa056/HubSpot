@@ -49,7 +49,7 @@ module.exports = {
         type: Sequelize.TIME,
         allowNull: false
       },
-      
+
       amount: {
         type: Sequelize.INTEGER,
         allowNull: false
@@ -57,8 +57,16 @@ module.exports = {
 
       status: {
         type: Sequelize.ENUM,
-        values: ['active', 'pending', 'expired'],
+        values: ['active', 'pending', 'expired', 'upcoming', 'failed'],
         defaultValue: 'pending',
+      },
+      reference: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+      paymentDate: {
+        type: Sequelize.STRING,
+        allowNull: true
       },
       createdAt: {
         allowNull: false,

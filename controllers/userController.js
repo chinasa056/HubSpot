@@ -338,7 +338,7 @@ exports.resetPassword = async (req, res) => {
 
 exports.deleteUserAccount = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const { userId } = req.user;
 
     const user = await User.findByPk(userId);
     if (!user) {
@@ -476,7 +476,7 @@ exports.updateUser = async (req, res) => {
 
 exports.changePassword = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const { userId } = req.user;
     const { password, newPassword, confirmPassword } = req.body;
 
     if (!password || !newPassword || !confirmPassword) {

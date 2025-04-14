@@ -357,47 +357,41 @@ router.post("/users/reset-password/:token",resetPasswordValidator, resetPassword
 
 /**
  * @swagger
- * /api/v1/users/change-password/{userId}:
+ * /api/v1/users/change-password:
  *   patch:
- *     summary: Change the password for a user
- *     description: |
- *       This endpoint allows a logged-in user to change their password by providing the 
- *       current password, new password, and confirming the new password. The user needs 
- *       to be authenticated and provide the correct current password to proceed. 
- *       The new password and confirmation must match.
+ *     summary: Change user password
+ *     description: >
+ *       Allows an authenticated user to securely change their password.  
+ *       - Requires the current password, a new password, and a confirmation of the new password.  
+ *       - The system verifies the current password before allowing a change.  
+ *       - New passwords must match for the update to be accepted.  
+ *       - This route is **authenticated** and accessible only to logged-in users.
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - name: userId
- *         in: path
- *         required: true
- *         description: The ID of the user changing the password.
- *         schema:
- *           type: integer
- *           example: 12345
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - password
+ *               - newPassword
+ *               - confirmPassword
  *             properties:
  *               password:
  *                 type: string
- *                 description: The current password of the user.
  *                 example: "oldPassword123"
  *               newPassword:
  *                 type: string
- *                 description: The new password for the user.
- *                 example: "newPassword123"
+ *                 example: "newStrongPassword456"
  *               confirmPassword:
  *                 type: string
- *                 description: A confirmation of the new password.
- *                 example: "newPassword123"
+ *                 example: "newStrongPassword456"
  *     responses:
  *       200:
- *         description: Password successfully changed.
+ *         description: Password changed successfully
  *         content:
  *           application/json:
  *             schema:
@@ -407,7 +401,7 @@ router.post("/users/reset-password/:token",resetPasswordValidator, resetPassword
  *                   type: string
  *                   example: "Password changed successfully"
  *       400:
- *         description: Bad request, e.g., incorrect current password or new passwords do not match.
+ *         description: Validation or password mismatch error
  *         content:
  *           application/json:
  *             schema:
@@ -417,7 +411,7 @@ router.post("/users/reset-password/:token",resetPasswordValidator, resetPassword
  *                   type: string
  *                   example: "Current password is incorrect"
  *       401:
- *         description: Authentication failed, user not logged in.
+ *         description: Unauthorized - user is not logged in
  *         content:
  *           application/json:
  *             schema:
@@ -427,7 +421,7 @@ router.post("/users/reset-password/:token",resetPasswordValidator, resetPassword
  *                   type: string
  *                   example: "Authentication Failed: User is not logged in"
  *       404:
- *         description: User not found.
+ *         description: User not found
  *         content:
  *           application/json:
  *             schema:
@@ -437,7 +431,7 @@ router.post("/users/reset-password/:token",resetPasswordValidator, resetPassword
  *                   type: string
  *                   example: "User not found"
  *       500:
- *         description: Server error while changing the password.
+ *         description: Internal server error
  *         content:
  *           application/json:
  *             schema:
@@ -447,7 +441,7 @@ router.post("/users/reset-password/:token",resetPasswordValidator, resetPassword
  *                   type: string
  *                   example: "Error changing password"
  */
-router.patch("/users/change-password/:userId",authenticate, changePasswordValidator, changePassword);
+router.patch("/users/change-password",authenticate, changePasswordValidator, changePassword);
 
 /**
  * @swagger
@@ -684,19 +678,14 @@ router.patch("/users/update", authenticate, updateUser);
  * @swagger
  * /api/v1/users/delete:
  *   delete:
- *     summary: Delete a user account
- *     description: Deletes a user account and their associated profile image from the system.
+ *     summary: Delete user account
+ *     description: >
+ *       Permanently deletes the authenticated user's account along with their profile image (if available).  
+ *       - This route is **authenticated** and can only be accessed by a logged-in user.  
+ *       - If the user has a profile image stored on Cloudinary, it will be removed before deleting the account.
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - name: userId
- *         in: query
- *         required: true
- *         description: The ID of the user to delete
- *         schema:
- *           type: string
- *           example: "12345"
  *     responses:
  *       200:
  *         description: User and profile image deleted successfully
@@ -708,16 +697,6 @@ router.patch("/users/update", authenticate, updateUser);
  *                 message:
  *                   type: string
  *                   example: "User and profile image deleted successfully"
- *       400:
- *         description: Bad request due to missing user ID
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "User ID is required"
  *       404:
  *         description: User not found
  *         content:
@@ -729,7 +708,7 @@ router.patch("/users/update", authenticate, updateUser);
  *                   type: string
  *                   example: "User not found"
  *       500:
- *         description: Server error during deletion
+ *         description: Server error while deleting user
  *         content:
  *           application/json:
  *             schema:
@@ -738,8 +717,10 @@ router.patch("/users/update", authenticate, updateUser);
  *                 message:
  *                   type: string
  *                   example: "Error deleting user account"
+ *                 error:
+ *                   type: string
+ *                   example: "Detailed error message"
  */
-
 router.delete("/users/delete", authenticate, deleteUserAccount)
 
 
