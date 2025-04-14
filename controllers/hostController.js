@@ -13,6 +13,7 @@ const sequelize = require("../database/dbConnect");
 exports.registerHost = async (req, res) => {
   try {
     const { fullName, email, password, confirmPassword, companyName, companyAddress, meansOfIdentification, idCardNumber } = req.body;
+
     const file = req.file;
 
     const name = fullName?.split(' ');
@@ -21,7 +22,7 @@ exports.registerHost = async (req, res) => {
     const hostExists = await Host.findOne({ where: { email: email.toLowerCase() } });
 
     if (hostExists) {
-      fs.unlinkSync(file.path);
+      fs.unlinkSync(file?.path);
       return res.status(400).json({
         message: `Host with email: ${email} already exists`,
       });
@@ -37,6 +38,7 @@ exports.registerHost = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const result = await cloudinary.uploader.upload(file.path);
+    console.log(file.path)
 
     if (fs.existsSync(file.path)) {
       fs.unlinkSync(file.path);

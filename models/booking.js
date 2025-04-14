@@ -3,7 +3,7 @@ const sequelize = require("../database/dbConnect");
 // const Space = require('./space');
 // const User = require('./user')
 
-class Booking extends Model {}
+class Booking extends Model { }
 
 Booking.init(
   {
@@ -56,6 +56,7 @@ Booking.init(
       type: DataTypes.DATE,
       allowNull: false
     },
+
     endDate: {
       type: DataTypes.DATE,
       allowNull: false
@@ -73,8 +74,18 @@ Booking.init(
 
     status: {
       type: DataTypes.ENUM,
-      values: ['active', 'pending', 'expired'], 
-      defaultValue: 'pending', 
+      values: ['active', 'pending', 'expired', 'upcoming', 'failed'],
+      defaultValue: 'pending',
+    },
+
+    reference: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    
+    paymentDate: {
+      type: DataTypes.STRING,
+      allowNull: true
     },
   },
   {
