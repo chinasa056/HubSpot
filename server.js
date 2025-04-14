@@ -12,6 +12,7 @@ const userRouter = require('./routes/userRoute');
 const spaceRoute = require("./routes/spaceRoute")
 const subscriptionRoute = require("./routes/subscriptionRoute");
 const favoriteRoute = require("./routes/favorite");
+const bookingRoute = require("./routes/bookingRoute")
 
 const hostRoute = require('./routes/hostRoutes')
 const PORT = process.env.PORT || 7039;

@@ -1,3 +1,4 @@
+
 exports.resetPasswordMail = (link, firstName) => {
     return `
        <!DOCTYPE html>
@@ -25,7 +26,7 @@ exports.resetPasswordMail = (link, firstName) => {
             background-color: #f4f4f4; /* Light grey background */
         }
         .header {
-            background: #570e0e;
+            background: #1E3A8A;
             padding: 20px;
             text-align: center;
             border-bottom: 1px solid #ddd;
@@ -42,7 +43,7 @@ exports.resetPasswordMail = (link, firstName) => {
         }
         .button {
             display: inline-block;
-            background-color: #fc7e7e; /* Button color */
+            background-color: #F2994A; /* Button color */
             color: #131111;
             padding: 15px 30px;
             font-size: 18px;
@@ -52,10 +53,10 @@ exports.resetPasswordMail = (link, firstName) => {
             transition: background-color 0.3s ease;
         }
         .button:hover {
-            background-color: #218838;
+            background-color: #F2994A;
         }
         .footer {
-            background: #570e0e;
+            background:  #1E3A8A;
             padding: 10px;
             text-align: center;
             border-top: 1px solid #ddd;
@@ -86,5 +87,5 @@ exports.resetPasswordMail = (link, firstName) => {
     </div>
 </body>
 </html>
-    `;
+`;
 };
