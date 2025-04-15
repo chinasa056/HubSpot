@@ -33,26 +33,26 @@ exports.addSpace = async (req, res) => {
       return res.status(404).json({ message: "Host Not Found" });
     }
 
-    const currentDate = new Date();
-    const spaceCount = await Space.findAll({ where: { hostId: userId } });
+    // const currentDate = new Date();
+    // const spaceCount = await Space.findAll({ where: { hostId: userId } });
 
-    if (host.subscription === null) {
-      return res.status(404).json({
-        message: "Please subscribe to a plan before listing your space",
-      });
-    } else if (host.subscription === "Standard" && spaceCount.length === 3) {
-      return res.status(400).json({
-        message:
-          "You are on the Standard plan and cannot list more than 3 spaces. Would you like to upgrade to Premium?",
-      });
-    }
+    // if (host.subscription === null) {
+    //   return res.status(404).json({
+    //     message: "Please subscribe to a plan before listing your space",
+    //   });
+    // } else if (host.subscription === "Standard" && spaceCount.length === 3) {
+    //   return res.status(400).json({
+    //     message:
+    //       "You are on the Standard plan and cannot list more than 3 spaces. Would you like to upgrade to Premium?",
+    //   });
+    // }
 
-    if (host.subscriptionExpired < currentDate) {
-      return res.status(400).json({
-        message:
-          "Your subscription has expired, please renew and enjoy the full benefits of our platform",
-      });
-    }
+    // if (host.subscriptionExpired < currentDate) {
+    //   return res.status(400).json({
+    //     message:
+    //       "Your subscription has expired, please renew and enjoy the full benefits of our platform",
+    //   });
+    // }
 
     const space = await Space.findOne({ where: { name: name.toLowerCase() } });
     if (space) {
@@ -165,7 +165,7 @@ exports.getOneSpace = async (req, res) => {
       message: "Details For This Space",
       data: space,
     });
-    
+
   } catch (error) {
     console.log(error);
     res.status(500).json({
@@ -181,7 +181,7 @@ exports.getSpacesByLocation = async (req, res) => {
 
     const spaces = await Space.findAll({ where: { location: location } });
 
-    if (!spaces.length) {
+    if (spaces.length === 0) {
       return res.status(404).json({
         message: "No Spaces Found for This Location",
       });
@@ -206,7 +206,7 @@ exports.getSpacesBySpaceType = async (req, res) => {
 
     const spaces = await Space.findAll({ where: { spaceType: spaceType.toLowerCase() } });
 
-    if (!spaces.length) {
+    if (spaces.length === 0) {
       return res.status(404).json({
         message: "No Spaces Found for This Category",
       });
