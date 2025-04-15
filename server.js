@@ -37,6 +37,8 @@ app.use('/api/v1', spaceRoute);
 app.use('/api/v1', subscriptionRoute);
 app.use('/api/v1/favorites', favoriteRoute);
 app.use('/api/v1', hostRoute);
+app.use('/api/v1', bookingRoute);
+
 
 
 const server = async () => {
@@ -77,7 +79,7 @@ const options = {
       },
       contact: {
         name: "HubSpot",
-         url: 'https://hubspot-k95r.onrender.com/appdocumentation'
+         url: 'https://hubspot-liard.vercel.app/'
       }
     },
     components: {
