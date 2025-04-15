@@ -2,17 +2,17 @@ const Host = require("../models/host");
 const axios = require("axios");
 const otpGenerator = require("otp-generator");
 const { sendMail } = require("../middleware/nodemailer");
-const ref = otpGenerator.generate(10, {
-  lowerCaseAlphabets: true,
-  upperCaseAlphabets: true,
-  specialChars: false,
-});
 const korapaySecret = process.env.KORAPAY_SECRET_KEY;
 const currentDate = new Date()
 
 
 exports.initializeStandardSubscription = async (req, res) => {
   try {
+    const ref = otpGenerator.generate(10, {
+      lowerCaseAlphabets: true,
+      upperCaseAlphabets: true,
+      specialChars: false,
+    });
     const { userId } = req.user;
 
     const host = await Host.findByPk(userId);
@@ -25,6 +25,7 @@ exports.initializeStandardSubscription = async (req, res) => {
         message: "You curently have an active Standard subscription, Would you like to upgrade to Premium?"
       })
     };
+    console.log("Refrence: ",ref)
 
     const paymentDetails = {
       amount: 10000,
@@ -43,7 +44,6 @@ exports.initializeStandardSubscription = async (req, res) => {
     );
 
     const { data } = response.data;
-
 
     res.status(200).json({
       message: "Subscription initialized successfully",
@@ -165,6 +165,11 @@ exports.checkSubscriptionStatus = async (req, res) => {
 
 exports.initializePremiumSubscription = async (req, res) => {
   try {
+    const ref = otpGenerator.generate(10, {
+      lowerCaseAlphabets: true,
+      upperCaseAlphabets: true,
+      specialChars: false,
+    });
     const { userId } = req.user;
 
     const host = await Host.findByPk(userId);
