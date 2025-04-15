@@ -142,8 +142,8 @@ exports.verifyBookingPerhour = async (req, res) => {
       } else if (currentDate >= booking.startDate) {
         booking.status = "active";
       }
-      const startDateTime = new Date(`${startDate}T${checkinTime}`);
-      booking.endDate = new Date(startDateTime.getTime() + booking.durationPerHour * 60 * 60 * 1000); // Adds hours to the start time
+      const startDateTime = new Date(`${startDate} ${checkinTime}`);
+      booking.endDate = new Date(startDateTime.getTime() + booking.durationPerHour * 60 * 60 * 1000);
 
       // UPDATE THE SPACE APACITY DETAILS
       space.capacity -= 1;
@@ -193,7 +193,7 @@ exports.verifyBookingPerhour = async (req, res) => {
 
       const failureMailOptions = {
         email: user.email,
-        subject: "Subscription Failed",
+        subject: "booking Failed",
         html: failedeHtml,
       };
 
@@ -201,7 +201,7 @@ exports.verifyBookingPerhour = async (req, res) => {
       await booking.save();
 
       res.status(200).json({
-        message: "Subscription failed",
+        message: "booking failed",
       });
     };
 
@@ -407,4 +407,41 @@ exports.verifyBookingPerDay = async (req, res) => {
       error: error.message,
     })
   };
+};
+
+exports.checkBookingStatusForAllSpaces = async (req, res) => {
+  try {
+    const activeBookings = await Booking.findAll({ where: { status: "active" } });
+
+    if (activeBookings.length === 0) {
+      return res.status(200).json({ message: "No active bookings found." });
+    }
+
+    for (const booking of activeBookings) {
+      if (new Date(booking.endDate) < currentDate) {
+        booking.status = "expired";
+        await booking.save();
+
+        const space = await Space.findByPk(booking.spaceId);
+        if (space) {
+          space.capacity += 1; 
+          await space.save();
+        } else {
+          console.error(`Space not found for ID: ${booking.spaceId}`);
+        }
+        continue
+      }
+    }
+
+    res.status(200).json({
+      message: "Expired bookings processed successfully"
+    });
+
+  } catch (error) {
+    console.error("Error checking expired bookings:", error);
+    res.status(500).json({
+      message: "Error checking expired bookings",
+      error: error.message,
+    });
+  }
 };

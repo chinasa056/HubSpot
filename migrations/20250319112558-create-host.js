@@ -38,7 +38,7 @@ module.exports = {
       },
       ninImage: {
         type: Sequelize.TEXT,
-        allowNull: false,
+        allowNull: true,
       },
       profileImage: {
         type: Sequelize.TEXT,
