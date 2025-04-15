@@ -51,7 +51,7 @@ Host.init(
 
     ninImage: {
       type: DataTypes.TEXT,
-      allowNull: false,
+      allowNull: true,
       get() {
         const raw = this.getDataValue('ninImage');
         try {
