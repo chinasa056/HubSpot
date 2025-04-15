@@ -203,7 +203,6 @@ router.post("/space/create", hostAuth, upload.array("images", 5), addSpace);
  *                   example: "Internal server error"
  */
 router.get("/space/getAll",  getAllSpaces);
-
 /**
  * @swagger
  * /api/v1/space/getOne/{spaceId}:
@@ -215,10 +214,11 @@ router.get("/space/getAll",  getAllSpaces);
  *       - in: path
  *         name: spaceId
  *         required: true
- *         description: The ID of the space to retrieve.
+ *         description: The UUID of the space to retrieve.
  *         schema:
- *           type: integer
- *           example: 1
+ *           type: string
+ *           format: uuid
+ *           example: "e9b1f35a-2d4f-4b71-912a-42b6b90d98a0"
  *     responses:
  *       200:
  *         description: Space details fetched successfully
@@ -234,8 +234,9 @@ router.get("/space/getAll",  getAllSpaces);
  *                   type: object
  *                   properties:
  *                     id:
- *                       type: integer
- *                       example: 1
+ *                       type: string
+ *                       format: uuid
+ *                       example: "e9b1f35a-2d4f-4b71-912a-42b6b90d98a0"
  *                     name:
  *                       type: string
  *                       example: "Lush Boardroom"
@@ -298,7 +299,6 @@ router.get("/space/getAll",  getAllSpaces);
  *                   type: string
  *                   example: "Internal server error"
  */
-
 router.get("/space/getOne/:spaceId", getOneSpace);
 
 /**
