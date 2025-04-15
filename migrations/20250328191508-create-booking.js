@@ -28,12 +28,12 @@ module.exports = {
 
       durationPerDay: {
         type: Sequelize.INTEGER,
-        allowNull: false
+        allowNull: true
       },
 
       durationPerHour: {
         type: Sequelize.INTEGER,
-        allowNull: false
+        allowNull: true
       },
 
       StartDate: {
@@ -42,7 +42,7 @@ module.exports = {
       },
       endDate: {
         type: Sequelize.DATE,
-        allowNull: false
+        allowNull: true
       },
 
       checkinTime: {

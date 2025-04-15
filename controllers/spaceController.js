@@ -401,6 +401,7 @@ exports.approveSpace = async (req, res) => {
     }
 
     space.isApproved = true;
+    space.listingStatus = "active"
     await space.save();
 
     res.status(200).json({

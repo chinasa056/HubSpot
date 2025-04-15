@@ -6,6 +6,7 @@ const { loginValidator, resetPasswordValidator, changePasswordValidator, registe
 const upload = require("../utils/multer")
 
 const router = require('express').Router();
+
 /**
  * @swagger
  * /api/v1/host/register:
@@ -69,7 +70,29 @@ const router = require('express').Router();
  *                   type: string
  *                   example: "Account registered successfully. Please check your email for verification."
  *                 data:
- *                   $ref: '#/components/schemas/Host'
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       example: "123e4567-e89b-12d3-a456-426614174000"
+ *                     fullName:
+ *                       type: string
+ *                       example: "John Doe"
+ *                     email:
+ *                       type: string
+ *                       example: "host@example.com"
+ *                     phoneNumber:
+ *                       type: string
+ *                       example: "+1234567890"
+ *                     companyName:
+ *                       type: string
+ *                       example: "Tech Innovations Ltd."
+ *                     companyAddress:
+ *                       type: string
+ *                       example: "123 Tech Street, Silicon Valley"
+ *                     isVerified:
+ *                       type: boolean
+ *                       example: false
  *       400:
  *         description: Invalid input, or passwords do not match, or host already exists.
  *         content:
@@ -301,7 +324,7 @@ router.post("/host/forgot-password", forgottenPasswordHost);
 /**
  * @swagger
  * /api/v1/host/reset-password/{token}:
- *   post:
+ *   patch:
  *     summary: Reset host password
  *     description: Resets the password of a host using a valid JWT token provided in the URL. The host must provide matching `newPassword` and `confirmPassword` fields in the request body.
  *     tags: [Host]

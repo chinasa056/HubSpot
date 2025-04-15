@@ -44,12 +44,12 @@ Booking.init(
 
     durationPerDay: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: true
     },
 
     durationPerHour: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: true
     },
 
     startDate: {
@@ -59,7 +59,7 @@ Booking.init(
 
     endDate: {
       type: DataTypes.DATE,
-      allowNull: false
+      allowNull: true
     },
 
     checkinTime: {
