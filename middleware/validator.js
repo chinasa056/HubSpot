@@ -87,6 +87,7 @@ exports.registerHostValidator = (req, res, next) => {
         "any.required": "idCardNumber is required.",
         "string.empty": "idCardNumber cannot be empty."
       }),
+    ninImage: joi.string()
   });
 
   const { error } = schema.validate(req.body, { abortEarly: false });

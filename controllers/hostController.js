@@ -16,6 +16,12 @@ exports.registerHost = async (req, res) => {
 
     const file = req.file;
 
+    if(!file) {
+      return res.status(400).json({
+        messsage: "Please upload an image for this field"
+      })
+    };
+
     const name = fullName?.split(' ');
     const nameFormat = name.map((e) => { return e.slice(0, 1).toUpperCase() + e.slice(1).toLowerCase() }).join(' ');
 
@@ -32,7 +38,7 @@ exports.registerHost = async (req, res) => {
       return res.status(400).json({
         message: "Passwords do not match",
       });
-    }
+    };
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
@@ -59,7 +65,7 @@ exports.registerHost = async (req, res) => {
         publicId: result.public_id
       }
     };
-
+   
     const host = await Host.create(hostData);
 
     const token = jwt.sign({ hostId: host.id }, process.env.JWT_SECRET, { expiresIn: "1d" });
@@ -112,9 +118,8 @@ exports.verifyHost = async (req, res) => {
           }
 
           if (host.isVerified) {
-            return res.status(400).json({
-              message: "Account is already verified",
-            });
+            return  res.redirect("https://hubspot-liard.vercel.app/hostlogin")
+            
           }
 
           // Generate a new token and send verification email
@@ -152,9 +157,7 @@ exports.verifyHost = async (req, res) => {
         host.isVerified = true;
         await host.save();
 
-        res.status(200).json({
-          message: "Account verified successfully",
-        });
+        res.redirect("https://hubspot-liard.vercel.app/hostlogin");
       }
     });
   } catch (error) {
