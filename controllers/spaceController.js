@@ -155,16 +155,17 @@ exports.getOneSpace = async (req, res) => {
     const { spaceId } = req.params;
 
     const space = await Space.findByPk(spaceId);
-    if (space.length === 0) {
+    if (!space) {
       return res.status(404).json({
         message: "Space Not Found",
       });
-    }
+    };
 
     res.status(200).json({
       message: "Details For This Space",
       data: space,
     });
+    
   } catch (error) {
     console.log(error);
     res.status(500).json({
