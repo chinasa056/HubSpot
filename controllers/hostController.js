@@ -14,95 +14,43 @@ exports.registerHost = async (req, res) => {
   try {
     const { fullName, email, password, confirmPassword, companyName, companyAddress, meansOfIdentification, idCardNumber } = req.body;
 
-    // const file = req.file;
-
-    // const name = fullName?.split(' ');
-    // const nameFormat = name.map((e) => { return e.slice(0, 1).toUpperCase() + e.slice(1).toLowerCase() }).join(' ');
-
-    // const hostExists = await Host.findOne({ where: { email: email.toLowerCase() } });
-
-    // if (hostExists) {
-    //   fs.unlinkSync(file?.path);
-    //   return res.status(400).json({
-    //     message: `Host with email: ${email} already exists`,
-    //   });
-    // }
-
-    // if (password !== confirmPassword) {
-    //   return res.status(400).json({
-    //     message: "Passwords do not match",
-    //   });
-    // }
-
-    // const salt = await bcrypt.genSalt(10);
-    // const hashedPassword = await bcrypt.hash(password, salt);
-
-    // const result = await cloudinary.uploader.upload(file.path);
-    // console.log(file.path)
-
-    // if (fs.existsSync(file.path)) {
-    //   fs.unlinkSync(file.path);
-    // } else {
-    //   console.warn('File already deleted or missing:', file.path);
-    // }
-
-    // const hostData = {
-    //   fullName: nameFormat.trim(),
-    //   email: email.toLowerCase().trim(),
-    //   password: hashedPassword,
-    //   companyName,
-    //   companyAddress,
-    //   meansOfIdentification,
-    //   idCardNumber,
-    //   ninImage: {
-    //     secureUrl: result.secure_url,
-    //     publicId: result.public_id
-    //   }
-    // };
     const file = req.file;
+        if(!file) {
+      return res.status(400).json({
+        messsage: "Please upload an image for this field"
+      })
+    };
 
-    const name = fullName?.split(" ");
-    const nameFormat = name
-      .map((e) => e.charAt(0).toUpperCase() + e.slice(1).toLowerCase())
-      .join(" ");
+    const name = fullName?.split(' ');
+    const nameFormat = name.map((e) => { return e.slice(0, 1).toUpperCase() + e.slice(1).toLowerCase() }).join(' ');
     
     const hostExists = await Host.findOne({ where: { email: email.toLowerCase() } });
-    
+
     if (hostExists) {
-      if (file) fs.unlinkSync(file.path); 
+      fs.unlinkSync(file?.path);
       return res.status(400).json({
         message: `Host with email: ${email} already exists`,
       });
     }
-    
+
     if (password !== confirmPassword) {
       return res.status(400).json({
         message: "Passwords do not match",
       });
     }
-    
+
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-    
-    let ninImageData = {}; 
-    
-    if (file) {
-      const result = await cloudinary.uploader.upload(file.path);
-      ninImageData = {
-        secureUrl: result.secure_url,
-        publicId: result.public_id,
-      };
-    
-      console.log(file.path);
-    
-      // Ensure the file is deleted after upload
-      if (fs.existsSync(file.path)) {
-        fs.unlinkSync(file.path);
-      } else {
-        console.warn("File already deleted or missing:", file.path);
-      }
+
+    const result = await cloudinary.uploader.upload(file.path);
+    console.log(file.path)
+
+    if (fs.existsSync(file.path)) {
+      fs.unlinkSync(file.path);
+    } else {
+      console.warn('File already deleted or missing:', file.path);
     }
-    
+
     const hostData = {
       fullName: nameFormat.trim(),
       email: email.toLowerCase().trim(),
@@ -111,8 +59,12 @@ exports.registerHost = async (req, res) => {
       companyAddress,
       meansOfIdentification,
       idCardNumber,
-      ninImage: file ? ninImageData : null,
+      ninImage: {
+        secureUrl: result.secure_url,
+        publicId: result.public_id
+      }
     };
+    
     const host = await Host.create(hostData);
 
     const token = jwt.sign({ hostId: host.id }, process.env.JWT_SECRET, { expiresIn: "1d" });
@@ -165,9 +117,8 @@ exports.verifyHost = async (req, res) => {
           }
 
           if (host.isVerified) {
-            return res.status(400).json({
-              message: "Account is already verified",
-            });
+            return  res.redirect("https://hubspot-liard.vercel.app/hostlogin")
+            
           }
 
           // Generate a new token and send verification email
