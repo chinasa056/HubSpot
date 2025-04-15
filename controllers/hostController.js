@@ -15,8 +15,7 @@ exports.registerHost = async (req, res) => {
     const { fullName, email, password, confirmPassword, companyName, companyAddress, meansOfIdentification, idCardNumber } = req.body;
 
     const file = req.file;
-
-    if(!file) {
+        if(!file) {
       return res.status(400).json({
         messsage: "Please upload an image for this field"
       })
@@ -24,7 +23,7 @@ exports.registerHost = async (req, res) => {
 
     const name = fullName?.split(' ');
     const nameFormat = name.map((e) => { return e.slice(0, 1).toUpperCase() + e.slice(1).toLowerCase() }).join(' ');
-
+    
     const hostExists = await Host.findOne({ where: { email: email.toLowerCase() } });
 
     if (hostExists) {
@@ -38,7 +37,7 @@ exports.registerHost = async (req, res) => {
       return res.status(400).json({
         message: "Passwords do not match",
       });
-    };
+    }
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
@@ -65,7 +64,7 @@ exports.registerHost = async (req, res) => {
         publicId: result.public_id
       }
     };
-   
+    
     const host = await Host.create(hostData);
 
     const token = jwt.sign({ hostId: host.id }, process.env.JWT_SECRET, { expiresIn: "1d" });
