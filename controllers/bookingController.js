@@ -44,7 +44,7 @@ exports.bookSpaceByHour = async (req, res) => {
       });
     };
 
-    if (!space.isAvailable || space.listingStatus !== "active") {
+    if (space.isAvailable === false || space.listingStatus !== "active") {
       return res.status(400).json({
         message: "Space is not available for booking",
       });
