@@ -1,4 +1,4 @@
-const { registerHost, verifyHost, loginHost, forgottenPasswordHost, resetPasswordHost, changePasswordHost, loggedOutHost, updateHostDetails, deleteHostAccount, getSpacesByHost, getBookingCategories, manageListing, getSpaceBookings } = require('../controllers/hostController');
+const { registerHost, verifyHost, loginHost, forgottenPasswordHost, resetPasswordHost, changePasswordHost, loggedOutHost, updateHostDetails, deleteHostAccount, getSpacesByHost, getBookingCategories, manageListing, getSpaceBookings, getHostCurrentBalance } = require('../controllers/hostController');
 
 const { authenticate, hostAuth } = require('../middleware/authentication');
 const { loginValidator, resetPasswordValidator, changePasswordValidator, registerHostValidator } = require('../middleware/validator');
@@ -918,27 +918,18 @@ router.get("/host/listings", hostAuth, manageListing);
  *                   example: "Internal server error"
  */
 router.get("/host/spacebookings", hostAuth, getSpaceBookings);
-
 /**
  * @swagger
- * /api/v1/host/bookingcategories/{hostId}:
+ * /api/v1/host/bookingcategories:
  *   get:
- *     summary: Retrieve categorized bookings for a specific host
- *     description: This endpoint allows the authenticated host to retrieve categorized bookings (upcoming, active, completed) associated with their spaces. The host must be authenticated to access this endpoint. If no bookings are found, the response will show counts of each category (upcoming, active, completed).
+ *     summary: Categorize host bookings by status
+ *     description: Returns the count of a host's bookings grouped into upcoming, active, and completed categories based on the current date.
  *     tags: [Host]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: hostId
- *         required: true
- *         description: The ID of the host to retrieve categorized bookings for.
- *         schema:
- *           type: string
- *           example: "1"
  *     responses:
  *       200:
- *         description: A summary of categorized bookings for the host.
+ *         description: Bookings categorized successfully
  *         content:
  *           application/json:
  *             schema:
@@ -954,39 +945,16 @@ router.get("/host/spacebookings", hostAuth, getSpaceBookings);
  *                       type: object
  *                       properties:
  *                         upcoming:
- *                           type: integer
- *                           description: The number of upcoming bookings for the host.
- *                           example: 5
- *                         active:
- *                           type: integer
- *                           description: The number of active bookings for the host.
+ *                           type: number
  *                           example: 3
+ *                         active:
+ *                           type: number
+ *                           example: 2
  *                         completed:
- *                           type: integer
- *                           description: The number of completed bookings for the host.
- *                           example: 7
- *       400:
- *         description: No spaces listed for this host or other validation errors.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "No spaces listed for this host"
- *       404:
- *         description: Host not found or no bookings found for the host.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Host not found"
+ *                           type: number
+ *                           example: 5
  *       500:
- *         description: Internal server error occurred while categorizing bookings.
+ *         description: Server error while categorizing bookings
  *         content:
  *           application/json:
  *             schema:
@@ -997,9 +965,58 @@ router.get("/host/spacebookings", hostAuth, getSpaceBookings);
  *                   example: "Error categorizing bookings"
  *                 error:
  *                   type: string
- *                   example: "Error message from the catch block"
+ *                   example: "Internal server error"
  */
-router.get("/host/bookingcategories/:hostId", hostAuth, getBookingCategories);
+router.get("/host/bookingcategories", hostAuth, getBookingCategories);
+
+/**
+ * @swagger
+ * /api/v1/host/currentbalance:
+ *   get:
+ *     summary: Retrieve current balance for the authenticated host
+ *     description: Returns the current balance amount for the logged-in host, representing their earnings from confirmed bookings.
+ *     tags: [Host]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Host current balance retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Host Current Balance"
+ *                 data:
+ *                   type: number
+ *                   example: 150000
+ *       404:
+ *         description: Host not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Host Not Found"
+ *       500:
+ *         description: Server error while fetching current balance
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Error categorizing bookings"
+ *                 error:
+ *                   type: string
+ *                   example: "Internal server error"
+ */
+router.get("/host/currentbalance", hostAuth, getHostCurrentBalance)
 
 
 module.exports = router;

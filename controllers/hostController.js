@@ -575,7 +575,7 @@ exports.manageListing = async (req, res) => {
 
     const spaces = await Space.findAll({
       where: { hostId },
-      attributes: ["name", "bookingCount", "createdAt", "capacity", "listingStatus"]
+      attributes: ["name", "bookingCount", "createdAt", "capacity", "listingStatus", "images"]
     });
 
     if (spaces.length === 0) {
@@ -676,6 +676,32 @@ exports.getBookingCategories = async (req, res) => {
     console.error(error.message);
     res.status(500).json({
       message: "Error categorizing bookings",
+      error: error.message,
+    });
+  }
+};
+
+// GET AND UPDATE HOST CURRENT BALANCE
+exports.getHostCurrentBalance = async(req, res) => {
+  try {
+    const {userId: hostId} = req.user;
+    const host = await Host.findByPk(hostId);
+    if(!host) {
+      return res.status(404).json({
+        message: "Host Not Found"
+      })
+    };
+
+    const {currentBalance} = host
+    res.status(200).json({
+      message: "Host Current Balance",
+      data: currentBalance
+    })
+    
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({
+      message: "Error fetching current balance bookings",
       error: error.message,
     });
   }
