@@ -117,7 +117,7 @@ const router = require('express').Router();
  *                   type: string
  *                   example: "Error message details"
  */
-router.post('/host/register', upload.single("ninImage"), registerHostValidator, registerHost);
+router.post('/host/register', /*upload.single("ninImage"), registerHostValidator,*/ registerHost);
 
 
 /**

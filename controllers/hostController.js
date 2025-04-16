@@ -28,7 +28,7 @@ exports.registerHost = async (req, res) => {
     const hostExists = await Host.findOne({ where: { email: email.toLowerCase() } });
 
     if (hostExists) {
-      fs.unlinkSync(file?.path);
+      // fs.unlinkSync(file?.path);
       return res.status(400).json({
         message: `Host with email: ${email} already exists`,
       });
@@ -43,14 +43,14 @@ exports.registerHost = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const result = await cloudinary.uploader.upload(file.path);
-    console.log(file.path)
+    // const result = await cloudinary.uploader.upload(file.path);
+    // console.log(file.path)
 
-    if (fs.existsSync(file.path)) {
-      fs.unlinkSync(file.path);
-    } else {
-      console.warn('File already deleted or missing:', file.path);
-    }
+    // if (fs.existsSync(file.path)) {
+    //   fs.unlinkSync(file.path);
+    // } else {
+    //   console.warn('File already deleted or missing:', file.path);
+    // }
 
     const hostData = {
       fullName: nameFormat.trim(),
@@ -60,10 +60,10 @@ exports.registerHost = async (req, res) => {
       companyAddress,
       meansOfIdentification,
       idCardNumber,
-      ninImage: {
-        secureUrl: result.secure_url,
-        publicId: result.public_id
-      }
+      // ninImage: {
+      //   secureUrl: result.secure_url,
+      //   publicId: result.public_id
+      // }
     };
     
     const host = await Host.create(hostData);
