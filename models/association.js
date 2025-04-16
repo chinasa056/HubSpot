@@ -17,6 +17,7 @@ Space.hasMany(Review, { foreignKey: 'spaceId' });
 
 Booking.belongsTo(User, { foreignKey: 'userId' });
 Booking.belongsTo(Space, { foreignKey: 'spaceId' });
+Space.hasMany(Booking,{foreignKey: 'spaceId'} )
 
 module.exports = { 
   Space, 

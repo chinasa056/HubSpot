@@ -765,7 +765,7 @@ router.delete('/host/delete/:hostId', hostAuth, deleteHostAccount);
  *                   type: string
  *                   example: "Error details message"
  */
-router.get("/host/getspaces/", hostAuth, getSpacesByHost);
+router.get("/host/getspaces", hostAuth, getSpacesByHost);
 
 /**
  * @swagger
@@ -851,24 +851,16 @@ router.get("/host/listings", hostAuth, manageListing);
 
 /**
  * @swagger
- * /api/v1/host/spacebookings/{spaceId}:
+ * /api/v1/host/spacebookings:
  *   get:
- *     summary: Retrieve all bookings for a specific space
- *     description: This endpoint allows the authenticated host to retrieve all bookings associated with a particular space. The host must be authenticated to access this endpoint. The space is identified by its `spaceId`. If no bookings are found for the space, the response will contain an empty array.
+ *     summary: Get all spaces and their bookings for the authenticated host
+ *     description: Retrieves a list of all spaces owned by the authenticated host, along with booking details for each space including user name, start date, and booking status.
  *     tags: [Host]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: spaceId
- *         required: true
- *         description: The ID of the space to retrieve bookings for.
- *         schema:
- *           type: integer
- *           example: 1
  *     responses:
  *       200:
- *         description: A list of bookings for the space.
+ *         description: Space and bookings retrieved successfully
  *         content:
  *           application/json:
  *             schema:
@@ -878,37 +870,31 @@ router.get("/host/listings", hostAuth, manageListing);
  *                   type: string
  *                   example: "Space and bookings retrieved successfully"
  *                 data:
- *                   type: object
- *                   properties:
- *                     name:
- *                       type: string
- *                       description: The name of the space.
- *                       example: "Conference Room A"
- *                     bookings:
- *                       type: array
- *                       items:
- *                         type: object
- *                         properties:
- *                           userName:
- *                             type: string
- *                             description: The name of the user who made the booking.
- *                             example: "John Doe"
- *                           startDate:
- *                             type: string
- *                             format: date-time
- *                             description: The start date and time of the booking.
- *                             example: "2025-05-01T09:00:00Z"
- *                           endDate:
- *                             type: string
- *                             format: date-time
- *                             description: The end date and time of the booking.
- *                             example: "2025-05-01T11:00:00Z"
- *                           status:
- *                             type: string
- *                             description: The status of the booking (e.g., confirmed, canceled).
- *                             example: "confirmed"
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       name:
+ *                         type: string
+ *                         example: "Modern Co-working Space"
+ *                       Bookings:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                           properties:
+ *                             userName:
+ *                               type: string
+ *                               example: "Jane Doe"
+ *                             startDate:
+ *                               type: string
+ *                               format: date
+ *                               example: "2025-05-01"
+ *                             status:
+ *                               type: string
+ *                               enum: [pending, active, upcoming, completed, failed]
+ *                               example: "active"
  *       404:
- *         description: The space with the given `spaceId` was not found.
+ *         description: Host or spaces not found
  *         content:
  *           application/json:
  *             schema:
@@ -916,9 +902,9 @@ router.get("/host/listings", hostAuth, manageListing);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Space not found"
+ *                   example: "No space found for this host"
  *       500:
- *         description: Internal server error occurred while fetching the space bookings.
+ *         description: Server error while fetching bookings
  *         content:
  *           application/json:
  *             schema:
@@ -929,9 +915,9 @@ router.get("/host/listings", hostAuth, manageListing);
  *                   example: "Error fetching space bookings"
  *                 error:
  *                   type: string
- *                   example: "Error details message"
+ *                   example: "Internal server error"
  */
-router.get("/host/spacebookings/:spaceId", hostAuth, getSpaceBookings);
+router.get("/host/spacebookings", hostAuth, getSpaceBookings);
 
 /**
  * @swagger

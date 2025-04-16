@@ -528,26 +528,29 @@ exports.getSpacesByHost = async (req, res) => {
 // MANAGE BOOKINGS
 exports.getSpaceBookings = async (req, res) => {
   try {
-    const { spaceId } = req.params;
-    const space = await Space.findByPk(spaceId, {
-      attributes: ['name'],
-      include: [
-        {
-          model: Booking,
-          attributes: ['userName', 'startDate', 'endDate', 'status'],
-        },
-      ],
-    });
-
-    if (!space) {
+    const { userId: hostId } = req.user;
+    const host = await Host.findByPk(hostId);
+    if (!host) {
       return res.status(404).json({
-        message: "Space not found",
+        message: "host not found",
+      });
+    };
+
+    const allSpaces = await Space.findAll({where: {hostId: hostId}, attributes: ["name"],
+    include: [{
+      model: Booking,
+      attributes: ['userName', 'startDate', 'status']
+    }]})
+
+    if (allSpaces.length === 0) {
+      return res.status(404).json({
+        message: "No space found for this host",
       });
     }
 
     res.status(200).json({
       message: "Space and bookings retrieved successfully",
-      data: space,
+      data: allSpaces,
     });
   } catch (error) {
     console.error(error.message);
