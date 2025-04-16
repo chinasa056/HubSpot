@@ -144,17 +144,13 @@ exports.verifyUser = async (req, res) => {
         }
 
         if (user.isVerified) {
-          return res.status(400).json({
-            message: "Account is already verified",
-          });
+          res.redirect("https://hubspot-liard.vercel.app/hostlogin");
         }
 
         user.isVerified = true;
         await user.save();
 
-        res.status(200).json({
-          message: "Account verified successfully",
-        });
+        res.redirect("https://hubspot-liard.vercel.app/hostlogin");
       }
     });
   } catch (error) {
