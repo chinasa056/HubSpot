@@ -20,6 +20,11 @@ const supportEmail = process.env.APP_USERNAME
 
 exports.bookSpaceByHour = async (req, res) => {
   try {
+    const ref = otpgenerator.generate(10, {
+      lowerCaseAlphabets: true,
+      upperCaseAlphabets: true,
+      specialChars: false,
+    });
     const { userId } = req.user;
     const { spaceId } = req.params;
     const { durationPerHour, startDate, checkinTime } = req.body;
@@ -216,6 +221,11 @@ exports.verifyBookingPerhour = async (req, res) => {
 
 exports.bookSpaceByDay = async (req, res) => {
   try {
+    const ref = otpgenerator.generate(10, {
+      lowerCaseAlphabets: true,
+      upperCaseAlphabets: true,
+      specialChars: false,
+    });
     const { userId } = req.user;
     const { spaceId } = req.params;
     const { durationPerDay, startDate, checkinTime } = req.body;
