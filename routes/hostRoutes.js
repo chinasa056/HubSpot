@@ -693,7 +693,7 @@ router.delete('/host/delete/:hostId', hostAuth, deleteHostAccount);
 
 /**
  * @swagger
- * /api/v1/host/getspaces/:
+ * /api/v1/host/getspaces:
  *   get:
  *     summary: Retrieve all spaces for the authenticated host
  *     description: This endpoint allows the authenticated host to retrieve a list of all spaces they own. The user must be authenticated to access this endpoint. If the host has no spaces, a message indicating no spaces were found will be returned.

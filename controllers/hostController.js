@@ -513,8 +513,8 @@ exports.getSpacesByHost = async (req, res) => {
 
     res.status(200).json({
       message: "Spaces Found for This Host",
-      data: spaces,
-      count: spaceCount
+      data: spaceCount,
+      // count: spaceCount
     });
   } catch (error) {
     console.error(error);
