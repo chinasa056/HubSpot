@@ -182,14 +182,14 @@ exports.login = async (req, res) => {
     });
     if (!user) {
       return res.status(404).json({
-        message: "User not found: Invalid Credentials",
+        message: "Invalid Credentials",
       });
     }
 
     const isCorrectPassword = await bcrypt.compare(password, user.password);
     if (!isCorrectPassword) {
       return res.status(400).json({
-        message: "User not found: Invalid Credentials",
+        message: "Invalid Credentials",
       });
     }
 

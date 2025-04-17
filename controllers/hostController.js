@@ -185,7 +185,7 @@ exports.loginHost = async (req, res) => {
     const host = await Host.findOne({ where: { email: email.toLowerCase() } });
     if (!host) {
       return res.status(404).json({
-        message: "login failed: incorrect credentials",
+        message: "Incorrect credentials",
       });
     }
 
