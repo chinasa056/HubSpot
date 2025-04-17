@@ -24,7 +24,7 @@ exports.registerHost = async (req, res) => {
 
     const name = fullName?.split(' ');
     const nameFormat = name.map((e) => { return e.slice(0, 1).toUpperCase() + e.slice(1).toLowerCase() }).join(' ');
-    
+
     const hostExists = await Host.findOne({ where: { email: email.toLowerCase() } });
 
     if (hostExists) {
@@ -65,7 +65,7 @@ exports.registerHost = async (req, res) => {
       //   publicId: result.public_id
       // }
     };
-    
+
     const host = await Host.create(hostData);
 
     const token = jwt.sign({ hostId: host.id }, process.env.JWT_SECRET, { expiresIn: "1d" });
@@ -118,8 +118,8 @@ exports.verifyHost = async (req, res) => {
           }
 
           if (host.isVerified) {
-            return  res.redirect("https://hubspot-liard.vercel.app/hostlogin")
-            
+            return res.redirect("https://hubspot-liard.vercel.app/hostlogin")
+
           }
 
           // Generate a new token and send verification email
@@ -536,11 +536,13 @@ exports.getSpaceBookings = async (req, res) => {
       });
     };
 
-    const space = await Space.findOne({where: {hostId: hostId}, attributes: ["name"],
-    include: [{
-      model: Booking,
-      attributes: ['userName', 'startDate','endDate', 'status']
-    }]})
+    const space = await Space.findOne({
+      where: { hostId: hostId }, attributes: ["name"],
+      include: [{
+        model: Booking,
+        attributes: ['userName', 'startDate', 'endDate', 'status']
+      }]
+    })
 
     if (!space) {
       return res.status(404).json({
@@ -606,72 +608,36 @@ exports.getBookingCategories = async (req, res) => {
     const { userId: hostId } = req.user;
     const currentDate = new Date();
 
-    const spaces = await Space.findAll({
-      where: { hostId },
-      // include: [
-      //   {
-      //     model: Booking,
-      //     attributes: ["userName", "status", "startDate", "endDate"],
-      //   },
-      // ],
-    });
+    const spaces = await Space.findAll({ where: { hostId } });
 
 
     const upcomingBookings = [];
     const activeBookings = [];
     const completedBookings = [];
-    //  const spaceId =  spaces.map((space) => space.id)
+
     for (const space of spaces) {
       const booking = await Booking.findAll({ where: { spaceId: space.id } });
       booking.forEach((singleBooking) => {
-        if (singleBooking.startDate > currentDate) {
+        if (singleBooking.status === 'upcoming') {
           upcomingBookings.push(singleBooking);
-        } else if (
-          new Date(singleBooking.startDate) <= currentDate &&
-          new Date(singleBooking.endDate) >= currentDate
-        ) {
+        } else if (singleBooking.status === 'active') {
           activeBookings.push(singleBooking);
-        } else if (new Date(singleBooking.endDate) < currentDate) {
+        } else if (singleBooking.status === 'expired') {
           completedBookings.push(singleBooking);
         }
-  
-
       })
-      // console.log('Booking Found: ',booking)
-      // upcomingBookings.push(booking)
-      // console.log('Booking Status: ',booking.status)
-     
     };
 
     const upcomingCount = upcomingBookings.length;
     const activeCount = activeBookings.length;
     const completedCount = completedBookings.length;
 
-
-    // spaces.forEach((space) => {
-    //   space.Bookings.forEach((booking) => {
-    //     const { startDate, endDate } = booking;
-    //     if (new Date(startDate) > currentDate) {
-    //       upcomingBookings.push(booking);
-    //     } else if (
-    //       new Date(startDate) <= currentDate &&
-    //       new Date(endDate) >= currentDate
-    //     ) {
-    //       activeBookings.push(booking);
-    //     } else if (new Date(endDate) < currentDate) {
-    //       completedBookings.push(booking);
-    //     }
-    //   });
-    // });
-
-
-
     res.status(200).json({
       message: "Bookings categorized successfully",
       data: {
-        upcomingBookings,
-        activeBookings,
-        completedBookings,
+        // upcomingBookings,
+        // activeBookings,
+        // completedBookings,
         counts: {
           upcoming: upcomingCount,
           active: activeCount,
@@ -689,22 +655,22 @@ exports.getBookingCategories = async (req, res) => {
 };
 
 // GET AND UPDATE HOST CURRENT BALANCE
-exports.getHostCurrentBalance = async(req, res) => {
+exports.getHostCurrentBalance = async (req, res) => {
   try {
-    const {userId: hostId} = req.user;
+    const { userId: hostId } = req.user;
     const host = await Host.findByPk(hostId);
-    if(!host) {
+    if (!host) {
       return res.status(404).json({
         message: "Host Not Found"
       })
     };
 
-    const {currentBalance} = host
+    const { currentBalance } = host
     res.status(200).json({
       message: "Host Current Balance",
       data: currentBalance
     })
-    
+
   } catch (error) {
     console.error(error.message);
     res.status(500).json({
