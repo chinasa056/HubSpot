@@ -539,7 +539,7 @@ exports.getSpaceBookings = async (req, res) => {
     const space = await Space.findOne({where: {hostId: hostId}, attributes: ["name"],
     include: [{
       model: Booking,
-      attributes: ['userName', 'startDate','endDate', 'status', 'profileImage']
+      attributes: ['userName', 'startDate','endDate', 'status']
     }]})
 
     if (!space) {
