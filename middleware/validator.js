@@ -205,20 +205,22 @@ exports.addSpaceValidator = (req, res, next) => {
       "string.empty": "Amenities cannot be empty.",
       "any.required": "Amenities are required.",
     }),
-    availability: joi.string().required().custom((value, helpers) => {
+    availability: Joi.string().required().invalid("").custom((value, helpers) => {
       try {
         JSON.parse(value);
         return value;
       } catch {
         return helpers.error("any.invalid");
       }
-    }).messages({
+    })
+    .messages({
       "any.required": "Availability is required.",
       "string.empty": "Availability cannot be empty.",
-      "any.invalid": "Availability must be a valid JSON string."
+      "any.invalid": "Availability must be a valid JSON string.",
     }),
-    spaceType: joi.string().valid("cowork hub", "creative space").required().messages({
-      "any.only": "Space type must be 'cowork hub' or 'creative spaces'.",
+  
+    spaceType: joi.string().valid("cowork space", "creative space").required().messages({
+      "any.only": "Space type must be 'cowork hub' or 'creative space'.",
       "any.required": "Space type is required.",
     }),
     location: joi.string().trim().required().messages({
@@ -234,9 +236,11 @@ exports.addSpaceValidator = (req, res, next) => {
   const { error } = schema.validate(req.body, { abortEarly: false });
 
   if (error) {
-    return res.status(400).json({
-      message: error.details.map((detail) => detail.message),
-    });
+    if(error) {
+        return res.status(400).json({
+            message: error.message
+        })
+    }
   }
 
   const files = req.files;
