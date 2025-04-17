@@ -608,12 +608,12 @@ exports.getBookingCategories = async (req, res) => {
 
     const spaces = await Space.findAll({
       where: { hostId },
-      include: [
-        {
-          model: Booking,
-          attributes: ["userName", "status", "startDate", "endDate"],
-        },
-      ],
+      // include: [
+      //   {
+      //     model: Booking,
+      //     attributes: ["userName", "status", "startDate", "endDate"],
+      //   },
+      // ],
     });
 
 
@@ -623,17 +623,24 @@ exports.getBookingCategories = async (req, res) => {
     //  const spaceId =  spaces.map((space) => space.id)
     for (const space of spaces) {
       const booking = await Booking.findAll({ where: { spaceId: space.id } });
-      if (new Date(booking.startDate) > currentDate) {
-        upcomingBookings.push(booking);
-      } else if (
-        new Date(booking.startDate) <= currentDate &&
-        new Date(booking.endDate) >= currentDate
-      ) {
-        activeBookings.push(booking);
-      } else if (new Date(booking.endDate) < currentDate) {
-        completedBookings.push(booking);
-      }
+      booking.forEach((singleBooking) => {
+        if (singleBooking.startDate > currentDate) {
+          upcomingBookings.push(singleBooking);
+        } else if (
+          new Date(singleBooking.startDate) <= currentDate &&
+          new Date(singleBooking.endDate) >= currentDate
+        ) {
+          activeBookings.push(singleBooking);
+        } else if (new Date(singleBooking.endDate) < currentDate) {
+          completedBookings.push(singleBooking);
+        }
+  
 
+      })
+      // console.log('Booking Found: ',booking)
+      // upcomingBookings.push(booking)
+      // console.log('Booking Status: ',booking.status)
+     
     };
 
     const upcomingCount = upcomingBookings.length;
@@ -662,9 +669,9 @@ exports.getBookingCategories = async (req, res) => {
     res.status(200).json({
       message: "Bookings categorized successfully",
       data: {
-        // upcomingBookings,
-        // activeBookings,
-        // completedBookings,
+        upcomingBookings,
+        activeBookings,
+        completedBookings,
         counts: {
           upcoming: upcomingCount,
           active: activeCount,

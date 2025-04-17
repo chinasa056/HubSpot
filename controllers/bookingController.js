@@ -29,6 +29,12 @@ exports.bookSpaceByHour = async (req, res) => {
     const { spaceId } = req.params;
     const { durationPerHour, startDate, checkinTime } = req.body;
 
+    if (!durationPerHour || !startDate || !checkinTime) {
+      return res.status(400).json({
+        message: "Please fill out all fields"
+      })
+    };
+
     const user = await User.findByPk(userId);
     if (!user) {
       return res.status(404).json({
@@ -112,7 +118,7 @@ exports.verifyBookingPerhour = async (req, res) => {
       })
     };
 
-    if(booking.status !== "pending") {
+    if (booking.status !== "pending") {
       return res.status(404).json({
         message: "booking for this reference is already confirmed"
       })
@@ -230,6 +236,12 @@ exports.bookSpaceByDay = async (req, res) => {
     const { spaceId } = req.params;
     const { durationPerDay, startDate, checkinTime } = req.body;
 
+    if (!durationPerDay || !startDate || !checkinTime) {
+      return res.status(400).json({
+        message: "Please fill out all fields"
+      })
+    };
+
     const user = await User.findByPk(userId);
     if (!user) {
       return res.status(404).json({
@@ -312,7 +324,7 @@ exports.verifyBookingPerDay = async (req, res) => {
       })
     };
 
-    if(booking.status !== "pending") {
+    if (booking.status !== "pending") {
       return res.status(404).json({
         message: "booking for this reference is already confirmed"
       })
@@ -419,39 +431,74 @@ exports.verifyBookingPerDay = async (req, res) => {
   };
 };
 
-exports.checkBookingStatusForAllSpaces = async (req, res) => {
+// exports.checkBookingStatusForAllSpaces = async (req, res) => {
+//   try {
+//     const activeBookings = await Booking.findAll({ where: { status: "active" } });
+
+//     if (activeBookings.length === 0) {
+//       return res.status(200).json({ message: "No active bookings found." });
+//     }
+
+//     for (const booking of activeBookings) {
+//       if (new Date(booking.endDate) < currentDate) {
+//         booking.status = "expired";
+//         await booking.save();
+
+//         const space = await Space.findByPk(booking.spaceId);
+//         if (space) {
+//           space.capacity += 1; 
+//           await space.save();
+//         } else {
+//           console.error(`Space not found for ID: ${booking.spaceId}`);
+//         }
+//         continue
+//       }
+//     }
+
+//     res.status(200).json({
+//       message: "Expired bookings processed successfully"
+//     });
+
+//   } catch (error) {
+//     console.error("Error checking expired bookings:", error);
+//     res.status(500).json({
+//       message: "Error checking expired bookings",
+//       error: error.message,
+//     });
+//   }
+// }; 
+
+exports.checkBookingStatusForAllSpaces = async () => { // No req, res needed
   try {
-    const activeBookings = await Booking.findAll({ where: { status: "active" } });
+    const activeBookings = await Booking.findAll();
 
     if (activeBookings.length === 0) {
-      return res.status(200).json({ message: "No active bookings found." });
+      console.log("No active bookings found.");
+      return; // No response needed
     }
 
     for (const booking of activeBookings) {
-      if (new Date(booking.endDate) < currentDate) {
+      if ( new Date(booking.startDate) <= currentDate) {
+        booking.status = "active";
+        await booking.save();
+      }
+      else if (new Date(booking.endDate) < currentDate) {
         booking.status = "expired";
         await booking.save();
 
         const space = await Space.findByPk(booking.spaceId);
         if (space) {
-          space.capacity += 1; 
+          space.capacity += 1;
           await space.save();
         } else {
           console.error(`Space not found for ID: ${booking.spaceId}`);
         }
-        continue
       }
     }
 
-    res.status(200).json({
-      message: "Expired bookings processed successfully"
-    });
+    console.log("Expired bookings processed successfully");
 
   } catch (error) {
-    console.error("Error checking expired bookings:", error);
-    res.status(500).json({
-      message: "Error checking expired bookings",
-      error: error.message,
-    });
+    console.error("Error checking expired bookings:", error.message);
   }
-}; 
+};

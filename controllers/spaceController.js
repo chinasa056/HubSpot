@@ -10,6 +10,12 @@ exports.addSpace = async (req, res) => {
     const { name, overview, amenities, pricePerDay, pricePerHour, capacity, availability, averageRating, spaceType, location, spaceAdress,
     } = req.body;
 
+    if(!name || !overview || !amenities || !pricePerDay || !pricePerHour || !capacity || !availability || !spaceType || !location || !spaceAdress) {
+      return res.status(400).json({
+        message: "Please Input All Fields"
+      })
+    };
+
     let parsedAvailability;
 
     try {
@@ -417,3 +423,26 @@ exports.approveSpace = async (req, res) => {
     });
   }
 };
+
+exports.getUnapprovedSpaces = async (req, res) => {
+  try {
+    const unapprovedSpaces = await Space.findAll({ where: { isApproved: false } });
+    if(unapprovedSpaces.length === 0) {
+      return res.status(404).json({
+        message: "No Unapproved Space found"
+      })
+    };
+
+    res.status(200).json({
+      message: "All unapproved spaces in the database",
+      data: unapprovedSpaces
+    })
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Error approving  Space",
+      data: error.message,
+    });
+  }
+}

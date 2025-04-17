@@ -1,5 +1,5 @@
 const { getSpacesByHost } = require("../controllers/hostController");
-const { addSpace, getAllSpaces, getOneSpace, getSpacesByLocation, deleteSpace, updateSpace, getTopRatedSpaces, approveSpace, getSpacesBySpaceType } = require("../controllers/spaceController");
+const { addSpace, getAllSpaces, getOneSpace, getSpacesByLocation, deleteSpace, updateSpace, getTopRatedSpaces, approveSpace, getSpacesBySpaceType, getUnapprovedSpaces } = require("../controllers/spaceController");
 const { hostAuth, authenticate, isAdmin } = require("../middleware/authentication");
 const upload = require("../utils/multer")
 
@@ -807,5 +807,77 @@ router.delete("/space/delete/:spaceId", authenticate, isAdmin, deleteSpace);
  */
 
 router.patch("/space/approve/:spaceId", authenticate, isAdmin, approveSpace);
+
+/**
+ * @swagger
+ * /api/v1/spaces/unapproved:
+ *   get:
+ *     summary: Get all unapproved spaces (Admin only)
+ *     description: Admin route to retrieve all spaces in the database that have not yet been approved.
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of all unapproved spaces
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "All unapproved spaces in the database"
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: "1b2c3d4e-567f-890g-h1i2-j3k4l5m6n7o8"
+ *                       name:
+ *                         type: string
+ *                         example: "The Green Room"
+ *                       isApproved:
+ *                         type: boolean
+ *                         example: false
+ *                       location:
+ *                         type: string
+ *                         example: "Lekki Phase 1, Lagos"
+ *                       hostId:
+ *                         type: string
+ *                         example: "3e4f5g6h-789i-012j-k3l4-m5n6o7p8q9r0"
+ *                       pricePerDay:
+ *                         type: number
+ *                         example: 30000
+ *                       capacity:
+ *                         type: number
+ *                         example: 15
+ *       404:
+ *         description: No unapproved space found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "No Unapproved Space found"
+ *       500:
+ *         description: Server error while retrieving unapproved spaces
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Error approving Space"
+ *                 data:
+ *                   type: string
+ *                   example: "Internal server error"
+ */
+router.get("/spaces/unapproved", authenticate, isAdmin, getUnapprovedSpaces)
 
 module.exports = router
