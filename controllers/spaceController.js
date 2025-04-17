@@ -280,7 +280,7 @@ exports.updateSpace = async (req, res) => {
       const newUploadedImages = [];
       for (const image of files) {
         const result = await cloudinary.uploader.upload(image.path, {
-          folder: "spaces",
+          folder: "uploads",
         });
         fs.unlinkSync(image.path);
         newUploadedImages.push({
