@@ -727,7 +727,7 @@ router.delete("/users/delete", authenticate, deleteUserAccount)
 router.get("/authenticate", passport.authenticate("google", { scope: ['profile', "email"] }))
 
 router.get("/users/login", passport.authenticate("google"), async (req, res) => {
-    const token = await jwt.sign({userId: req.user._id, isAdmin: req.user.isAdmin, isLoggedIn: req.user.isLoggedIn}, process.env.JWT_SECRET, {expiresIn: "1day"})
+    const token = await jwt.sign({userId: req.user.id, isAdmin: req.user.isAdmin, isLoggedIn: req.user.isLoggedIn}, process.env.JWT_SECRET, {expiresIn: "1day"})
     res.status(200).json({
         message: "Login Successful",
         data: req.user,
