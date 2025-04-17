@@ -536,13 +536,13 @@ exports.getSpaceBookings = async (req, res) => {
       });
     };
 
-    const allSpaces = await Space.findAll({where: {hostId: hostId}, attributes: ["name"],
+    const space = await Space.findOne({where: {hostId: hostId}, attributes: ["name"],
     include: [{
       model: Booking,
-      attributes: ['userName', 'startDate', 'status']
+      attributes: ['userName', 'startDate','endDate', 'status', 'profileImage']
     }]})
 
-    if (allSpaces.length === 0) {
+    if (!space) {
       return res.status(404).json({
         message: "No space found for this host",
       });
@@ -550,7 +550,7 @@ exports.getSpaceBookings = async (req, res) => {
 
     res.status(200).json({
       message: "Space and bookings retrieved successfully",
-      data: allSpaces,
+      data: space,
     });
   } catch (error) {
     console.error(error.message);

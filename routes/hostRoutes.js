@@ -853,8 +853,8 @@ router.get("/host/listings", hostAuth, manageListing);
  * @swagger
  * /api/v1/host/spacebookings:
  *   get:
- *     summary: Get all spaces and their bookings for the authenticated host
- *     description: Retrieves a list of all spaces owned by the authenticated host, along with booking details for each space including user name, start date, and booking status.
+ *     summary: Get space and associated bookings for a host
+ *     description: Retrieves the space owned by the authenticated host along with booking details such as user name, start date, end date, booking status, and user profile image.
  *     tags: [Host]
  *     security:
  *       - bearerAuth: []
@@ -870,31 +870,36 @@ router.get("/host/listings", hostAuth, manageListing);
  *                   type: string
  *                   example: "Space and bookings retrieved successfully"
  *                 data:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       name:
- *                         type: string
- *                         example: "Modern Co-working Space"
- *                       Bookings:
- *                         type: array
- *                         items:
- *                           type: object
- *                           properties:
- *                             userName:
- *                               type: string
- *                               example: "Jane Doe"
- *                             startDate:
- *                               type: string
- *                               format: date
- *                               example: "2025-05-01"
- *                             status:
- *                               type: string
- *                               enum: [pending, active, upcoming, completed, failed]
- *                               example: "active"
+ *                   type: object
+ *                   properties:
+ *                     name:
+ *                       type: string
+ *                       example: "Premium Coworking Space"
+ *                     Bookings:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           userName:
+ *                             type: string
+ *                             example: "John Doe"
+ *                           startDate:
+ *                             type: string
+ *                             format: date
+ *                             example: "2025-04-15"
+ *                           endDate:
+ *                             type: string
+ *                             format: date
+ *                             example: "2025-04-20"
+ *                           status:
+ *                             type: string
+ *                             example: "active"
+ *                           profileImage:
+ *                             type: string
+ *                             format: uri
+ *                             example: "https://res.cloudinary.com/.../profile.jpg"
  *       404:
- *         description: Host or spaces not found
+ *         description: Host or space not found
  *         content:
  *           application/json:
  *             schema:
