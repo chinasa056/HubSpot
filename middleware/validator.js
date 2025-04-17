@@ -205,7 +205,7 @@ exports.addSpaceValidator = (req, res, next) => {
       "string.empty": "Amenities cannot be empty.",
       "any.required": "Amenities are required.",
     }),
-    availability: Joi.string().required().invalid("").custom((value, helpers) => {
+    availability: joi.string().required().invalid("").custom((value, helpers) => {
       try {
         JSON.parse(value);
         return value;
