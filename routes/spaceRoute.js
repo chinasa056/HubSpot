@@ -1,6 +1,7 @@
 const { getSpacesByHost } = require("../controllers/hostController");
 const { addSpace, getAllSpaces, getOneSpace, getSpacesByLocation, deleteSpace, updateSpace, getTopRatedSpaces, approveSpace, getSpacesBySpaceType, getUnapprovedSpaces } = require("../controllers/spaceController");
 const { hostAuth, authenticate, isAdmin } = require("../middleware/authentication");
+const { addSpaceValidator } = require("../middleware/validator");
 const upload = require("../utils/multer")
 
 const router = require("express").Router();
@@ -122,7 +123,7 @@ const router = require("express").Router();
  *       bearerFormat: JWT
  */
 
-router.post("/space/create", hostAuth, upload.array("images", 5), addSpace);
+router.post("/space/create", hostAuth, upload.array("images", 5), addSpaceValidator,addSpace);
 
 /**
  * @swagger

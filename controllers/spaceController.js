@@ -10,12 +10,6 @@ exports.addSpace = async (req, res) => {
     const { name, overview, amenities, pricePerDay, pricePerHour, capacity, availability, averageRating, spaceType, location, spaceAdress,
     } = req.body;
 
-    if(!name || !overview || !amenities || !pricePerDay || !pricePerHour || !capacity || !availability || !spaceType || !location || !spaceAdress) {
-      return res.status(400).json({
-        message: "Please Input All Fields"
-      })
-    };
-
     let parsedAvailability;
 
     try {

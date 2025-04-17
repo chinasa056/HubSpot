@@ -64,7 +64,7 @@ Space.init(
     },
     spaceType: {
       type: DataTypes.ENUM,
-      values: ['cowork space', 'creative spaces'],
+      values: ['cowork hub', 'creative space'],
       allowNull: false
     },
     location: {
