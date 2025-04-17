@@ -279,9 +279,7 @@ exports.updateSpace = async (req, res) => {
 
       const newUploadedImages = [];
       for (const image of files) {
-        const result = await cloudinary.uploader.upload(image.path, {
-          folder: "uploads",
-        });
+        const result = await cloudinary.uploader.upload(image.path);
         fs.unlinkSync(image.path);
         newUploadedImages.push({
           imageUrl: result.secure_url,

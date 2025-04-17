@@ -217,7 +217,7 @@ exports.addSpaceValidator = (req, res, next) => {
       "string.empty": "Availability cannot be empty.",
       "any.invalid": "Availability must be a valid JSON string."
     }),
-    spaceType: joi.string().valid("cowork space", "creative space").required().messages({
+    spaceType: joi.string().valid("cowork hub", "creative space").required().messages({
       "any.only": "Space type must be 'cowork hub' or 'creative spaces'.",
       "any.required": "Space type is required.",
     }),
