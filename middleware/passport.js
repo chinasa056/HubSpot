@@ -30,12 +30,16 @@ passport.use(new GoogleStrategy({
 }))
 
 passport.serializeUser((user, done) => {
+    console.log('serialize user:',user);
+    
     done(null, user.id)
 });
 
 passport.deserializeUser(async (id, done) => {
     try{
         const user = await User.findByPk(id)
+    console.log('deserialize user: ',user);
+
         if(!user) {
             return done(new Error("User not found"), null)
         }
