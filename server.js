@@ -12,8 +12,9 @@ const session = require("express-session")
 const userRouter = require('./routes/userRoute');
 const spaceRoute = require("./routes/spaceRoute")
 const subscriptionRoute = require("./routes/subscriptionRoute");
-const favoriteRoute = require("./routes/favorite");
+const favoriteRoute = require("./routes/favouriteRoute");
 const bookingRoute = require("./routes/bookingRoute")
+const reviewRoute = require("./routes/review")
 
 const hostRoute = require('./routes/hostRoutes')
 const PORT = process.env.PORT || 7039;
@@ -36,9 +37,11 @@ app.use(passport.session())
 app.use('/api/v1', userRouter);
 app.use('/api/v1', spaceRoute);
 app.use('/api/v1', subscriptionRoute);
-app.use('/api/v1/favorites', favoriteRoute);
 app.use('/api/v1', hostRoute);
+app.use('/api/v1', favoriteRoute);
 app.use('/api/v1', bookingRoute);
+app.use('/api/v1', reviewRoute);
+
 
 
 

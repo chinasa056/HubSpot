@@ -205,7 +205,7 @@ exports.verifyBookingPerhour = async (req, res) => {
       await booking.save();
 
       res.status(200).json({
-        message: "booking verification is successful",
+        message: "booking verification is successful, please check your email for your booking details",
         data: reference
       });
     } else {
@@ -423,7 +423,7 @@ exports.verifyBookingPerDay = async (req, res) => {
       await booking.save();
 
       res.status(200).json({
-        message: "booking verification is successful",
+        message: "booking verification is successful, please check your email for your booking details",
         data: reference,
         bookingDetails: booking
       });
