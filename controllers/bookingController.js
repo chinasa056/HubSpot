@@ -131,11 +131,11 @@ exports.verifyBookingPerhour = async (req, res) => {
       })
     };
 
-    if (booking.status !== "pending") {
-      return res.status(404).json({
-        message: "booking for this reference is already confirmed"
-      })
-    };
+    // if (booking.status !== "pending") {
+    //   return res.status(404).json({
+    //     message: "booking for this reference is already confirmed"
+    //   })
+    // };
 
     const user = await User.findByPk(booking.userId);
     if (!user) {
@@ -347,11 +347,11 @@ exports.verifyBookingPerDay = async (req, res) => {
       })
     };
 
-    if (booking.status !== "pending") {
-      return res.status(404).json({
-        message: "booking for this reference is already confirmed"
-      })
-    };
+    // if (booking.status !== "pending") {
+    //   return res.status(404).json({
+    //     message: "booking for this reference is already confirmed"
+    //   })
+    // };
 
     const user = await User.findByPk(booking.userId);
     if (!user) {
