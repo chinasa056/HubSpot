@@ -141,13 +141,13 @@ exports.verifyUser = async (req, res) => {
         }
 
         if (user.isVerified) {
-          res.redirect("https://hubspot-liard.vercel.app/hostlogin");
+          res.redirect("https://hubspot-liard.vercel.app/login");
         }
 
         user.isVerified = true;
         await user.save();
 
-        res.redirect("https://hubspot-liard.vercel.app/hostlogin");
+        res.redirect("https://hubspot-liard.vercel.app/login");
       }
     });
   } catch (error) {
