@@ -121,6 +121,7 @@ exports.bookSpaceByHour = async (req, res) => {
 
 exports.verifyBookingPerhour = async (req, res) => {
   try {
+    const currentDate = new Date()
     const { reference } = req.query;
     const booking = await Booking.findOne({ where: { reference } });
 
@@ -139,7 +140,7 @@ exports.verifyBookingPerhour = async (req, res) => {
     const user = await User.findByPk(booking.userId);
     if (!user) {
       return res.status(404).json({
-        message: `User not found for booking ID: ${subscription.id}`,
+        message: `User not found for booking ID: ${booking.id}`,
       })
     };
 
@@ -337,6 +338,7 @@ exports.bookSpaceByDay = async (req, res) => {
 
 exports.verifyBookingPerDay = async (req, res) => {
   try {
+    const currentDate = new Date()
     const { reference } = req.query;
     const booking = await Booking.findOne({ where: { reference } });
     if (!booking) {
@@ -354,7 +356,7 @@ exports.verifyBookingPerDay = async (req, res) => {
     const user = await User.findByPk(booking.userId);
     if (!user) {
       return res.status(404).json({
-        message: `User not found for booking ID: ${subscription.id}`,
+        message: `User not found for booking ID: ${booking.id}`,
       })
     };
 
