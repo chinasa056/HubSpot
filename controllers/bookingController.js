@@ -117,6 +117,9 @@ exports.verifyBookingPerhour = async (req, res) => {
         message: "No booking found for this reference"
       })
     };
+console.log("Entire booking", booking);
+console.log("booking status: ", booking.status);
+
 
     if (booking.status !== "pending") {
       return res.status(404).json({
@@ -154,11 +157,16 @@ exports.verifyBookingPerhour = async (req, res) => {
         booking.status = "active";
       }
       const startDateTime = new Date(`${startDate} ${checkinTime}`);
+      console.log('start date time:', startDateTime);
+      
       booking.endDate = new Date(startDateTime.getTime() + booking.durationPerHour * 60 * 60 * 1000);
+      console.log('bookingduration per hour: ',booking.durationPerHour);
+      
+      console.log('combined',  new Date(startDateTime.getTime() + booking.durationPerHour * 60 * 60 * 1000 ));
 
       // UPDATE THE SPACE APACITY DETAILS
-      space.capacity -= 1;
-      space.bookingCount += 1;
+      space.capacity -= 1
+      space.bookingCount += 1
 
       if (space.capacity === 0) {
         space.isAvailable = false;
@@ -362,13 +370,18 @@ exports.verifyBookingPerDay = async (req, res) => {
       booking.endDate = new Date(startDate.getTime() + durationPerDay * 24 * 60 * 60 * 1000); // Add duration per day to startDate
 
       // UPDATE THE SPACE APACITY DETAILS
-      space.capacity -= 1;
-      space.bookingCount += 1;
+      space.capacity -= 1
+      space.bookingCount += 1
+
+      console.log(typeof space.capacity);
+      
 
       if (space.capacity === 0) {
         space.isAvailable = false;
       }
       await space.save();
+
+      console.log(typeof space.capacity);
 
       // Update the host's current balance
       const host = await Host.findByPk(space.hostId);
@@ -483,8 +496,11 @@ exports.checkBookingStatusForAllSpaces = async () => { // No req, res needed
         await booking.save();
       }
       else if (new Date(booking.endDate) < currentDate) {
+        console.log(new Date(booking.endDate) < currentDate);
+        
         booking.status = "expired";
         await booking.save();
+console.log('after expiry', booking);
 
         const space = await Space.findByPk(booking.spaceId);
         if (space) {
