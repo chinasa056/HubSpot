@@ -66,7 +66,7 @@ app.use((error, req, res, next) => {
 
 
 const swaggerJsdoc = require("swagger-jsdoc");
-const swagger_UI = require("swagger-ui-express")
+const swagger_UI = require("swagger-ui-express");
 
 const options = {
   definition: {
@@ -113,14 +113,15 @@ app.use("/appdocumentation", swagger_UI.serve, swagger_UI.setup(openapiSpecifica
 
 // const { checkBookingStatusForAllSpaces } = require("./controllers/bookingController");
 // checkBookingStatusForAllSpaces()
+const { checkBookingStatusForAllSpaces } = require("./controllers/bookingController");
 
-// cron.schedule("* * * * *", () => {
-//   console.log("Running automated booking status check...");
-//   checkBookingStatusForAllSpaces();
-// }, {
-//   scheduled: true,
-//   timezone: "Africa/Lagos"
-// });
+cron.schedule("* * * * *", () => {
+  console.log("Running automated booking status check...");
+  checkBookingStatusForAllSpaces();
+}, {
+  scheduled: true,
+  timezone: "Africa/Lagos"
+});
 app.listen(PORT, () => {
   console.log(`server is listening to port: ${PORT}`);
 });
