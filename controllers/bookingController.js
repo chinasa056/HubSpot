@@ -15,7 +15,7 @@ const formattedDate = new Date().toLocaleString();
 const korapaySecret = process.env.KORAPAY_SECRET_KEY;
 const transactionUrl = "https://api.korapay.com/merchant/api/v1/charges/initialize"
 const verifyUrl = "https://api.korapay.com/merchant/api/v1/charges"
-const currentDate = new Date()
+// const currentDate = new Date()
 const supportEmail = process.env.APP_USERNAME
 
 exports.bookSpaceByHour = async (req, res) => {
@@ -34,6 +34,18 @@ exports.bookSpaceByHour = async (req, res) => {
         message: "Please fill out all fields"
       })
     };
+
+    const currentDateTime = new Date(); 
+
+    const datePart = new Date(startDate).toISOString().split("T")[0]; // "2025-04-15"
+    const startDateTime = new Date(`${datePart}T${checkinTime}`); // "2025-04-15T07:00:00"
+    
+    if (startDateTime < currentDateTime) {
+      return res.status(400).json({
+        message: "Start date and check-in time cannot be in the past",
+      });
+    }
+    
 
     const user = await User.findByPk(userId);
     if (!user) {
@@ -146,7 +158,7 @@ exports.verifyBookingPerhour = async (req, res) => {
     const firstName = user.fullName.split(" ")[0];
 
     const { startDate, checkinTime } = booking
-    
+
     if (data?.status && data.data?.status === "success") {
       if (currentDate < booking.startDate) {
         booking.status = "upcoming"
@@ -157,7 +169,7 @@ exports.verifyBookingPerhour = async (req, res) => {
       const startDateTime = new Date(`${plainDate}T${checkinTime}`);
 
       booking.endDate = new Date(startDateTime.getTime() + Number(booking.durationPerHour) * 60 * 60 * 1000);
-    
+
       // UPDATE THE SPACE APACITY DETAILS
       space.capacity -= 1
       space.bookingCount += 1
@@ -229,6 +241,7 @@ exports.verifyBookingPerhour = async (req, res) => {
 
 exports.bookSpaceByDay = async (req, res) => {
   try {
+    const currentDate = new Date()
     const ref = otpgenerator.generate(10, {
       lowerCaseAlphabets: true,
       upperCaseAlphabets: true,
@@ -243,6 +256,12 @@ exports.bookSpaceByDay = async (req, res) => {
         message: "Please fill out all fields"
       })
     };
+
+    if (new Date(startDate) < new Date(currentDate.setHours(0, 0, 0, 0))) {
+      return res.status(400).json({
+        message: "Start date cannot be in the past"
+      });
+    }
 
     const user = await User.findByPk(userId);
     if (!user) {
