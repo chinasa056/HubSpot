@@ -191,7 +191,7 @@ exports.bookingFailure = (firstName, supportEmail, reference) => {
             background-color: #f4f4f4;
         }
         .header {
-            background: #DC2626; /* Red background */
+            background: #1E3A8A; /* Red background */
             padding: 20px;
             text-align: center;
             border-bottom: 1px solid #ddd;

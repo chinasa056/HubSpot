@@ -16,7 +16,7 @@ const korapaySecret = process.env.KORAPAY_SECRET_KEY;
 const transactionUrl = "https://api.korapay.com/merchant/api/v1/charges/initialize"
 const verifyUrl = "https://api.korapay.com/merchant/api/v1/charges"
 // const currentDate = new Date()
-const supportEmail = process.env.APP_USERNAME
+// const supportEmail = "hubspotnigeria@gmail.com"
 
 exports.bookSpaceByHour = async (req, res) => {
   try {
@@ -205,9 +205,13 @@ exports.verifyBookingPerhour = async (req, res) => {
     } else if (data?.status && data.data?.status !== "success") {
       booking.status = "failed";
 
+      const {reference} = booking
+      const supportEmail = "hubspotnigeria@gmail.com"
+
+      
       const failedeHtml = bookingFailure(
         firstName,
-        booking.reference,
+        reference,
         supportEmail
       );
 
@@ -217,12 +221,12 @@ exports.verifyBookingPerhour = async (req, res) => {
         html: failedeHtml,
       };
 
-      // await sendMail(failureMailOptions);
+      await sendMail(failureMailOptions);
       await booking.save();
 
       res.status(200).json({
         message: "booking failed",
-        error: error.message
+        // error: error.message
       });
     };
 
