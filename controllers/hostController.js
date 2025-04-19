@@ -577,7 +577,7 @@ exports.manageListing = async (req, res) => {
 
     const spaces = await Space.findAll({
       where: { hostId },
-      attributes: ["name", "bookingCount", "createdAt", "capacity", "listingStatus", "images"]
+      attributes: ["name","spaceType", "bookingCount", "createdAt", "capacity", "listingStatus", "images"]
     });
 
     if (spaces.length === 0) {
@@ -606,10 +606,8 @@ exports.manageListing = async (req, res) => {
 exports.getBookingCategories = async (req, res) => {
   try {
     const { userId: hostId } = req.user;
-    const currentDate = new Date();
 
     const spaces = await Space.findAll({ where: { hostId } });
-
 
     const upcomingBookings = [];
     const activeBookings = [];

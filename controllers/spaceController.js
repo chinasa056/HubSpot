@@ -92,7 +92,7 @@ exports.addSpace = async (req, res) => {
       hostId: userId,
       spaceAdress,
       spaceType: spaceType.toLowerCase(),
-      name: name.toLowerCase(),
+      name,
       overview,
       amenities,
       pricePerDay,
@@ -208,18 +208,18 @@ exports.getSpacesBySpaceType = async (req, res) => {
 
     if (spaces.length === 0) {
       return res.status(404).json({
-        message: "No Spaces Found for This Category",
+        message: "No Spaces Found for This Space Type",
       });
     }
 
     res.status(200).json({
-      message: "Spaces Found for This Category",
+      message: "Spaces Found for This Space Type",
       data: spaces,
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      message: "Error Fetching Spaces by Category",
+      message: "Error Fetching Spaces by Space Type",
       data: error.message,
     });
   }

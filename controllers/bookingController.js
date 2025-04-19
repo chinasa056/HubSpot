@@ -36,9 +36,8 @@ exports.bookSpaceByHour = async (req, res) => {
     };
 
     const currentDateTime = new Date(); 
-
-    const datePart = new Date(startDate).toISOString().split("T")[0]; // "2025-04-15"
-    const startDateTime = new Date(`${datePart}T${checkinTime}`); // "2025-04-15T07:00:00"
+    const datePart = new Date(startDate).toISOString().split("T")[0];
+    const startDateTime = new Date(`${datePart}T${checkinTime}`); 
     
     if (startDateTime < currentDateTime) {
       return res.status(400).json({
@@ -46,7 +45,6 @@ exports.bookSpaceByHour = async (req, res) => {
       });
     }
     
-
     const user = await User.findByPk(userId);
     if (!user) {
       return res.status(404).json({
@@ -130,12 +128,6 @@ exports.verifyBookingPerhour = async (req, res) => {
         message: "No booking found for this reference"
       })
     };
-
-    // if (booking.status !== "pending") {
-    //   return res.status(404).json({
-    //     message: "booking for this reference is already confirmed"
-    //   })
-    // };
 
     const user = await User.findByPk(booking.userId);
     if (!user) {
@@ -347,12 +339,6 @@ exports.verifyBookingPerDay = async (req, res) => {
       })
     };
 
-    // if (booking.status !== "pending") {
-    //   return res.status(404).json({
-    //     message: "booking for this reference is already confirmed"
-    //   })
-    // };
-
     const user = await User.findByPk(booking.userId);
     if (!user) {
       return res.status(404).json({
@@ -382,21 +368,16 @@ exports.verifyBookingPerDay = async (req, res) => {
       } else if (currentDate >= booking.startDate) {
         booking.status = "active";
       }
-      booking.endDate = new Date(startDate.getTime() + durationPerDay * 24 * 60 * 60 * 1000); // Add duration per day to startDate
+      booking.endDate = new Date(startDate.getTime() + durationPerDay * 24 * 60 * 60 * 1000); 
 
       // UPDATE THE SPACE APACITY DETAILS
       space.capacity -= 1
       space.bookingCount += 1
 
-      console.log(typeof space.capacity);
-
-
       if (space.capacity === 0) {
         space.isAvailable = false;
       }
       await space.save();
-
-      console.log(typeof space.capacity);
 
       // Update the host's current balance
       const host = await Host.findByPk(space.hostId);
@@ -496,6 +477,44 @@ exports.verifyBookingPerDay = async (req, res) => {
 //   }
 // }; 
 
+// exports.checkBookingStatusForAllSpaces = async () => {
+//   try {
+//     const currentDate = new Date();
+
+//     const bookings = await Booking.findAll();
+
+//     if (bookings.length === 0) {
+//       console.log("No bookings found.");
+//       return;
+//     }
+
+//     for (const booking of bookings) {
+//       if (new Date(booking.startDate) <= currentDate) {
+//         booking.status = "active";
+//         await booking.save();
+//       }
+
+//       else if (booking.status !== "expired" && new Date(booking.endDate) < currentDate) {
+//         booking.status = "expired";
+//         await booking.save();
+
+//         const space = await Space.findByPk(booking.spaceId);
+//         if (space) {
+//           space.capacity += 1;
+//           await space.save();
+//         } else {
+//           console.error(`Space not found for ID: ${booking.spaceId}`);
+//         }
+//       }
+//     }
+
+//     console.log("Booking status check completed.");
+
+//   } catch (error) {
+//     console.error("Error checking booking status:", error.message);
+//   }
+// };
+
 exports.checkBookingStatusForAllSpaces = async () => {
   try {
     const currentDate = new Date();
@@ -505,16 +524,23 @@ exports.checkBookingStatusForAllSpaces = async () => {
     if (bookings.length === 0) {
       console.log("No bookings found.");
       return;
-    }
-
+    };
+    
     for (const booking of bookings) {
-      if (new Date(booking.startDate) <= currentDate) {
-        booking.status = "active";
-        await booking.save();
-      }
+      const {startDate, checkinTime, endDate, status} = booking
 
-      else if (booking.status !== "expired" && new Date(booking.endDate) < currentDate) {
-        booking.status = "expired";
+      const startDateOnly = new Date(startDate).toISOString().split("T")[0];
+      const combinedDateAndTime = `${startDateOnly}T${checkinTime}`;
+      const startDateAndTime = new Date(combinedDateAndTime);
+
+      if (startDateAndTime <= currentDate) {
+        if (status !== "active") {
+          status = "active";
+          await booking.save();
+        }
+      }
+      else if (status !== "expired" && new Date(endDate) < currentDate) {
+        status = "expired";
         await booking.save();
 
         const space = await Space.findByPk(booking.spaceId);
@@ -525,7 +551,7 @@ exports.checkBookingStatusForAllSpaces = async () => {
           console.error(`Space not found for ID: ${booking.spaceId}`);
         }
       }
-    }
+    };
 
     console.log("Booking status check completed.");
 
@@ -533,3 +559,4 @@ exports.checkBookingStatusForAllSpaces = async () => {
     console.error("Error checking booking status:", error.message);
   }
 };
+

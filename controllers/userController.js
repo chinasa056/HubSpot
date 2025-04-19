@@ -370,7 +370,8 @@ exports.manageBookings = async (req, res) => {
       });
     }
 
-    const userBookings = await Booking.findAll({ where: { userId } });
+    const userBookings = await Booking.findAll({ where: { userId },
+    attributes: ["id","spaceName", "startDate", "status"] });
 
     if (userBookings.length === 0) {
       return res.status(200).json({

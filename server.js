@@ -42,9 +42,6 @@ app.use('/api/v1', favoriteRoute);
 app.use('/api/v1', bookingRoute);
 app.use('/api/v1', reviewRoute);
 
-
-
-
 const server = async () => {
   try {
     await sequelize.authenticate();
@@ -66,7 +63,6 @@ app.use((error, req, res, next) => {
   }
   next()
 })
-
 
 const swaggerJsdoc = require("swagger-jsdoc");
 const swagger_UI = require("swagger-ui-express");
@@ -114,8 +110,6 @@ const options = {
 const openapiSpecification = swaggerJsdoc(options);
 app.use("/appdocumentation", swagger_UI.serve, swagger_UI.setup(openapiSpecification))
 
-// const { checkBookingStatusForAllSpaces } = require("./controllers/bookingController");
-// checkBookingStatusForAllSpaces()
 const { checkBookingStatusForAllSpaces } = require("./controllers/bookingController");
 
 cron.schedule("* * * * *", () => {

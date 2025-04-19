@@ -31,7 +31,7 @@ exports.getUserFavoriteSpace = async (req, res) => {
         const favorite = await Favorite.findAll({ where: { userId: req.user.userId },
         include: {
             model: Space,
-            attributes: ['name', 'averageRating']
+            attributes: ['name','location', 'averageRating']
         } });
         if (!favorite.length) {
             return res.status(404).json({
