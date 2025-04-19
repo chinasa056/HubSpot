@@ -508,7 +508,7 @@ exports.checkBookingStatusForAllSpaces = async () => {
     }
 
     for (const booking of bookings) {
-      if (booking.status === "upcoming" && new Date(booking.startDate) <= currentDate) {
+      if (new Date(booking.startDate) <= currentDate) {
         booking.status = "active";
         await booking.save();
       }
