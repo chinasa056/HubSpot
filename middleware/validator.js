@@ -206,25 +206,17 @@ exports.addSpaceValidator = (req, res, next) => {
       "any.required": "Amenities are required.",
     }),
     availability: joi.string().required().invalid(" ").custom((value, helpers) => {
-      console.log(value);
-      
       try {
         JSON.parse(value);
-      console.log(value);
-
         return value;
       } catch {
-        console.log(helpers);
         return helpers.error("any.invalid");
-        
       }
-    })
-    .messages({
+    }).messages({
       "any.required": "Availability is required.",
       "string.empty": "Availability cannot be empty.",
       "any.invalid": "Availability must be a valid JSON string.",
     }),
-  
     spaceType: joi.string().required().messages({
       "any.required": "Space type is required.",
       "string.empty": "spaceType cannot be empty.",
@@ -237,16 +229,19 @@ exports.addSpaceValidator = (req, res, next) => {
       "string.empty": "Space address cannot be empty.",
       "any.required": "Space address is required.",
     }),
+    averageRating: joi.number().min(0).max(5).messages({
+      "number.base": "Average rating must be a number.",
+      "number.min": "Average rating must be at least 0.",
+      "number.max": "Average rating must not exceed 5.",
+    }),
   });
 
   const { error } = schema.validate(req.body, { abortEarly: false });
 
   if (error) {
-    if(error) {
-        return res.status(400).json({
-            message: error.message
-        })
-    }
+    return res.status(400).json({
+      message: error.message
+    });
   }
 
   const files = req.files;
@@ -258,11 +253,12 @@ exports.addSpaceValidator = (req, res, next) => {
   const allowedTypes = "image/";
   const validFiles = files.filter(file => file.mimetype.startsWith(allowedTypes));
 
-  if (validFiles.length = 0 || validFiles.length > 5) {
+  if (validFiles.length === 0 || validFiles.length > 5) {
     return res.status(400).json({
-      message: "please upload only valid image types.",
+      message: "Please upload only valid image types.",
     });
   }
+
   next();
 };
 

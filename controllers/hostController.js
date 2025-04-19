@@ -577,7 +577,7 @@ exports.manageListing = async (req, res) => {
 
     const spaces = await Space.findAll({
       where: { hostId },
-      attributes: ["name","spaceType", "bookingCount", "createdAt", "capacity", "listingStatus", "images"]
+      attributes: ["name", "spaceType", "bookingCount", "createdAt", "capacity", "listingStatus", "images"]
     });
 
     if (spaces.length === 0) {
@@ -674,6 +674,75 @@ exports.getHostCurrentBalance = async (req, res) => {
     res.status(500).json({
       message: "Error fetching current balance bookings",
       error: error.message,
+    });
+  }
+};
+
+// BOOKINGS
+exports.fetchBookingListing = async (req, res) => {
+  try {
+    const { userId: hostId } = req.user;
+
+    const host = await Host.findByPk(hostId);
+    if (!host) {
+      return res.status(404).json({
+        message: "Host not found"
+      })
+    };
+
+    const spaces = await Space.findAll({
+      where: { hostId },
+      attributes: ["name","bookingCount", "capacity"]
+    });
+
+    if (spaces.length === 0) {
+      return res.status(400).json({
+        message: "No spaces listed for this host"
+      })
+    };
+
+    res.status(200).json({
+      message: "Space listings for this host",
+      data: spaces
+    })
+
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({
+      message: "Error categorizing bookings",
+      error: error.message
+    });
+  }
+};
+
+// SHOWING THE SPACES AFTER THE SPACES
+exports.getSpaceBookingsbySpaceId = async (req, res) => {
+  try {
+
+    const { spaceId } = req.params;
+    const space = await Space.findOne({
+      where: { spaceId }, attributes: ["name"],
+      include: [{
+        model: Booking,
+        attributes: ['userName', 'startDate', 'endDate', 'status']
+      }]
+    })
+
+    if (!space) {
+      return res.status(404).json({
+        message: "No space found",
+      });
+    }
+
+    res.status(200).json({
+      message: "Space and bookings retrieved successfully",
+      data: space,
+    });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({
+      message: "Error fetching space bookings",
+      error: error.message
     });
   }
 };

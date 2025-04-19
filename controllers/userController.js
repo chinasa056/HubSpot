@@ -208,8 +208,8 @@ exports.login = async (req, res) => {
 
     res.status(200).json({
       message: "Account successfully logged in",
-      data: user.fullName,
-      token,
+      data: user,
+      token
     });
   } catch (error) {
     console.error(error);

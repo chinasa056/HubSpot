@@ -1,4 +1,4 @@
-const { registerHost, verifyHost, loginHost, forgottenPasswordHost, resetPasswordHost, changePasswordHost, loggedOutHost, updateHostDetails, deleteHostAccount, getSpacesByHost, getBookingCategories, manageListing, getSpaceBookings, getHostCurrentBalance } = require('../controllers/hostController');
+const { registerHost, verifyHost, loginHost, forgottenPasswordHost, resetPasswordHost, changePasswordHost, loggedOutHost, updateHostDetails, deleteHostAccount, getSpacesByHost, getBookingCategories, manageListing, getSpaceBookings, getHostCurrentBalance, fetchBookingListing, getSpaceBookingsbySpaceId } = require('../controllers/hostController');
 
 const { authenticate, hostAuth } = require('../middleware/authentication');
 const { loginValidator, resetPasswordValidator, changePasswordValidator, registerHostValidator } = require('../middleware/validator');
@@ -1023,5 +1023,157 @@ router.get("/host/bookingcategories", hostAuth, getBookingCategories);
  */
 router.get("/host/currentbalance", hostAuth, getHostCurrentBalance)
 
+
+/**
+ * @swagger
+ * /api/v1/host/bookingList:
+ *   get:
+ *     summary: Get Host Space Listings
+ *     description: Retrieves a list of all spaces owned by the authenticated host, including their name, type, booking count, and capacity.
+ *     tags: [Host - Bookings]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Space listings for this host
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Space listings for this host
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       name:
+ *                         type: string
+ *                         example: Cozy Loft Apartment
+ *                       spaceType:
+ *                         type: string
+ *                         example: Apartment
+ *                       bookingCount:
+ *                         type: number
+ *                         example: 12
+ *                       capacity:
+ *                         type: number
+ *                         example: 4
+ *       400:
+ *         description: No spaces listed for this host
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: No spaces listed for this host
+ *       404:
+ *         description: Host not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Host not found
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Error categorizing bookings
+ *                 error:
+ *                   type: string
+ *                   example: Error details here
+ */
+router.get("/host/bookingList", hostAuth, fetchBookingListing);
+
+
+/**
+ * @swagger
+ * /api/v1/host/bookingdetails/{spaceId}:
+ *   get:
+ *     summary: Get bookings for a specific space
+ *     description: Retrieves the space name and its associated bookings using the provided spaceId.
+ *     tags: [Host - Bookings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: spaceId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID of the space to retrieve bookings for
+ *     responses:
+ *       200:
+ *         description: Space and bookings retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Space and bookings retrieved successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     name:
+ *                       type: string
+ *                       example: Cozy Loft
+ *                     Bookings:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           userName:
+ *                             type: string
+ *                             example: Jane Doe
+ *                           startDate:
+ *                             type: string
+ *                             format: date
+ *                             example: 2025-04-01
+ *                           endDate:
+ *                             type: string
+ *                             format: date
+ *                             example: 2025-04-03
+ *                           status:
+ *                             type: string
+ *                             example: active
+ *       404:
+ *         description: No space found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: No space found
+ *       500:
+ *         description: Error fetching space bookings
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Error fetching space bookings
+ *                 error:
+ *                   type: string
+ *                   example: Error details here
+ */
+router.get("/host/bookingdetails/:spaceId", hostAuth, getSpaceBookingsbySpaceId)
 
 module.exports = router;

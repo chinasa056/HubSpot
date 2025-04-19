@@ -148,6 +148,8 @@ exports.verifyBookingPerhour = async (req, res) => {
     });
 
     const { data } = response;
+    console.log("response data: ", data);
+    
     const firstName = user.fullName.split(" ")[0];
 
     const { startDate, checkinTime } = booking
@@ -200,7 +202,7 @@ exports.verifyBookingPerhour = async (req, res) => {
         message: "booking verification is successful, please check your email for your booking details",
         data: reference
       });
-    } else {
+    } else if (data?.status && data.data?.status !== "success") {
       booking.status = "failed";
 
       const failedeHtml = bookingFailure(
@@ -215,11 +217,12 @@ exports.verifyBookingPerhour = async (req, res) => {
         html: failedeHtml,
       };
 
-      await sendMail(failureMailOptions);
+      // await sendMail(failureMailOptions);
       await booking.save();
 
       res.status(200).json({
         message: "booking failed",
+        error: error.message
       });
     };
 
@@ -524,23 +527,22 @@ exports.checkBookingStatusForAllSpaces = async () => {
     if (bookings.length === 0) {
       console.log("No bookings found.");
       return;
-    };
-    
+    }
+
     for (const booking of bookings) {
-      const {startDate, checkinTime, endDate, status} = booking
-
-      const startDateOnly = new Date(startDate).toISOString().split("T")[0];
+      const startDateOnly = new Date(booking.startDate).toISOString().split("T")[0];
+      const checkinTime = booking.checkinTime;
       const combinedDateAndTime = `${startDateOnly}T${checkinTime}`;
-      const startDateAndTime = new Date(combinedDateAndTime);
+      const startDateTime = new Date(combinedDateAndTime);
 
-      if (startDateAndTime <= currentDate) {
-        if (status !== "active") {
-          status = "active";
+      if (startDateTime <= currentDate) {
+        if (booking.status !== "active") {
+          booking.status = "active";
           await booking.save();
         }
       }
-      else if (status !== "expired" && new Date(endDate) < currentDate) {
-        status = "expired";
+      else if (booking.status !== "expired" && new Date(booking.endDate) < currentDate) {
+        booking.status = "expired";
         await booking.save();
 
         const space = await Space.findByPk(booking.spaceId);
@@ -551,7 +553,7 @@ exports.checkBookingStatusForAllSpaces = async () => {
           console.error(`Space not found for ID: ${booking.spaceId}`);
         }
       }
-    };
+    }
 
     console.log("Booking status check completed.");
 
