@@ -113,15 +113,15 @@ const options = {
 const openapiSpecification = swaggerJsdoc(options);
 app.use("/appdocumentation", swagger_UI.serve, swagger_UI.setup(openapiSpecification))
 
-// const { checkBookingStatusForAllSpaces } = require("./controllers/bookingController");
+const { checkBookingStatusForAllSpaces } = require("./controllers/bookingController");
 
-// cron.schedule("* * * * *", () => {
-//   console.log("Running automated booking status check...");
-//   checkBookingStatusForAllSpaces();
-// }, {
-//   scheduled: true,
-//   timezone: "Africa/Lagos"
-// });
+cron.schedule("* * * * *", () => {
+  console.log("Running automated booking status check...");
+  checkBookingStatusForAllSpaces();
+}, {
+  scheduled: true,
+  timezone: "Africa/Lagos"
+});
 app.listen(PORT, () => {
   console.log(`server is listening to port: ${PORT}`);
 });
