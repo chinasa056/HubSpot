@@ -62,7 +62,7 @@ exports.initiateHostPayout = async (req, res) => {
         amount: payoutAmount,
         reference,
         status: "processing",
-        paymentDate: formattedDate,
+        paynemtDate: formattedDate,
       });
 
       return res.status(200).json({
