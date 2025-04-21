@@ -723,10 +723,17 @@ exports.fetchBookingListing = async (req, res) => {
 // SHOWING THE SPACES AFTER THE SPACES
 exports.getSpaceBookingsbySpaceId = async (req, res) => {
   try {
+    const {userId: hostId} = req.user
 
+    const host = await Host.findByPk(hostId);
+    if(!host) {
+      return res.status(404).json({
+        message: "Host not found"
+      })
+    };
     const { spaceId } = req.params;
     const space = await Space.findOne({
-      where: { spaceId }, attributes: ["name"],
+      where: { id: spaceId }, attributes: ["name"],
       include: [{
         model: Booking,
         attributes: ['userName', 'startDate', 'endDate', 'status']
