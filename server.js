@@ -16,6 +16,7 @@ const favoriteRoute = require("./routes/favouriteRoute");
 const bookingRoute = require("./routes/bookingRoute")
 const reviewRoute = require("./routes/review")
 const payoutRoute = require("./routes/payoutRoute")
+const korapayRoute = require("./routes/WebhookRoute")
 
 const hostRoute = require('./routes/hostRoutes')
 const PORT = process.env.PORT || 7039;
@@ -43,6 +44,8 @@ app.use('/api/v1', favoriteRoute);
 app.use('/api/v1', bookingRoute);
 app.use('/api/v1', reviewRoute);
 app.use('/api/v1', payoutRoute);
+
+app.use('/api/v1', korapayRoute);
 
 
 const server = async () => {
@@ -113,15 +116,15 @@ const options = {
 const openapiSpecification = swaggerJsdoc(options);
 app.use("/appdocumentation", swagger_UI.serve, swagger_UI.setup(openapiSpecification))
 
-const { checkBookingStatusForAllSpaces } = require("./controllers/bookingController");
+// const { checkBookingStatusForAllSpaces } = require("./controllers/bookingController");
 
-cron.schedule("* * * * *", () => {
-  console.log("Running automated booking status check...");
-  checkBookingStatusForAllSpaces();
-}, {
-  scheduled: true,
-  timezone: "Africa/Lagos"
-});
+// cron.schedule("* * * * *", () => {
+//   console.log("Running automated booking status check...");
+//   checkBookingStatusForAllSpaces();
+// }, {
+//   scheduled: true,
+//   timezone: "Africa/Lagos"
+// });
 app.listen(PORT, () => {
   console.log(`server is listening to port: ${PORT}`);
 });
