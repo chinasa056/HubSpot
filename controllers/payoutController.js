@@ -53,33 +53,33 @@ exports.initiateHostPayout = async (req, res) => {
     console.log("KoraPay response:", response.data);
     const {data } = response.data;
 
-    // if (data?.status  && data?.status === "processing") {
-    //   await Payment.create({
-    //     hostId: host.id,
-    //     email: host.email,
-    //     amount: payoutAmount,
-    //     reference,
-    //     status: "processing",
-    //     paymentDate: formattedDate,
-    //   });
+    if (data?.status  && data?.status === "processing") {
+      await Payment.create({
+        hostId: host.id,
+        email: host.email,
+        amount: payoutAmount,
+        reference,
+        status: "processing",
+        paymentDate: formattedDate,
+      });
 
-    //   return res.status(200).json({
-    //     message: "Payout request sent successfully. Awaiting confirmation.",
-    //     reference,
-    //     amount: payoutAmount,
-    //   });
-    // } else {
-    //   await Payment.create({
-    //     hostId: host.id,
-    //     email: host.email,
-    //     amount: 0,
-    //     reference,
-    //     status: "failed",
-    //     paymentDate: formattedDate,
-    //   });
+      return res.status(200).json({
+        message: "Payout request sent successfully. Awaiting confirmation.",
+        reference,
+        amount: payoutAmount,
+      });
+    } else {
+      await Payment.create({
+        hostId: host.id,
+        email: host.email,
+        amount: 0,
+        reference,
+        status: "failed",
+        paymentDate: formattedDate,
+      });
 
-    //   return res.status(500).json({ message: `KoraPay rejected payout: ${message}` });
-    // }
+      return res.status(500).json({ message: `KoraPay rejected payout: ${message}` });
+    }
   } catch (error) {
     console.error("Payout error:", error.message);
     return res.status(500).json({
