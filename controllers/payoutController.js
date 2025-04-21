@@ -119,7 +119,6 @@ exports.korapayWebhook = async (req, res) => {
         payment.status = "success";
 
         host.currentBalance -= data.amount;
-        await host.save();
 
         const payoutDetails = {
           reference: data.reference,
@@ -139,6 +138,7 @@ exports.korapayWebhook = async (req, res) => {
         };
 
         await sendMail(successMailOptions);
+        await host.save();
         await payment.save();
 
         console.log(
