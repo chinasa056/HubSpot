@@ -183,7 +183,7 @@ exports.getSpacesByLocation = async (req, res) => {
 
     if (spaces.length === 0) {
       return res.status(404).json({
-        message: "No Spaces Found for This Location",
+        message: [],
       });
     }
 
