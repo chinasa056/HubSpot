@@ -235,3 +235,79 @@ exports.bookingFailure = (firstName, supportEmail, reference) => {
 </html>
     `;
 };
+
+exports.payoutSuccess = (firstName, payoutDetails) => {
+    const { reference, amount, fee, status } = payoutDetails;
+
+    return `
+       <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payout Confirmation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            background-color: #2c2c2c;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            background-color: #f4f4f4;
+        }
+        .header {
+            background: #1E3A8A;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+            color: #ffffff;
+            border-radius: 10px 10px 0 0;
+        }
+        .content {
+            padding: 20px;
+            color: #333333;
+        }
+        .footer {
+            background: #1E3A8A;
+            padding: 10px;
+            text-align: center;
+            border-top: 1px solid #ddd;
+            font-size: 0.9em;
+            color: #cccccc;
+            border-radius: 0 0 10px 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Payout Processed Successfully!</h1>
+        </div>
+        <div class="content">
+            <p>Hello ${firstName},</p>
+            <p>Your payout request has been processed successfully. Here are the details of your payout:</p>
+            <p><strong>Reference:</strong> ${reference}</p>
+            <p><strong>Amount Paid:</strong> ₦${amount.toFixed(2)}</p>
+            <p><strong>Transaction Fee:</strong> ₦${fee.toFixed(2)}</p>
+            <p><strong>Status:</strong> ${status}</p>
+            <p>We have successfully transferred the amount to your account. You can check your balance for confirmation.</p>
+            <p>Thank you for being a valued host.</p>
+            <p>Best regards,<br>Payout Team</p>
+        </div>
+        <div class="footer">
+            <p>&copy; ${new Date().getFullYear()} . All rights reserved.</p>
+        </div>  
+    </div>
+</body>
+</html>
+    `;
+};

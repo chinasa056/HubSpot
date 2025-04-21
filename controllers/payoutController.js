@@ -2,6 +2,7 @@ const axios = require("axios");
 const Host = require("../models/host");
 const Payment = require("../models/payment");
 const otpgenerator = require("otp-generator");
+const { payoutSuccess } = require("../utils/mailTemplate");
 const formattedDate = new Date().toLocaleString();
 const korapaySecret = process.env.KORAPAY_SECRET_KEY;
 const payoutUrl = "https://api.korapay.com/merchant/api/v1/transactions/disburse";
@@ -110,10 +111,30 @@ exports.korapayWebhook = async (req, res) => {
   
         if (payment.status !== 'success') {
           payment.status = 'success';
-          await payment.save();
   
           host.currentBalance -= data.amount;
           await host.save();
+
+          const payoutDetails = {
+            reference: data.reference,
+            amount: data.amount,
+            fee: data.fee,
+            status: data.status
+          };
+
+          const firstName = host.fullName
+
+           const payoutSuccessHtml = payoutSuccess(firstName, payoutDetails);
+
+           const successMailOptions = {
+                   email: user.email,
+                   subject: "Withdrawal Successful",
+                   html: payoutSuccessHtml,
+                 };
+           
+                 await sendMail(successMailOptions);
+          await payment.save();
+
   
           console.log(`Payout successful. Host balance updated. Ref: ${data.reference}`);
         } else {
