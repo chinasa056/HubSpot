@@ -56,6 +56,7 @@ exports.initiateHostPayout = async (req, res) => {
     if (data?.status  && data?.status === "processing") {
       await Payment.create({
         hostId: host.id,
+        hostName: host.fullName,
         email: host.email,
         amount: payoutAmount,
         reference,
@@ -71,6 +72,7 @@ exports.initiateHostPayout = async (req, res) => {
     } else {
       await Payment.create({
         hostId: host.id,
+        hostName: host.fullName,
         email: host.email,
         amount: 0,
         reference,

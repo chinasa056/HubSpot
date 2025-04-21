@@ -16,6 +16,10 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
+      hostName: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
       amount: {
         type: Sequelize.INTEGER,
         allowNull: false,
@@ -31,7 +35,7 @@ module.exports = {
         defaultValue: 'processing',
       },
       paynemtDate: {
-        type: Sequelize.ENUM,
+        type: Sequelize.DATE,
         allowNull: false,
       },
       createdAt: {

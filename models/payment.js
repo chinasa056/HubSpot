@@ -15,6 +15,10 @@ Payment.init(
       type: DataTypes.UUID,
       allowNull: false
     },
+    hostName: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     email: {
       type: DataTypes.STRING,
       allowNull: false,
