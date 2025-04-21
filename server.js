@@ -15,6 +15,7 @@ const subscriptionRoute = require("./routes/subscriptionRoute");
 const favoriteRoute = require("./routes/favouriteRoute");
 const bookingRoute = require("./routes/bookingRoute")
 const reviewRoute = require("./routes/review")
+const payoutRoute = require("./routes/payoutRoute")
 
 const hostRoute = require('./routes/hostRoutes')
 const PORT = process.env.PORT || 7039;
@@ -41,6 +42,8 @@ app.use('/api/v1', hostRoute);
 app.use('/api/v1', favoriteRoute);
 app.use('/api/v1', bookingRoute);
 app.use('/api/v1', reviewRoute);
+app.use('/api/v1', payoutRoute);
+
 
 const server = async () => {
   try {

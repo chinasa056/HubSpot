@@ -368,7 +368,7 @@ exports.getTopRatedSpaces = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      message: "Error Deleting Space",
+      message: "Error fetching top rated Space",
       data: error.message,
     });
   }

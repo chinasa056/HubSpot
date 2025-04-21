@@ -6,11 +6,6 @@ const axios = require("axios");
 const otpgenerator = require("otp-generator");
 const { bookingSuccess, bookingFailure } = require("../utils/mailTemplate");
 const { sendMail } = require("../middleware/nodemailer");
-const ref = otpgenerator.generate(10, {
-  lowerCaseAlphabets: true,
-  upperCaseAlphabets: true,
-  specialChars: false,
-});
 const formattedDate = new Date().toLocaleString();
 const korapaySecret = process.env.KORAPAY_SECRET_KEY;
 const transactionUrl = "https://api.korapay.com/merchant/api/v1/charges/initialize"

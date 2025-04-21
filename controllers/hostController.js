@@ -416,8 +416,8 @@ exports.loggedOutHost = async (req, res) => {
 
 exports.updateHostDetails = async (req, res) => {
   try {
-    const { hostId } = req.params;
-    const updates = req.body;
+    const { userId: hostId } = req.user;
+    const { bankName, accountNumber, accountName } = req.body;
     const file = req.file;
 
     const host = await Host.findByPk(hostId);
@@ -427,18 +427,22 @@ exports.updateHostDetails = async (req, res) => {
       });
     }
 
-    let profileImageUrl = []
+    const updates = {
+      bankName,
+      accountNumber,
+      accountName,
+    };
+
     if (file) {
       try {
         const result = await cloudinary.uploader.upload(file.path);
-        const profileImageDetails = {
-          secureUrl: result.secure_url,
-          publicId: result.public_id
-        };
-        profileImageUrl.push(profileImageDetails)
-        updates.profileImage = profileImageUrl
+        updates.profileImage = [
+          {
+            secureUrl: result.secure_url,
+            publicId: result.public_id,
+          },
+        ];
         fs.unlinkSync(file.path);
-
       } catch (uploadError) {
         fs.unlinkSync(file.path);
         return res.status(500).json({
@@ -460,6 +464,7 @@ exports.updateHostDetails = async (req, res) => {
     });
   }
 };
+
 
 exports.deleteHostAccount = async (req, res) => {
   try {
@@ -692,7 +697,7 @@ exports.fetchBookingListing = async (req, res) => {
 
     const spaces = await Space.findAll({
       where: { hostId },
-      attributes: ["name","bookingCount", "capacity"]
+      attributes: ["id","name","bookingCount", "capacity"]
     });
 
     if (spaces.length === 0) {

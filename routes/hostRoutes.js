@@ -400,7 +400,7 @@ router.post("/host/forgot-password", forgottenPasswordHost);
  *                   example: "Error message details"
  */
 
-router.patch("/host/reset-password",resetPasswordValidator, resetPasswordHost)
+router.patch("/host/reset-password/:token",resetPasswordValidator, resetPasswordHost)
 
 /**
  * @swagger
@@ -500,144 +500,40 @@ router.patch("/host/change-password/:userId", authenticate, changePasswordValida
 
 /**
  * @swagger
- * /api/v1/host/logout:
- *   patch:
- *     summary: Log out a host
- *     description: This endpoint allows a host to log out by updating their login status to `false`. The host must be authenticated.
- *     tags: [Host]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *                 example: "host@example.com"
- *     responses:
- *       200:
- *         description: Host logged out successfully.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Host logged out successfully"
- *       400:
- *         description: Email is required in the request body.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Email is required"
- *       404:
- *         description: Host does not exist for the provided email.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Host does not exist"
- *       500:
- *         description: Internal server error.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Internal server error"
- */
-router.patch("/host/logout", hostAuth, loggedOutHost);
-
-/**
- * @swagger
- * /api/v1/host/update/{hostId}:
+ * /api/v1/host/update:
  *   put:
- *     summary: Update host details
- *     description: This endpoint allows a host to update their personal details, including their profile image. The host must be authenticated.
+ *     summary: Update host's bank details and profile image
  *     tags: [Host]
- *     parameters:
- *       - in: path
- *         name: hostId
- *         required: true
- *         description: The ID of the host whose details need to be updated.
- *         schema:
- *           type: string
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             properties:
- *               fullName:
+ *               bankName:
  *                 type: string
- *                 example: "John Doe"
- *               email:
+ *                 example: Access Bank
+ *               accountNumber:
+ *                 type: integer
+ *                 example: 0123456789
+ *               accountName:
  *                 type: string
- *                 example: "john.doe@example.com"
- *               companyName:
+ *                 example: John Doe
+ *               profileImage:
  *                 type: string
- *                 example: "John's Company"
- *               companyAddress:
- *                 type: string
- *                 example: "123 Street, City, Country"
+ *                 format: binary
  *     responses:
  *       200:
- *         description: Host details updated successfully.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Host details updated successfully"
- *                 data:
- *                   type: object
- *                   description: The updated host details
- *       400:
- *         description: Bad request (incorrect parameters).
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Invalid input"
+ *         description: Host details updated successfully
  *       404:
- *         description: Host not found.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Host not found"
+ *         description: Host not found
  *       500:
- *         description: Internal server error (error during the update process).
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Error updating host details"
+ *         description: Error updating host details
  */
-router.put('/host/update/:hostId', upload.single('profileImage'), hostAuth, updateHostDetails);
+router.put('/host/update', upload.single('profileImage'), hostAuth, updateHostDetails);
 
 
 /**
