@@ -497,19 +497,18 @@ router.patch("/host/reset-password/:token",resetPasswordValidator, resetPassword
 
 router.patch("/host/change-password/:userId", authenticate, changePasswordValidator, changePasswordHost);
 
-
 /**
  * @swagger
  * /api/v1/host/update:
  *   put:
- *     summary: Update host's bank details and profile image
+ *     summary: Update host bank details
  *     tags: [Host]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
- *         multipart/form-data:
+ *         application/json:
  *           schema:
  *             type: object
  *             properties:
@@ -517,14 +516,14 @@ router.patch("/host/change-password/:userId", authenticate, changePasswordValida
  *                 type: string
  *                 example: Access Bank
  *               accountNumber:
- *                 type: integer
- *                 example: 0123456789
+ *                 type: string
+ *                 example: "1234567890"
  *               accountName:
  *                 type: string
  *                 example: John Doe
- *               profileImage:
+ *               bankCode:
  *                 type: string
- *                 format: binary
+ *                 example: "044"
  *     responses:
  *       200:
  *         description: Host details updated successfully

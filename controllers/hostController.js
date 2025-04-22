@@ -431,6 +431,7 @@ exports.updateHostDetails = async (req, res) => {
       bankName,
       accountNumber,
       accountName,
+      bankCode
     };
 
     if (file) {

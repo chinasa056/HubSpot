@@ -86,6 +86,11 @@ Host.init(
       allowNull: true,
     },
 
+    bankCode: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+
     bankAccountNumber: {
       type: DataTypes.INTEGER,
       allowNull: true,
