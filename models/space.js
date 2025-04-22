@@ -91,6 +91,10 @@ Space.init(
       values: ['active', 'pending','rejected'],
       defaultValue: 'pending',
     },
+    spaceAddress: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
     averageRating: {
       type: DataTypes.FLOAT,
     },
