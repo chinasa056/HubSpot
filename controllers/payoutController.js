@@ -118,7 +118,8 @@ exports.korapayWebhook = async (req, res) => {
       if (payment.status !== "success") {
         payment.status = "success";
 
-        host.currentBalance -= data.amount;
+        host.currentBalance = Math.max(0, host.currentBalance - data.amount);
+        await host.save();
 
         const payoutDetails = {
           reference: data.reference,
