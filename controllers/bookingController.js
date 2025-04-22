@@ -160,12 +160,12 @@ exports.verifyBookingPerhour = async (req, res) => {
 
       booking.endDate = new Date(startDateTime.getTime() + Number(booking.durationPerHour) * 60 * 60 * 1000);
 
-      if(booking.endDate === null) {
-        booking.status = "failed"
-        return res.status(400).json({
-          message: "Booking Failed"
-        }) 
-      };
+      // if(booking.endDate === null) {
+      //   booking.status = "failed"
+      //   return res.status(400).json({
+      //     message: "Booking Failed"
+      //   }) 
+      // };
 
       // await booking.destroy()
 
