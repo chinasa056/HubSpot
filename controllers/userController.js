@@ -83,39 +83,30 @@ exports.verifyUser = async (req, res) => {
     const { token } = req.params;
 
     if (!token) {
-      return res.status(404).json({
-        message: "Verification token is missing",
-      });
+      return res.status(404).json({ message: "Verification token is missing" });
     }
 
     jwt.verify(token, process.env.JWT_SECRET, async (error, payload) => {
       if (error) {
         if (error instanceof jwt.JsonWebTokenError) {
-          const { userId } = jwt.decode(token); // Decode token to fetch user ID
+          const { userId } = jwt.decode(token);
           const user = await User.findByPk(userId);
 
           if (!user) {
-            return res.status(404).json({
-              message: "Account not found",
-            });
+            return res.status(404).json({ message: "Account not found" });
           }
 
           if (user.isVerified) {
-            return res.status(400).json({
-              message: "Account is already verified",
-            });
+            return res.status(400).json({ message: "Account is already verified" });
           }
 
-          // Generate a new token and send verification email
           const newToken = jwt.sign(
             { userId: user.id },
             process.env.JWT_SECRET,
-            { expiresIn: "1hour" }
+            { expiresIn: "1h" }
           );
+
           const link = `${req.protocol}://${req.get("host")}/api/v1/users/verify/${newToken}`;
-
-        //  const link = `https://hubspot-liard.vercel.app/verifyemail:${newToken}`
-
           const firstName = user.fullName.split(" ")[0];
 
           const mailOptions = {
@@ -127,42 +118,38 @@ exports.verifyUser = async (req, res) => {
           await sendMail(mailOptions);
 
           return res.status(200).json({
-            message:
-              "Session expired: A new verification link has been sent to your email.",
+            message: "Session expired: A new verification link has been sent to your email.",
           });
         }
       } else {
         const user = await User.findByPk(payload.userId);
 
         if (!user) {
-          return res.status(404).json({
-            message: "Account not found",
-          });
+          return res.status(404).json({ message: "Account not found" });
         }
 
         if (user.isVerified) {
-          res.redirect("https://hubspot-liard.vercel.app/login");
+          return res.redirect("https://hubspot-liard.vercel.app/login");
         }
 
         user.isVerified = true;
         await user.save();
 
-        res.redirect("https://hubspot-liard.vercel.app/login");
+        return res.redirect("https://hubspot-liard.vercel.app/login");
       }
     });
   } catch (error) {
     console.error(error.message);
     if (error instanceof jwt.JsonWebTokenError) {
       return res.status(400).json({
-        message:
-          "Session expired: A new link has been sent to your email address.",
+        message: "Session expired: A new link has been sent to your email address.",
       });
     }
-    res.status(500).json({
-      message: "Error verifying user",
-    });
+
+    return res.status(500).json({ message: "Error verifying user" });
   }
 };
+
 
 exports.login = async (req, res) => {
   try {

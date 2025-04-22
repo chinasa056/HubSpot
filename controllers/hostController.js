@@ -149,13 +149,13 @@ exports.verifyHost = async (req, res) => {
         }
 
         if (host.isVerified === true) {
-          res.redirect("https://hubspot-liard.vercel.app/hostlogin");
+         return res.redirect("https://hubspot-liard.vercel.app/hostlogin");
         }
 
         host.isVerified = true;
         await host.save();
 
-        res.redirect("https://hubspot-liard.vercel.app/hostlogin");
+      return  res.redirect("https://hubspot-liard.vercel.app/hostlogin");
       }
     });
   } catch (error) {
