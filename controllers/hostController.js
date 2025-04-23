@@ -417,7 +417,7 @@ exports.loggedOutHost = async (req, res) => {
 exports.updateHostDetails = async (req, res) => {
   try {
     const { userId: hostId } = req.user;
-    const { bankName, accountNumber, accountName } = req.body;
+    const { bankName, accountNumber, accountName, bankCode } = req.body;
     const file = req.file;
 
     const host = await Host.findByPk(hostId);
@@ -459,9 +459,10 @@ exports.updateHostDetails = async (req, res) => {
       data: updatedHost,
     });
   } catch (error) {
-    console.error(error.message);
+    console.error(error);
     res.status(500).json({
       message: "Error updating host details",
+      error: error.message
     });
   }
 };
