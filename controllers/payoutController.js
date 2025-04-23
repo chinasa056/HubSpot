@@ -40,8 +40,8 @@ exports.initiateHostPayout = async (req, res) => {
         currency: "NGN",
         narration: "Payout for booking earnings",
         bank_account: {
-          bank: host.bankCode.toString(),
-          account: host.bankAccountNumber.toString(),
+          bank: host.bankCode,
+          account: host.bankAccountNumber
         },
         customer: {
           name: host.fullName,

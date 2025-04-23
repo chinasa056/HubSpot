@@ -10,6 +10,14 @@ exports.addSpace = async (req, res) => {
     const { name, overview, amenities, pricePerDay, pricePerHour, capacity, availability, averageRating, spaceType, location, spaceAddress,
     } = req.body;
 
+    let parsedAmenities;
+    try {
+      parsedAmenities = typeof amenities === 'string' ? JSON.parse(amenities) : amenities;
+    } catch (err) {
+      return res.status(400).json({ message: "Invalid amenities format", error: err.message });
+    };
+
+
     let parsedAvailability;
 
     try {
@@ -94,7 +102,7 @@ exports.addSpace = async (req, res) => {
       spaceType: spaceType.toLowerCase(),
       name,
       overview,
-      amenities,
+      amenities: parsedAmenities,
       pricePerDay,
       pricePerHour,
       capacity,
@@ -419,7 +427,7 @@ exports.approveSpace = async (req, res) => {
 exports.getUnapprovedSpaces = async (req, res) => {
   try {
     const unapprovedSpaces = await Space.findAll({ where: { isApproved: false } });
-    if(unapprovedSpaces.length === 0) {
+    if (unapprovedSpaces.length === 0) {
       return res.status(404).json({
         message: "No Unapproved Space found"
       })
