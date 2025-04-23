@@ -225,7 +225,7 @@ exports.addSpaceValidator = (req, res, next) => {
       "string.empty": "Location cannot be empty.",
       "any.required": "Location is required.",
     }),
-    spaceAdress: joi.string().trim().required().messages({
+    spaceAddress: joi.string().trim().required().messages({
       "string.empty": "Space address cannot be empty.",
       "any.required": "Space address is required.",
     }),

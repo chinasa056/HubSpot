@@ -7,7 +7,7 @@ const User = require("../models/user");
 exports.addSpace = async (req, res) => {
   try {
     const { userId } = req.user;
-    const { name, overview, amenities, pricePerDay, pricePerHour, capacity, availability, averageRating, spaceType, location, spaceAdress,
+    const { name, overview, amenities, pricePerDay, pricePerHour, capacity, availability, averageRating, spaceType, location, spaceAddress,
     } = req.body;
 
     let parsedAvailability;
@@ -90,7 +90,7 @@ exports.addSpace = async (req, res) => {
 
     const newSpace = await Space.create({
       hostId: userId,
-      spaceAdress,
+      spaceAddress,
       spaceType: spaceType.toLowerCase(),
       name,
       overview,
