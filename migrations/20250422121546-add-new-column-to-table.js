@@ -9,3 +9,4 @@ module.exports = {
     await queryInterface.removeColumn('Spaces', 'spaceAddress');
 },
 };
+

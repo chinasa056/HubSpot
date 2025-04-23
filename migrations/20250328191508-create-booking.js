@@ -36,7 +36,7 @@ module.exports = {
         allowNull: true
       },
 
-      StartDate: {
+      startDate: {
         type: Sequelize.DATE,
         allowNull: false
       },
