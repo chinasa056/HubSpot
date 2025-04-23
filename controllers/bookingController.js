@@ -189,7 +189,9 @@ exports.verifyBookingPerhour = async (req, res) => {
         reference: booking.reference,
         startDate: booking.startDate,
         checkinTime: booking.checkinTime,
-        endDate: booking.endDate
+        endDate: booking.endDate,
+        spaceName: booking.spaceName,
+        location: space.spaceAddress
       }
       const successHtml = bookingSuccess(firstName, bookingDetails);
 

@@ -1,5 +1,5 @@
 exports.verify = (link, firstName) => {
-    return `
+  return `
        <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -86,13 +86,14 @@ exports.verify = (link, firstName) => {
     </div>
 </body>
 </html>
-`
+`;
 };
 
 exports.bookingSuccess = (firstName, bookingDetails) => {
-    const { reference, startDate, checkinTime, endDate } = bookingDetails;
+  const { reference, startDate, checkinTime, endDate, spaceName, location } =
+    bookingDetails;
 
-    return `
+  return `
        <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -148,10 +149,12 @@ exports.bookingSuccess = (firstName, bookingDetails) => {
         <div class="content">
             <p>Hello ${firstName},</p>
             <p>Your booking has been successfully confirmed! Here are your booking details:</p>
+            <p><strong>Space:</strong> ${spaceName}</p>
+            <p><strong>Location:</strong> ${location}</p>
             <p><strong>Start Date & Time:</strong> ${startDate} ${checkinTime}</p>
             <p><strong>End Date & Time:</strong> ${endDate}</p>
             <p><strong>Reference:</strong> ${reference}</p>
-            <p>Please keep this reference code for verification when you visit the hub.</p>
+            <p>Here’s your reference code—think of it as a little memory tag for your upcoming visit!</p>
             <p>Thank you for choosing our services.</p>
             <p>Best regards,<br>Booking Team</p>
         </div>
@@ -165,7 +168,7 @@ exports.bookingSuccess = (firstName, bookingDetails) => {
 };
 
 exports.bookingFailure = (firstName, supportEmail, reference) => {
-    return `
+  return `
        <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -237,9 +240,9 @@ exports.bookingFailure = (firstName, supportEmail, reference) => {
 };
 
 exports.payoutSuccess = (firstName, payoutDetails) => {
-    const { reference, amount, fee, status } = payoutDetails;
+  const { reference, amount, fee, status } = payoutDetails;
 
-    return `
+  return `
        <!DOCTYPE html>
 <html lang="en">
 <head>
