@@ -40,7 +40,7 @@ exports.initiateHostPayout = async (req, res) => {
         currency: "NGN",
         narration: "Payout for booking earnings",
         bank_account: {
-          bank: host.bankCode,
+          bank: host.bankCode.toString(),
           account: host.bankAccountNumber
         },
         customer: {
@@ -54,7 +54,7 @@ exports.initiateHostPayout = async (req, res) => {
       headers: { Authorization: `Bearer ${korapaySecret}` },
     });
 
-    // console.log("full response:", response);
+    console.log("full response:", response);
     console.log("KoraPay response:", response.data);
     const { data } = response.data;
 
@@ -90,10 +90,10 @@ exports.initiateHostPayout = async (req, res) => {
         .json({ message: `KoraPay rejected payout: ${message}` });
     }
   } catch (error) {
-    console.error("Payout error:", error.message);
+    console.error("Payout error:", error);
     return res.status(500).json({
       message: "Error initiating payout",
-      error: error.message,
+      error: error,
     });
   }
 };
