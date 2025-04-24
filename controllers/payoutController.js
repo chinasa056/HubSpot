@@ -41,7 +41,7 @@ exports.initiateHostPayout = async (req, res) => {
         narration: "Payout for booking earnings",
         bank_account: {
           bank: host.bankCode.toString(),
-          account: host.bankAccountNumber
+          account: host.bankAccountNumber.toString()
         },
         customer: {
           name: host.fullName,
