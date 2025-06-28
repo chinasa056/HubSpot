@@ -1,6 +1,6 @@
 # 🚀 HubSpot
 
-HubSpot is a platform that connects professionals in Lagos with flexible coworking spaces and creative hubs. With 43% of Lagos professionals working remotely 1–2 days per week and over 400 startups in the city, the demand for affordable and convenient workspaces is rising (Stears, 2023). High commuting costs due to traffic and fuel prices further increase the need for local, reliable alternatives. FlexiSpace makes it simple to discover and book verified workspaces — offering a cost-effective solution that fosters productivity and collaboration.
+**HubSpot** is a platform that connects professionals in Lagos with flexible coworking spaces and creative hubs. With 43% of Lagos professionals working remotely 1–2 days per week and over 400 startups in the city, the demand for affordable and convenient workspaces is rising (Stears, 2023). High commuting costs due to traffic and fuel prices further increase the need for local, reliable alternatives. HubSpot makes it simple to discover and book verified workspaces, offering a cost-effective solution that fosters productivity and collaboration.
 
 
 ## 📌 Problem Statement
@@ -11,7 +11,7 @@ With soaring commuting costs and rapid urbanization in Lagos, professionals stru
 
 ## ✅ Solution
 
-FlexiSpace provides a seamless platform for discovering, booking, and managing verified coworking spaces and creative hubs across Lagos. By eliminating the hassle of searching for quality spaces and offering centralized booking and reviews, FlexiSpace meets the city’s growing need for flexible, cost-effective workspace solutions — while empowering hosts with tools for listing, managing availability, and secure payments.
+HubSpot provides a seamless platform for discovering, booking, and managing verified coworking spaces and creative hubs across Lagos. By eliminating the hassle of searching for quality spaces and offering centralized booking and reviews, HubSpot meets the city’s growing need for flexible, cost-effective workspace solutions, while empowering hosts with tools for listing, managing availability, and secure payments.
 
 
 ## 🎯 Goals & Objectives
@@ -49,7 +49,7 @@ FlexiSpace provides a seamless platform for discovering, booking, and managing v
 
 # ➕ Payout Feature for Hosts
 
-FlexiSpace includes a **Payout System** for hosts. When a space is booked and the payment is completed, the host’s earnings are tracked. Hosts can securely withdraw their balance through integrated payout APIs (e.g., Kora Pay). The payout system ensures quick, automated transfers and clear transaction histories for hosts.
+HubSpot includes a **Payout System** for hosts. When a space is booked and the payment is completed, the host’s earnings are tracked. Hosts can securely withdraw their balance through integrated payout APIs (e.g., Kora Pay). The payout system ensures quick, automated transfers and clear transaction histories for hosts.
 
 **Highlights:**
 
@@ -158,15 +158,8 @@ npx sequelize db:migrate
 npm run dev
 ```
 
-Visit: `http://localhost:PORT`
+Visit: `https://hubspot-liard.vercel.app/`
 
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please open issues or submit pull requests. Follow best practices for code style and commit messages.
-
----
 
 ## 📫 Contact
 
