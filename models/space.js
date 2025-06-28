@@ -46,6 +46,17 @@ Space.init(
     amenities: {
       type: DataTypes.TEXT,
       allowNull: false,
+      get() {
+        const raw = this.getDataValue('amenities');
+        try {
+          return raw ? JSON.parse(raw) : [];
+        } catch (e) {
+          return [];
+        }
+      },
+      set(value) {
+        this.setDataValue('amenities', JSON.stringify(value));
+      }
     },
     availability: {
       type: DataTypes.TEXT,
@@ -60,11 +71,11 @@ Space.init(
       },
       set(value) {
         this.setDataValue('availability', JSON.stringify(value));
-    },
+      },
     },
     spaceType: {
       type: DataTypes.ENUM,
-      values: ['cowork space', 'creative spaces'],
+      values: ['cowork hub', 'creative space'],
       allowNull: false
     },
     location: {
@@ -84,12 +95,16 @@ Space.init(
       },
       set(value) {
         this.setDataValue('images', JSON.stringify(value));
-    },
+      },
     },
     listingStatus: {
       type: DataTypes.ENUM,
-      values: ['active', 'pending','rejected'],
+      values: ['active', 'pending', 'rejected'],
       defaultValue: 'pending',
+    },
+    spaceAddress: {
+      type: DataTypes.STRING,
+      allowNull: false
     },
     averageRating: {
       type: DataTypes.FLOAT,
@@ -99,11 +114,11 @@ Space.init(
       defaultValue: true
     },
     bookingCount: {
-      type:DataTypes.INTEGER,
+      type: DataTypes.INTEGER,
       defaultValue: 0
     },
     isApproved: {
-      type:DataTypes.BOOLEAN,
+      type: DataTypes.BOOLEAN,
       defaultValue: false
     },
     createdAt: {

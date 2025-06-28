@@ -7,8 +7,16 @@ const User = require("../models/user");
 exports.addSpace = async (req, res) => {
   try {
     const { userId } = req.user;
-    const { name, overview, amenities, pricePerDay, pricePerHour, capacity, availability, averageRating, spaceType, location, spaceAdress,
+    const { name, overview, amenities, pricePerDay, pricePerHour, capacity, availability, averageRating, spaceType, location, spaceAddress,
     } = req.body;
+
+    let parsedAmenities;
+    try {
+      parsedAmenities = typeof amenities === 'string' ? JSON.parse(amenities) : amenities;
+    } catch (err) {
+      return res.status(400).json({ message: "Invalid amenities format", error: err.message });
+    };
+
 
     let parsedAvailability;
 
@@ -90,11 +98,11 @@ exports.addSpace = async (req, res) => {
 
     const newSpace = await Space.create({
       hostId: userId,
-      spaceAdress,
+      spaceAddress,
       spaceType: spaceType.toLowerCase(),
-      name: name.toLowerCase(),
+      name,
       overview,
-      amenities,
+      amenities: parsedAmenities,
       pricePerDay,
       pricePerHour,
       capacity,
@@ -182,8 +190,8 @@ exports.getSpacesByLocation = async (req, res) => {
     const spaces = await Space.findAll({ where: { location: location } });
 
     if (spaces.length === 0) {
-      return res.status(404).json({
-        message: "No Spaces Found for This Location",
+      return res.status(200).json({
+        message: [],
       });
     }
 
@@ -208,18 +216,18 @@ exports.getSpacesBySpaceType = async (req, res) => {
 
     if (spaces.length === 0) {
       return res.status(404).json({
-        message: "No Spaces Found for This Category",
+        message: "No Spaces Found for This Space Type",
       });
     }
 
     res.status(200).json({
-      message: "Spaces Found for This Category",
+      message: "Spaces Found for This Space Type",
       data: spaces,
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      message: "Error Fetching Spaces by Category",
+      message: "Error Fetching Spaces by Space Type",
       data: error.message,
     });
   }
@@ -279,9 +287,7 @@ exports.updateSpace = async (req, res) => {
 
       const newUploadedImages = [];
       for (const image of files) {
-        const result = await cloudinary.uploader.upload(image.path, {
-          folder: "spaces",
-        });
+        const result = await cloudinary.uploader.upload(image.path);
         fs.unlinkSync(image.path);
         newUploadedImages.push({
           imageUrl: result.secure_url,
@@ -370,7 +376,7 @@ exports.getTopRatedSpaces = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      message: "Error Deleting Space",
+      message: "Error fetching top rated Space",
       data: error.message,
     });
   }
@@ -417,3 +423,26 @@ exports.approveSpace = async (req, res) => {
     });
   }
 };
+
+exports.getUnapprovedSpaces = async (req, res) => {
+  try {
+    const unapprovedSpaces = await Space.findAll({ where: { isApproved: false } });
+    if (unapprovedSpaces.length === 0) {
+      return res.status(404).json({
+        message: "No Unapproved Space found"
+      })
+    };
+
+    res.status(200).json({
+      message: "All unapproved spaces in the database",
+      data: unapprovedSpaces
+    })
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Error approving  Space",
+      data: error.message,
+    });
+  }
+}

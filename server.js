@@ -4,6 +4,7 @@ require("./models/association");
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan")
+const cron = require('node-cron');
 const passport = require("passport")
 
 require("./middleware/passport")
@@ -11,8 +12,11 @@ const session = require("express-session")
 const userRouter = require('./routes/userRoute');
 const spaceRoute = require("./routes/spaceRoute")
 const subscriptionRoute = require("./routes/subscriptionRoute");
-const favoriteRoute = require("./routes/favorite");
+const favoriteRoute = require("./routes/favouriteRoute");
 const bookingRoute = require("./routes/bookingRoute")
+const reviewRoute = require("./routes/review")
+const payoutRoute = require("./routes/payoutRoute")
+const korapayRoute = require("./routes/WebhookRoute")
 
 const hostRoute = require('./routes/hostRoutes')
 const PORT = process.env.PORT || 7039;
@@ -35,10 +39,13 @@ app.use(passport.session())
 app.use('/api/v1', userRouter);
 app.use('/api/v1', spaceRoute);
 app.use('/api/v1', subscriptionRoute);
-app.use('/api/v1/favorites', favoriteRoute);
 app.use('/api/v1', hostRoute);
+app.use('/api/v1', favoriteRoute);
 app.use('/api/v1', bookingRoute);
+app.use('/api/v1', reviewRoute);
+app.use('/api/v1', payoutRoute);
 
+app.use('/api/v1', korapayRoute);
 
 
 const server = async () => {
@@ -63,9 +70,8 @@ app.use((error, req, res, next) => {
   next()
 })
 
-
 const swaggerJsdoc = require("swagger-jsdoc");
-const swagger_UI = require("swagger-ui-express")
+const swagger_UI = require("swagger-ui-express");
 
 const options = {
   definition: {
@@ -110,13 +116,15 @@ const options = {
 const openapiSpecification = swaggerJsdoc(options);
 app.use("/appdocumentation", swagger_UI.serve, swagger_UI.setup(openapiSpecification))
 
-const cron = require('node-cron');
-const { checkSubscriptionStatus } = require("./controllers/subscriptionController");
+// const { checkBookingStatusForAllSpaces } = require("./controllers/bookingController");
 
-cron.schedule('0 0 * * *', () => {
-checkSubscriptionStatus()
-});
-
+// cron.schedule("* * * * *", () => {
+//   console.log("Running automated booking status check...");
+//   checkBookingStatusForAllSpaces();
+// }, {
+//   scheduled: true,
+//   timezone: "Africa/Lagos"
+// });
 app.listen(PORT, () => {
   console.log(`server is listening to port: ${PORT}`);
 });

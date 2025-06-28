@@ -722,12 +722,95 @@ router.patch("/users/update", authenticate, updateUser);
  *                   example: "Detailed error message"
  */
 router.delete("/users/delete", authenticate, deleteUserAccount)
-
-
+/**
+ * @swagger
+ * swagger: "2.0"
+ * info:
+ *   description: "This is the API documentation for Google authentication using Passport.js"
+ *   version: "1.0.0"
+ *   title: "Google Authentication API"
+ *   contact:
+ *     name: "Your Name"
+ *     email: "your.email@example.com"
+ * paths:
+ *   /api/v1/authenticate:
+ *     get:
+ *       summary: "Initiate Google authentication"
+ *       description: "Redirects the user to the Google OAuth consent screen to log in with their Google account."
+ *       tags:
+ *         - "Authentication"
+ *       responses:
+ *         302:
+ *           description: "Redirects to Google OAuth consent screen"
+ *           headers:
+ *             Location:
+ *               description: "Google OAuth URL"
+ *               type: string
+ *               example: "https://accounts.google.com/o/oauth2/v2/auth?...&response_type=code&redirect_uri=..."
+ *         500:
+ *           description: "Error initiating authentication"
+ *           schema:
+ *             type: object
+ *             properties:
+ *               message:
+ *                 type: string
+ *                 example: "Error redirecting to Google OAuth"
+ *   
+ *   /api/v1/users/login:
+ *     get:
+ *       summary: "Handle Google OAuth callback and login"
+ *       description: "Handles the callback from Google after the user authenticates and logs them in. If the user doesn't exist, it creates a new user and returns a JWT token."
+ *       tags:
+ *         - "Authentication"
+ *       responses:
+ *         200:
+ *           description: "Login successful"
+ *           schema:
+ *             type: object
+ *             properties:
+ *               message:
+ *                 type: string
+ *                 example: "Login Successful"
+ *               data:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     example: 1
+ *                   fullName:
+ *                     type: string
+ *                     example: "John Doe"
+ *                   email:
+ *                     type: string
+ *                     example: "john.doe@example.com"
+ *                   isVerified:
+ *                     type: boolean
+ *                     example: true
+ *                   isAdmin:
+ *                     type: boolean
+ *                     example: false
+ *                   isLoggedIn:
+ *                     type: boolean
+ *                     example: true
+ *               token:
+ *                 type: string
+ *                 example: "jwt_token_here"
+ *         500:
+ *           description: "Error handling login"
+ *           schema:
+ *             type: object
+ *             properties:
+ *               message:
+ *                 type: string
+ *                 example: "Internal server error"
+ *               error:
+ *                 type: string
+ *                 example: "OAuth authentication failed"
+ */
 router.get("/authenticate", passport.authenticate("google", { scope: ['profile', "email"] }))
 
 router.get("/users/login", passport.authenticate("google"), async (req, res) => {
-    const token = await jwt.sign({userId: req.user._id, isAdmin: req.user.isAdmin, isLoggedIn: req.user.isLoggedIn}, process.env.JWT_SECRET, {expiresIn: "1day"})
+    const token = await jwt.sign({userId: req.user.id, isAdmin: req.user.isAdmin, isLoggedIn: req.user.isLoggedIn}, process.env.JWT_SECRET, {expiresIn: "1day"})
     res.status(200).json({
         message: "Login Successful",
         data: req.user,

@@ -24,7 +24,7 @@ exports.registerHost = async (req, res) => {
 
     const name = fullName?.split(' ');
     const nameFormat = name.map((e) => { return e.slice(0, 1).toUpperCase() + e.slice(1).toLowerCase() }).join(' ');
-    
+
     const hostExists = await Host.findOne({ where: { email: email.toLowerCase() } });
 
     if (hostExists) {
@@ -65,7 +65,7 @@ exports.registerHost = async (req, res) => {
       //   publicId: result.public_id
       // }
     };
-    
+
     const host = await Host.create(hostData);
 
     const token = jwt.sign({ hostId: host.id }, process.env.JWT_SECRET, { expiresIn: "1d" });
@@ -118,8 +118,8 @@ exports.verifyHost = async (req, res) => {
           }
 
           if (host.isVerified) {
-            return  res.redirect("https://hubspot-liard.vercel.app/hostlogin")
-            
+            return res.redirect("https://hubspot-liard.vercel.app/hostlogin")
+
           }
 
           // Generate a new token and send verification email
@@ -149,13 +149,13 @@ exports.verifyHost = async (req, res) => {
         }
 
         if (host.isVerified === true) {
-          res.redirect("https://hubspot-liard.vercel.app/hostlogin");
+         return res.redirect("https://hubspot-liard.vercel.app/hostlogin");
         }
 
         host.isVerified = true;
         await host.save();
 
-        res.redirect("https://hubspot-liard.vercel.app/hostlogin");
+      return  res.redirect("https://hubspot-liard.vercel.app/hostlogin");
       }
     });
   } catch (error) {
@@ -185,7 +185,7 @@ exports.loginHost = async (req, res) => {
     const host = await Host.findOne({ where: { email: email.toLowerCase() } });
     if (!host) {
       return res.status(404).json({
-        message: "login failed: incorrect credentials",
+        message: "Incorrect credentials",
       });
     }
 
@@ -416,8 +416,8 @@ exports.loggedOutHost = async (req, res) => {
 
 exports.updateHostDetails = async (req, res) => {
   try {
-    const { hostId } = req.params;
-    const updates = req.body;
+    const { userId: hostId } = req.user;
+    const { bankName, accountNumber, accountName, bankCode } = req.body;
     const file = req.file;
 
     const host = await Host.findByPk(hostId);
@@ -427,18 +427,23 @@ exports.updateHostDetails = async (req, res) => {
       });
     }
 
-    let profileImageUrl = []
+    const updates = {
+      bankName,
+      accountNumber,
+      accountName,
+      bankCode
+    };
+
     if (file) {
       try {
         const result = await cloudinary.uploader.upload(file.path);
-        const profileImageDetails = {
-          secureUrl: result.secure_url,
-          publicId: result.public_id
-        };
-        profileImageUrl.push(profileImageDetails)
-        updates.profileImage = profileImageUrl
+        updates.profileImage = [
+          {
+            secureUrl: result.secure_url,
+            publicId: result.public_id,
+          },
+        ];
         fs.unlinkSync(file.path);
-
       } catch (uploadError) {
         fs.unlinkSync(file.path);
         return res.status(500).json({
@@ -454,12 +459,14 @@ exports.updateHostDetails = async (req, res) => {
       data: updatedHost,
     });
   } catch (error) {
-    console.error(error.message);
+    console.error(error);
     res.status(500).json({
       message: "Error updating host details",
+      error: error.message
     });
   }
 };
+
 
 exports.deleteHostAccount = async (req, res) => {
   try {
@@ -513,8 +520,8 @@ exports.getSpacesByHost = async (req, res) => {
 
     res.status(200).json({
       message: "Spaces Found for This Host",
-      data: spaces,
-      count: spaceCount
+      data: spaceCount,
+      // count: spaceCount
     });
   } catch (error) {
     console.error(error);
@@ -528,20 +535,25 @@ exports.getSpacesByHost = async (req, res) => {
 // MANAGE BOOKINGS
 exports.getSpaceBookings = async (req, res) => {
   try {
-    const { spaceId } = req.params;
-    const space = await Space.findByPk(spaceId, {
-      attributes: ['name'],
-      include: [
-        {
-          model: Booking,
-          attributes: ['userName', 'startDate', 'endDate', 'status'],
-        },
-      ],
-    });
+    const { userId: hostId } = req.user;
+    const host = await Host.findByPk(hostId);
+    if (!host) {
+      return res.status(404).json({
+        message: "host not found",
+      });
+    };
+
+    const space = await Space.findOne({
+      where: { hostId: hostId }, attributes: ["name"],
+      include: [{
+        model: Booking,
+        attributes: ['userName', 'startDate', 'endDate', 'status']
+      }]
+    })
 
     if (!space) {
       return res.status(404).json({
-        message: "Space not found",
+        message: "No space found for this host",
       });
     }
 
@@ -572,7 +584,7 @@ exports.manageListing = async (req, res) => {
 
     const spaces = await Space.findAll({
       where: { hostId },
-      attributes: ["name", "bookingCount", "createdAt", "capacity", "listingStatus"]
+      attributes: ["name", "spaceType", "bookingCount", "createdAt", "capacity", "listingStatus", "images"]
     });
 
     if (spaces.length === 0) {
@@ -601,60 +613,29 @@ exports.manageListing = async (req, res) => {
 exports.getBookingCategories = async (req, res) => {
   try {
     const { userId: hostId } = req.user;
-    const currentDate = new Date();
 
-    const spaces = await Space.findAll({
-      where: { hostId },
-      include: [
-        {
-          model: Booking,
-          attributes: ["userName", "status", "startDate", "endDate"],
-        },
-      ],
-    });
-
+    const spaces = await Space.findAll({ where: { hostId } });
 
     const upcomingBookings = [];
     const activeBookings = [];
     const completedBookings = [];
-    //  const spaceId =  spaces.map((space) => space.id)
+
     for (const space of spaces) {
       const booking = await Booking.findAll({ where: { spaceId: space.id } });
-      if (new Date(booking.startDate) > currentDate) {
-        upcomingBookings.push(booking);
-      } else if (
-        new Date(booking.startDate) <= currentDate &&
-        new Date(booking.endDate) >= currentDate
-      ) {
-        activeBookings.push(booking);
-      } else if (new Date(booking.endDate) < currentDate) {
-        completedBookings.push(booking);
-      }
-
+      booking.forEach((singleBooking) => {
+        if (singleBooking.status === 'upcoming') {
+          upcomingBookings.push(singleBooking);
+        } else if (singleBooking.status === 'active') {
+          activeBookings.push(singleBooking);
+        } else if (singleBooking.status === 'expired') {
+          completedBookings.push(singleBooking);
+        }
+      })
     };
 
     const upcomingCount = upcomingBookings.length;
     const activeCount = activeBookings.length;
     const completedCount = completedBookings.length;
-
-
-    // spaces.forEach((space) => {
-    //   space.Bookings.forEach((booking) => {
-    //     const { startDate, endDate } = booking;
-    //     if (new Date(startDate) > currentDate) {
-    //       upcomingBookings.push(booking);
-    //     } else if (
-    //       new Date(startDate) <= currentDate &&
-    //       new Date(endDate) >= currentDate
-    //     ) {
-    //       activeBookings.push(booking);
-    //     } else if (new Date(endDate) < currentDate) {
-    //       completedBookings.push(booking);
-    //     }
-    //   });
-    // });
-
-
 
     res.status(200).json({
       message: "Bookings categorized successfully",
@@ -674,6 +655,108 @@ exports.getBookingCategories = async (req, res) => {
     res.status(500).json({
       message: "Error categorizing bookings",
       error: error.message,
+    });
+  }
+};
+
+// GET AND UPDATE HOST CURRENT BALANCE
+exports.getHostCurrentBalance = async (req, res) => {
+  try {
+    const { userId: hostId } = req.user;
+    const host = await Host.findByPk(hostId);
+    if (!host) {
+      return res.status(404).json({
+        message: "Host Not Found"
+      })
+    };
+
+    const { currentBalance } = host
+    res.status(200).json({
+      message: "Host Current Balance",
+      data: currentBalance
+    })
+
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({
+      message: "Error fetching current balance bookings",
+      error: error.message,
+    });
+  }
+};
+
+// BOOKINGS
+exports.fetchBookingListing = async (req, res) => {
+  try {
+    const { userId: hostId } = req.user;
+
+    const host = await Host.findByPk(hostId);
+    if (!host) {
+      return res.status(404).json({
+        message: "Host not found"
+      })
+    };
+
+    const spaces = await Space.findAll({
+      where: { hostId },
+      attributes: ["id","name","bookingCount", "capacity"]
+    });
+
+    if (spaces.length === 0) {
+      return res.status(400).json({
+        message: "No spaces listed for this host"
+      })
+    };
+
+    res.status(200).json({
+      message: "Space listings for this host",
+      data: spaces
+    })
+
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({
+      message: "Error categorizing bookings",
+      error: error.message
+    });
+  }
+};
+
+// SHOWING THE SPACES AFTER THE SPACES
+exports.getSpaceBookingsbySpaceId = async (req, res) => {
+  try {
+    const {userId: hostId} = req.user
+
+    const host = await Host.findByPk(hostId);
+    if(!host) {
+      return res.status(404).json({
+        message: "Host not found"
+      })
+    };
+    const { spaceId } = req.params;
+    const space = await Space.findOne({
+      where: { id: spaceId }, attributes: ["name"],
+      include: [{
+        model: Booking,
+        attributes: ['userName', 'startDate', 'endDate', 'status']
+      }]
+    })
+
+    if (!space) {
+      return res.status(404).json({
+        message: "No space found",
+      });
+    }
+
+    res.status(200).json({
+      message: "Space and bookings retrieved successfully",
+      data: space,
+    });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({
+      message: "Error fetching space bookings",
+      error: error.message
     });
   }
 };

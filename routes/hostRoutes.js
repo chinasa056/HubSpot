@@ -1,4 +1,4 @@
-const { registerHost, verifyHost, loginHost, forgottenPasswordHost, resetPasswordHost, changePasswordHost, loggedOutHost, updateHostDetails, deleteHostAccount, getSpacesByHost, getBookingCategories, manageListing, getSpaceBookings } = require('../controllers/hostController');
+const { registerHost, verifyHost, loginHost, forgottenPasswordHost, resetPasswordHost, changePasswordHost, loggedOutHost, updateHostDetails, deleteHostAccount, getSpacesByHost, getBookingCategories, manageListing, getSpaceBookings, getHostCurrentBalance, fetchBookingListing, getSpaceBookingsbySpaceId } = require('../controllers/hostController');
 
 const { authenticate, hostAuth } = require('../middleware/authentication');
 const { loginValidator, resetPasswordValidator, changePasswordValidator, registerHostValidator } = require('../middleware/validator');
@@ -400,7 +400,7 @@ router.post("/host/forgot-password", forgottenPasswordHost);
  *                   example: "Error message details"
  */
 
-router.patch("/host/reset-password",resetPasswordValidator, resetPasswordHost)
+router.patch("/host/reset-password/:token",resetPasswordValidator, resetPasswordHost)
 
 /**
  * @swagger
@@ -497,82 +497,14 @@ router.patch("/host/reset-password",resetPasswordValidator, resetPasswordHost)
 
 router.patch("/host/change-password/:userId", authenticate, changePasswordValidator, changePasswordHost);
 
-
 /**
  * @swagger
- * /api/v1/host/logout:
- *   patch:
- *     summary: Log out a host
- *     description: This endpoint allows a host to log out by updating their login status to `false`. The host must be authenticated.
- *     tags: [Host]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *                 example: "host@example.com"
- *     responses:
- *       200:
- *         description: Host logged out successfully.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Host logged out successfully"
- *       400:
- *         description: Email is required in the request body.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Email is required"
- *       404:
- *         description: Host does not exist for the provided email.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Host does not exist"
- *       500:
- *         description: Internal server error.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Internal server error"
- */
-router.patch("/host/logout", hostAuth, loggedOutHost);
-
-/**
- * @swagger
- * /api/v1/host/update/{hostId}:
+ * /api/v1/host/update:
  *   put:
- *     summary: Update host details
- *     description: This endpoint allows a host to update their personal details, including their profile image. The host must be authenticated.
+ *     summary: Update host bank details
  *     tags: [Host]
- *     parameters:
- *       - in: path
- *         name: hostId
- *         required: true
- *         description: The ID of the host whose details need to be updated.
- *         schema:
- *           type: string
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -580,64 +512,27 @@ router.patch("/host/logout", hostAuth, loggedOutHost);
  *           schema:
  *             type: object
  *             properties:
- *               fullName:
+ *               bankName:
  *                 type: string
- *                 example: "John Doe"
- *               email:
+ *                 example: Access Bank
+ *               accountNumber:
  *                 type: string
- *                 example: "john.doe@example.com"
- *               companyName:
+ *                 example: "1234567890"
+ *               accountName:
  *                 type: string
- *                 example: "John's Company"
- *               companyAddress:
+ *                 example: John Doe
+ *               bankCode:
  *                 type: string
- *                 example: "123 Street, City, Country"
+ *                 example: "044"
  *     responses:
  *       200:
- *         description: Host details updated successfully.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Host details updated successfully"
- *                 data:
- *                   type: object
- *                   description: The updated host details
- *       400:
- *         description: Bad request (incorrect parameters).
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Invalid input"
+ *         description: Host details updated successfully
  *       404:
- *         description: Host not found.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Host not found"
+ *         description: Host not found
  *       500:
- *         description: Internal server error (error during the update process).
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Error updating host details"
+ *         description: Error updating host details
  */
-router.put('/host/update/:hostId', upload.single('profileImage'), hostAuth, updateHostDetails);
+router.put('/host/update', upload.single('profileImage'), hostAuth, updateHostDetails);
 
 
 /**
@@ -693,7 +588,7 @@ router.delete('/host/delete/:hostId', hostAuth, deleteHostAccount);
 
 /**
  * @swagger
- * /api/v1/host/getspaces/:
+ * /api/v1/host/getspaces:
  *   get:
  *     summary: Retrieve all spaces for the authenticated host
  *     description: This endpoint allows the authenticated host to retrieve a list of all spaces they own. The user must be authenticated to access this endpoint. If the host has no spaces, a message indicating no spaces were found will be returned.
@@ -765,7 +660,7 @@ router.delete('/host/delete/:hostId', hostAuth, deleteHostAccount);
  *                   type: string
  *                   example: "Error details message"
  */
-router.get("/host/getspaces/", hostAuth, getSpacesByHost);
+router.get("/host/getspaces", hostAuth, getSpacesByHost);
 
 /**
  * @swagger
@@ -851,24 +746,16 @@ router.get("/host/listings", hostAuth, manageListing);
 
 /**
  * @swagger
- * /api/v1/host/spacebookings/{spaceId}:
+ * /api/v1/host/spacebookings:
  *   get:
- *     summary: Retrieve all bookings for a specific space
- *     description: This endpoint allows the authenticated host to retrieve all bookings associated with a particular space. The host must be authenticated to access this endpoint. The space is identified by its `spaceId`. If no bookings are found for the space, the response will contain an empty array.
+ *     summary: Get space and associated bookings for a host
+ *     description: Retrieves the space owned by the authenticated host along with booking details such as user name, start date, end date, booking status, and user profile image.
  *     tags: [Host]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: spaceId
- *         required: true
- *         description: The ID of the space to retrieve bookings for.
- *         schema:
- *           type: integer
- *           example: 1
  *     responses:
  *       200:
- *         description: A list of bookings for the space.
+ *         description: Space and bookings retrieved successfully
  *         content:
  *           application/json:
  *             schema:
@@ -882,33 +769,32 @@ router.get("/host/listings", hostAuth, manageListing);
  *                   properties:
  *                     name:
  *                       type: string
- *                       description: The name of the space.
- *                       example: "Conference Room A"
- *                     bookings:
+ *                       example: "Premium Coworking Space"
+ *                     Bookings:
  *                       type: array
  *                       items:
  *                         type: object
  *                         properties:
  *                           userName:
  *                             type: string
- *                             description: The name of the user who made the booking.
  *                             example: "John Doe"
  *                           startDate:
  *                             type: string
- *                             format: date-time
- *                             description: The start date and time of the booking.
- *                             example: "2025-05-01T09:00:00Z"
+ *                             format: date
+ *                             example: "2025-04-15"
  *                           endDate:
  *                             type: string
- *                             format: date-time
- *                             description: The end date and time of the booking.
- *                             example: "2025-05-01T11:00:00Z"
+ *                             format: date
+ *                             example: "2025-04-20"
  *                           status:
  *                             type: string
- *                             description: The status of the booking (e.g., confirmed, canceled).
- *                             example: "confirmed"
+ *                             example: "active"
+ *                           profileImage:
+ *                             type: string
+ *                             format: uri
+ *                             example: "https://res.cloudinary.com/.../profile.jpg"
  *       404:
- *         description: The space with the given `spaceId` was not found.
+ *         description: Host or space not found
  *         content:
  *           application/json:
  *             schema:
@@ -916,9 +802,9 @@ router.get("/host/listings", hostAuth, manageListing);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Space not found"
+ *                   example: "No space found for this host"
  *       500:
- *         description: Internal server error occurred while fetching the space bookings.
+ *         description: Server error while fetching bookings
  *         content:
  *           application/json:
  *             schema:
@@ -929,30 +815,21 @@ router.get("/host/listings", hostAuth, manageListing);
  *                   example: "Error fetching space bookings"
  *                 error:
  *                   type: string
- *                   example: "Error details message"
+ *                   example: "Internal server error"
  */
-router.get("/host/spacebookings/:spaceId", hostAuth, getSpaceBookings);
-
+router.get("/host/spacebookings", hostAuth, getSpaceBookings);
 /**
  * @swagger
- * /api/v1/host/bookingcategories/{hostId}:
+ * /api/v1/host/bookingcategories:
  *   get:
- *     summary: Retrieve categorized bookings for a specific host
- *     description: This endpoint allows the authenticated host to retrieve categorized bookings (upcoming, active, completed) associated with their spaces. The host must be authenticated to access this endpoint. If no bookings are found, the response will show counts of each category (upcoming, active, completed).
+ *     summary: Categorize host bookings by status
+ *     description: Returns the count of a host's bookings grouped into upcoming, active, and completed categories based on the current date.
  *     tags: [Host]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: hostId
- *         required: true
- *         description: The ID of the host to retrieve categorized bookings for.
- *         schema:
- *           type: string
- *           example: "1"
  *     responses:
  *       200:
- *         description: A summary of categorized bookings for the host.
+ *         description: Bookings categorized successfully
  *         content:
  *           application/json:
  *             schema:
@@ -968,39 +845,16 @@ router.get("/host/spacebookings/:spaceId", hostAuth, getSpaceBookings);
  *                       type: object
  *                       properties:
  *                         upcoming:
- *                           type: integer
- *                           description: The number of upcoming bookings for the host.
- *                           example: 5
- *                         active:
- *                           type: integer
- *                           description: The number of active bookings for the host.
+ *                           type: number
  *                           example: 3
+ *                         active:
+ *                           type: number
+ *                           example: 2
  *                         completed:
- *                           type: integer
- *                           description: The number of completed bookings for the host.
- *                           example: 7
- *       400:
- *         description: No spaces listed for this host or other validation errors.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "No spaces listed for this host"
- *       404:
- *         description: Host not found or no bookings found for the host.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Host not found"
+ *                           type: number
+ *                           example: 5
  *       500:
- *         description: Internal server error occurred while categorizing bookings.
+ *         description: Server error while categorizing bookings
  *         content:
  *           application/json:
  *             schema:
@@ -1011,9 +865,210 @@ router.get("/host/spacebookings/:spaceId", hostAuth, getSpaceBookings);
  *                   example: "Error categorizing bookings"
  *                 error:
  *                   type: string
- *                   example: "Error message from the catch block"
+ *                   example: "Internal server error"
  */
-router.get("/host/bookingcategories/:hostId", hostAuth, getBookingCategories);
+router.get("/host/bookingcategories", hostAuth, getBookingCategories);
 
+/**
+ * @swagger
+ * /api/v1/host/currentbalance:
+ *   get:
+ *     summary: Retrieve current balance for the authenticated host
+ *     description: Returns the current balance amount for the logged-in host, representing their earnings from confirmed bookings.
+ *     tags: [Host]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Host current balance retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Host Current Balance"
+ *                 data:
+ *                   type: number
+ *                   example: 150000
+ *       404:
+ *         description: Host not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Host Not Found"
+ *       500:
+ *         description: Server error while fetching current balance
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Error categorizing bookings"
+ *                 error:
+ *                   type: string
+ *                   example: "Internal server error"
+ */
+router.get("/host/currentbalance", hostAuth, getHostCurrentBalance)
+
+
+/**
+ * @swagger
+ * /api/v1/host/bookingList:
+ *   get:
+ *     summary: Get Host Space Listings
+ *     description: Retrieves a list of all spaces owned by the authenticated host, including their name, type, booking count, and capacity.
+ *     tags: [Host - Bookings]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Space listings for this host
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Space listings for this host
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       name:
+ *                         type: string
+ *                         example: Cozy Loft Apartment
+ *                       spaceType:
+ *                         type: string
+ *                         example: Apartment
+ *                       bookingCount:
+ *                         type: number
+ *                         example: 12
+ *                       capacity:
+ *                         type: number
+ *                         example: 4
+ *       400:
+ *         description: No spaces listed for this host
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: No spaces listed for this host
+ *       404:
+ *         description: Host not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Host not found
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Error categorizing bookings
+ *                 error:
+ *                   type: string
+ *                   example: Error details here
+ */
+router.get("/host/bookingList", hostAuth, fetchBookingListing);
+
+
+/**
+ * @swagger
+ * /api/v1/host/bookingdetails/{spaceId}:
+ *   get:
+ *     summary: Get bookings for a specific space
+ *     description: Retrieves the space name and its associated bookings using the provided spaceId.
+ *     tags: [Host - Bookings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: spaceId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID of the space to retrieve bookings for
+ *     responses:
+ *       200:
+ *         description: Space and bookings retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Space and bookings retrieved successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     name:
+ *                       type: string
+ *                       example: Cozy Loft
+ *                     Bookings:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           userName:
+ *                             type: string
+ *                             example: Jane Doe
+ *                           startDate:
+ *                             type: string
+ *                             format: date
+ *                             example: 2025-04-01
+ *                           endDate:
+ *                             type: string
+ *                             format: date
+ *                             example: 2025-04-03
+ *                           status:
+ *                             type: string
+ *                             example: active
+ *       404:
+ *         description: No space found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: No space found
+ *       500:
+ *         description: Error fetching space bookings
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Error fetching space bookings
+ *                 error:
+ *                   type: string
+ *                   example: Error details here
+ */
+router.get("/host/bookingdetails/:spaceId", hostAuth, getSpaceBookingsbySpaceId)
 
 module.exports = router;

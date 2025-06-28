@@ -18,7 +18,7 @@ exports.addReview = async (req, res) => {
     const space = await Space.findByPk(spaceId);
     if (!space) {
       return res.status(404).json({
-        message: "Review failed: Space not found not found",
+        message: "Review failed: Space not found",
       });
     }
 
@@ -62,9 +62,9 @@ exports.getReviewsForASpace = async (req, res) => {
     const { spaceId } = req.params;
 
     const space = await Space.findByPk(spaceId);
-    if (space === null) {
+    if (!space) {
       return res.status(404).json({
-        message: "fetching review failed:  found not found",
+        message: "fetching review failed:  space not found",
       });
     }
 

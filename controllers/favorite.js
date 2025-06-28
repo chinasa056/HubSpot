@@ -3,7 +3,7 @@ const Favorite = require("../models/favorite");
 const Space = require("../models/space");
 
 
-const favoriteAndUnfavoriteSpace = async (req, res) => {
+exports.favoriteAndUnfavoriteSpace = async (req, res) => {
     try {
         const { spaceId } = req.params;
         const user = await User.findOne({ where: { id: req.user.userId } });
@@ -24,14 +24,14 @@ const favoriteAndUnfavoriteSpace = async (req, res) => {
             data: error.message
         })
     }
-}
+};
 
-const getUserFavoriteSpace = async (req, res) => {
+exports.getUserFavoriteSpace = async (req, res) => {
     try {
         const favorite = await Favorite.findAll({ where: { userId: req.user.userId },
         include: {
             model: Space,
-            attributes: ['name', 'averageRating']
+            attributes: ['name','location', 'averageRating']
         } });
         if (!favorite.length) {
             return res.status(404).json({
@@ -48,9 +48,4 @@ const getUserFavoriteSpace = async (req, res) => {
             data: error.message
         })
     }
-}
-
-module.exports = {
-    favoriteAndUnfavoriteSpace,
-    getUserFavoriteSpace
 };
